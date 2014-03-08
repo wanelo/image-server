@@ -14,7 +14,8 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/product/image/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.jpg", imageHandler).Methods("GET")
+	r.HandleFunc("/product/image/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.jpg", widthHeightHandler).Methods("GET")
+	r.HandleFunc("/product/image/{id:[0-9]+}/{width:[0-9]+}.jpg", squareHandler).Methods("GET")
 	http.Handle("/", r)
 	log.Println("Listening on port 3000...")
 	http.ListenAndServe(":3000", nil)
@@ -63,20 +64,33 @@ func createResizedImage(fullSizePath string, resizedPath string, width string, h
 
 		jpeg.Encode(toimg, dst, &jpeg.Options{90})
 	}
-
 }
 
-func imageHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	width := params["width"]
-	height := params["height"]
-
+func createImages(id string, width string, height string) (path string) {
 	fullSizePath := "public/" + id
 	resizedPath := "public/" + id + "_" + width + "x" + height + ".jpg"
 
 	downloadAndSaveOriginal(fullSizePath, id)
 	createResizedImage(fullSizePath, resizedPath, width, height)
+	return resizedPath
+}
 
+func widthHeightHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+	width := params["width"]
+	height := params["height"]
+
+	resizedPath := createImages(id, width, height)
+	http.ServeFile(w, r, resizedPath)
+}
+
+func squareHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+	width := params["width"]
+	height := params["width"]
+
+	resizedPath := createImages(id, width, height)
 	http.ServeFile(w, r, resizedPath)
 }
