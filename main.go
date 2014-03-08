@@ -1,15 +1,16 @@
 package main
 
 import (
+	"code.google.com/p/graphics-go/graphics"
 	"github.com/gorilla/mux"
-	"github.com/nfnt/resize"
+	"image"
 	"image/jpeg"
 	"io"
-	/*	"io/ioutil"*/
 	"log"
 	"net/http"
 	"os"
-	/*	"strconv"*/)
+	"strconv"
+)
 
 func main() {
 	r := mux.NewRouter()
@@ -19,24 +20,23 @@ func main() {
 	http.ListenAndServe(":3000", nil)
 }
 
-func imageHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	width := params["width"]
-	height := params["height"]
+func downloadAndSaveOriginal(path string, productId string) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		resp, err := http.Get("http://cdn-s3-2.wanelo.com/product/image/" + productId + "/original.jpg")
+		if err != nil {
+			// panic?
+		}
+		defer resp.Body.Close()
+		out, err := os.Create(path)
+		defer out.Close()
 
-	resp, err := http.Get("http://cdn-s3-2.wanelo.com/product/image/" + id + "/original.jpg")
-	if err != nil {
-		// panic?
+		/*	imgBody := resp.Body*/
+		io.Copy(out, resp.Body)
 	}
-	defer resp.Body.Close()
-	out, err := os.Create("public/" + id)
-	defer out.Close()
+}
 
-	/*	imgBody := resp.Body*/
-	io.Copy(out, resp.Body)
-
-	file, err := os.Open("public/" + id)
+func createResizedImage(fullSizePath string, resizedPath string, width string, height string) {
+	file, err := os.Open(fullSizePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,21 +47,36 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	outResized, err := os.Create("public/" + id + "_" + width + "x" + height + ".jpg")
-	if err != nil {
-		log.Fatal(err)
+	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
+		// Third way
+		widthInt, _ := strconv.Atoi(width)
+		heightInt, _ := strconv.Atoi(height)
+
+		dst := image.NewRGBA(image.Rect(0, 0, widthInt, heightInt))
+		graphics.Thumbnail(dst, img)
+
+		toimg, err := os.Create(resizedPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer toimg.Close()
+
+		jpeg.Encode(toimg, dst, &jpeg.Options{90})
 	}
-	defer outResized.Close()
 
-	// resize to width 1000 using Lanczos resampling
-	// and preserve aspect ratio
-	/*	widthInt, _ := strconv.ParseInt(width, 32, 2)*/
-	m := resize.Resize(100, 100, img, resize.Lanczos3)
+}
 
-	// write new image to file
-	jpeg.Encode(outResized, m, nil)
+func imageHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+	width := params["width"]
+	height := params["height"]
 
-	/*	w.ServeContent(w, req, name, modtime, sizeFunc, content)*/
+	fullSizePath := "public/" + id
+	resizedPath := "public/" + id + "_" + width + "x" + height + ".jpg"
 
-	w.Write([]byte("Hello " + id + " " + width + " " + height))
+	downloadAndSaveOriginal(fullSizePath, id)
+	createResizedImage(fullSizePath, resizedPath, width, height)
+
+	http.ServeFile(w, r, resizedPath)
 }
