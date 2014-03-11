@@ -17,9 +17,6 @@ import (
 )
 
 func main() {
-	/*	runtime.GOMAXPROCS(100)*/
-	/*	fmt.Printf("GOMAXPROCS is %d\n", runtime.GOMAXPROCS(0))*/
-
 	r := mux.NewRouter()
 	r.HandleFunc("/product/image/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.{format}", rectangleHandler).Methods("GET")
 	r.HandleFunc("/product/image/{id:[0-9]+}/x{width:[0-9]+}.{format}", squareHandler).Methods("GET")
@@ -47,35 +44,6 @@ func downloadAndSaveOriginal(path string, productId string) {
 		log.Printf("Took %s to download image: %s", elapsed, path)
 	}
 }
-
-/*func createJPG(fullSizePath string, resizedPath string, width string, height string) {
-	file, err := os.Open(fullSizePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// decode jpeg into image.Image
-	img, err := jpeg.Decode(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Third way
-	widthInt, _ := strconv.Atoi(width)
-	heightInt, _ := strconv.Atoi(height)
-
-	dst := image.NewRGBA(image.Rect(0, 0, widthInt, heightInt))
-	graphics.Thumbnail(dst, img)
-
-	toimg, err := os.Create(resizedPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer toimg.Close()
-
-	jpgOptions := jpeg.Options{95}
-	jpeg.Encode(toimg, dst, &jpgOptions)
-}*/
 
 func createWithMagick(fullSizePath string, resizedPath string, width string, height string, format string) {
 	start := time.Now()
@@ -113,15 +81,16 @@ func createWithMagick(fullSizePath string, resizedPath string, width string, hei
 
 func createImages(id string, width string, height string, format string) (path string) {
 	fullSizePath := "public/" + id
-	resizedPath := "public/" + id + "_" + width + "x" + height + "." + format
+	var resizedPath string
+	if height == "0" {
+		resizedPath = "public/generated/" + id + "_x" + width + "." + format
+	} else {
+		resizedPath = "public/generated/" + id + "_" + width + "x" + height + "." + format
+	}
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		downloadAndSaveOriginal(fullSizePath, id)
-		/*	if format == "jpg" {*/
-		/*		createJPG(fullSizePath, resizedPath, width, height)*/
-		/*	} else if format == "webp" {*/
 		createWithMagick(fullSizePath, resizedPath, width, height, format)
-		/*	}*/
 	}
 
 	return resizedPath
@@ -153,44 +122,10 @@ func widthHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id := params["id"]
 	width := params["width"]
+	height := "0"
 	format := params["format"]
 
-	fullSizePath := "public/" + id
-	resizedPath := "public/" + id + "_w" + width + "." + format
-
-	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(fullSizePath, id)
-
-		/* here*/
-		im, err := magick.DecodeFile(fullSizePath)
-		if err != nil {
-			log.Panicln(err)
-			return
-		}
-		defer im.Dispose()
-
-		widthInt, _ := strconv.Atoi(width)
-		heightInt := 0
-
-		im2, err := im.CropResize(widthInt, heightInt, magick.FHamming, magick.CSCenter)
-		if err != nil {
-			log.Panicln(err)
-			return
-		}
-
-		out, err := os.Create(resizedPath)
-		defer out.Close()
-
-		info := magick.NewInfo()
-		info.SetQuality(75)
-		info.SetFormat(format)
-		err = im2.Encode(out, info)
-
-		if err != nil {
-			log.Panicln(err)
-			return
-		}
-	}
+	resizedPath := createImages(id, width, height, format)
 	http.ServeFile(w, r, resizedPath)
 }
 
@@ -200,7 +135,7 @@ func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 	format := params["format"]
 
 	fullSizePath := "public/" + id
-	resizedPath := "public/" + id + "_full_size." + format
+	resizedPath := "public/generated/" + id + "_full_size." + format
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		downloadAndSaveOriginal(fullSizePath, id)
