@@ -1,17 +1,12 @@
 package main
 
 import (
-	/*	"code.google.com/p/graphics-go/graphics"*/
-	/*	"fmt"*/
 	"github.com/gorilla/mux"
 	"github.com/rainycape/magick"
-	/*	"image"*/
-	/*	"image/jpeg"*/
 	"io"
 	"log"
 	"net/http"
 	"os"
-	/*	"runtime"*/
 	"strconv"
 	"time"
 )
@@ -38,7 +33,6 @@ func downloadAndSaveOriginal(path string, productId string) {
 		out, err := os.Create(path)
 		defer out.Close()
 
-		/*	imgBody := resp.Body*/
 		io.Copy(out, resp.Body)
 		elapsed := time.Since(start)
 		log.Printf("Took %s to download image: %s", elapsed, path)
