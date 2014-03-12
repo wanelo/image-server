@@ -80,7 +80,6 @@ func createWithMagick(fullSizePath string, resizedPath string, width string, hei
 }
 
 func createImages(id string, width string, height string, format string) (path string) {
-	fullSizePath := "public/" + id
 	var resizedPath string
 	if height == "0" {
 		resizedPath = "public/generated/" + id + "_x" + width + "." + format
@@ -89,8 +88,9 @@ func createImages(id string, width string, height string, format string) (path s
 	}
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(fullSizePath, id)
-		createWithMagick(fullSizePath, resizedPath, width, height, format)
+		originalPath := "public/" + id
+		downloadAndSaveOriginal(originalPath, id)
+		createWithMagick(originalPath, resizedPath, width, height, format)
 	}
 
 	return resizedPath
