@@ -32,8 +32,9 @@ func downloadAndSaveOriginal(path string, productId string) {
 		}
 		defer resp.Body.Close()
 
-		folder := filepath.Dir(path)
-		os.Mkdir(folder, 0700)
+		dir := filepath.Dir(path)
+		os.Mkdir(dir, 0700)
+
 		out, err := os.Create(path)
 		defer out.Close()
 
@@ -86,6 +87,9 @@ func createImages(id string, width string, height string, format string) (path s
 	}
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
+		dir := filepath.Dir(resizedPath)
+		os.Mkdir(dir, 0700)
+
 		originalPath := "public/" + id
 		downloadAndSaveOriginal(originalPath, id)
 		createWithMagick(originalPath, resizedPath, width, height, format)
