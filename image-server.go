@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -30,6 +31,9 @@ func downloadAndSaveOriginal(path string, productId string) {
 			log.Fatal(err)
 		}
 		defer resp.Body.Close()
+
+		folder := filepath.Dir(path)
+		os.Mkdir(folder, 0700)
 		out, err := os.Create(path)
 		defer out.Close()
 
