@@ -1,6 +1,7 @@
 package main
 
 import (
+	/*	"fmt"*/
 	"github.com/gorilla/mux"
 	"github.com/rainycape/magick"
 	"io"
@@ -23,10 +24,16 @@ func main() {
 	http.ListenAndServe(":7000", nil)
 }
 
-func downloadAndSaveOriginal(path string, productId string) {
+func downloadAndSaveOriginal(path string, productId string, source string) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		start := time.Now()
-		resp, err := http.Get("http://cdn-s3-2.wanelo.com/product/image/" + productId + "/original.jpg")
+		var url string
+		if source != "" {
+			url = source
+		} else {
+			url = "http://cdn-s3-2.wanelo.com/product/image/" + productId + "/original.jpg"
+		}
+		resp, err := http.Get(url)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,69 +85,76 @@ func createWithMagick(fullSizePath string, resizedPath string, width string, hei
 	log.Printf("Took %s to generate image: %s", elapsed, resizedPath)
 }
 
-func createImages(id string, width string, height string, format string) (path string) {
+func createImages(ic *ImageConfiguration) (path string) {
 	var resizedPath string
-	if height == "0" {
-		resizedPath = "public/generated/" + id + "_x" + width + "." + format
+	if ic.height == "0" {
+		resizedPath = "public/generated/" + ic.id + "_x" + ic.width + "." + ic.format
 	} else {
-		resizedPath = "public/generated/" + id + "_" + width + "x" + height + "." + format
+		resizedPath = "public/generated/" + ic.id + "_" + ic.width + "x" + ic.height + "." + ic.format
 	}
 
+	log.Printf("Source specified: %s", ic.source)
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		dir := filepath.Dir(resizedPath)
 		os.Mkdir(dir, 0700)
 
-		originalPath := "public/" + id
-		downloadAndSaveOriginal(originalPath, id)
-		createWithMagick(originalPath, resizedPath, width, height, format)
+		originalPath := "public/" + ic.id
+		downloadAndSaveOriginal(originalPath, ic.id, ic.source)
+		createWithMagick(originalPath, resizedPath, ic.width, ic.height, ic.format)
 	}
 
 	return resizedPath
 }
 
-func rectangleHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	width := params["width"]
-	height := params["height"]
-	format := params["format"]
+type ImageConfiguration struct {
+	id     string
+	width  string
+	height string
+	format string
+	source string
+}
 
-	resizedPath := createImages(id, width, height, format)
+func buildImageConfiguration(r *http.Request) *ImageConfiguration {
+	ic := new(ImageConfiguration)
+	params := mux.Vars(r)
+	qs := r.URL.Query()
+
+	ic.id = params["id"]
+	ic.width = params["width"]
+	ic.height = params["height"]
+	ic.format = params["format"]
+	ic.source = qs.Get("printer")
+
+	return ic
+}
+
+func rectangleHandler(w http.ResponseWriter, r *http.Request) {
+	ic := buildImageConfiguration(r)
+	resizedPath := createImages(ic)
 	http.ServeFile(w, r, resizedPath)
 }
 
 func squareHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	width := params["width"]
-	height := params["width"]
-	format := params["format"]
-
-	resizedPath := createImages(id, width, height, format)
+	ic := buildImageConfiguration(r)
+	ic.height = ic.width
+	resizedPath := createImages(ic)
 	http.ServeFile(w, r, resizedPath)
 }
 
 func widthHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	width := params["width"]
-	height := "0"
-	format := params["format"]
-
-	resizedPath := createImages(id, width, height, format)
+	ic := buildImageConfiguration(r)
+	ic.height = "0"
+	resizedPath := createImages(ic)
 	http.ServeFile(w, r, resizedPath)
 }
 
 func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["id"]
-	format := params["format"]
-
-	fullSizePath := "public/" + id
-	resizedPath := "public/generated/" + id + "_full_size." + format
+	ic := buildImageConfiguration(r)
+	fullSizePath := "public/" + ic.id
+	resizedPath := "public/generated/" + ic.id + "_full_size." + ic.format
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(fullSizePath, id)
+		downloadAndSaveOriginal(fullSizePath, ic.id, ic.source)
 
 		im, err := magick.DecodeFile(fullSizePath)
 		if err != nil {
@@ -154,7 +168,7 @@ func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 
 		info := magick.NewInfo()
 		info.SetQuality(75)
-		info.SetFormat(format)
+		info.SetFormat(ic.format)
 		err = im.Encode(out, info)
 
 		if err != nil {
