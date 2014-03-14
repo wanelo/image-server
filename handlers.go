@@ -45,9 +45,7 @@ func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 		out, err := os.Create(resizedPath)
 		defer out.Close()
 
-		info := magick.NewInfo()
-		info.SetQuality(75)
-		info.SetFormat(ic.format)
+		info := ic.MagickInfo()
 		err = im.Encode(out, info)
 
 		if err != nil {

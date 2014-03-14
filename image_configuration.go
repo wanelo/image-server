@@ -3,18 +3,18 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/rainycape/magick"
 	"net/http"
 	"strconv"
 )
 
 type ImageConfiguration struct {
-	id        string
-	width     int
-	height    int
-	widthStr  string
-	heightStr string
-	format    string
-	source    string
+	id      string
+	width   int
+	height  int
+	format  string
+	source  string
+	quality int
 }
 
 func (ic *ImageConfiguration) RemoteImageUrl() string {
@@ -27,6 +27,13 @@ func (ic *ImageConfiguration) RemoteImageUrl() string {
 
 func (ic *ImageConfiguration) OriginalImagePath() string {
 	return "public/" + ic.id
+}
+
+func (ic *ImageConfiguration) MagickInfo() *magick.Info {
+	info := magick.NewInfo()
+	info.SetQuality(75)
+	info.SetFormat(ic.format)
+	return info
 }
 
 func (ic *ImageConfiguration) ResizedImagePath() string {

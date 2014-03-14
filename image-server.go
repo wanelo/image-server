@@ -69,9 +69,7 @@ func createWithMagick(ic *ImageConfiguration, resizedPath string) {
 	out, err := os.Create(resizedPath)
 	defer out.Close()
 
-	info := magick.NewInfo()
-	info.SetQuality(75)
-	info.SetFormat(ic.format)
+	info := ic.MagickInfo()
 	err = im2.Encode(out, info)
 
 	if err != nil {
