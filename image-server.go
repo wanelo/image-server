@@ -1,7 +1,7 @@
 package main
 
 import (
-	/*	"fmt"*/
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rainycape/magick"
 	"io"
@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 )
 
@@ -101,70 +100,4 @@ func createImages(ic *ImageConfiguration) (path string) {
 	}
 
 	return resizedPath
-}
-
-func buildImageConfiguration(r *http.Request) *ImageConfiguration {
-	ic := new(ImageConfiguration)
-	params := mux.Vars(r)
-	qs := r.URL.Query()
-
-	ic.id = params["id"]
-	ic.width = params["width"]
-	ic.height = params["height"]
-	ic.format = params["format"]
-	ic.source = qs.Get("source")
-
-	return ic
-}
-
-func rectangleHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
-	resizedPath := createImages(ic)
-	http.ServeFile(w, r, resizedPath)
-}
-
-func squareHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
-	ic.height = ic.width
-	resizedPath := createImages(ic)
-	http.ServeFile(w, r, resizedPath)
-}
-
-func widthHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
-	ic.height = "0"
-	resizedPath := createImages(ic)
-	http.ServeFile(w, r, resizedPath)
-}
-
-func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
-	fullSizePath := "public/" + ic.id
-	resizedPath := "public/generated/" + ic.id + "_full_size." + ic.format
-
-	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(ic)
-
-		im, err := magick.DecodeFile(fullSizePath)
-		if err != nil {
-			log.Panicln(err)
-			return
-		}
-		defer im.Dispose()
-
-		out, err := os.Create(resizedPath)
-		defer out.Close()
-
-		info := magick.NewInfo()
-		info.SetQuality(75)
-		info.SetFormat(ic.format)
-		err = im.Encode(out, info)
-
-		if err != nil {
-			log.Panicln(err)
-			return
-		}
-	}
-
-	http.ServeFile(w, r, resizedPath)
 }
