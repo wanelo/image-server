@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rainycape/magick"
 	"io"
@@ -80,14 +79,9 @@ func createWithMagick(ic *ImageConfiguration, resizedPath string) {
 }
 
 func createImages(ic *ImageConfiguration) (path string) {
-	var resizedPath string
-	if ic.height == 0 {
-		resizedPath = fmt.Sprintf("public/generated/%s_x%d.%s", ic.id, ic.width, ic.format)
-	} else {
-		resizedPath = fmt.Sprintf("public/generated/%s_%dx%d.%s", ic.id, ic.width, ic.height, ic.format)
-	}
-
+	var resizedPath = ic.ResizedImagePath()
 	log.Printf("Source specified: %s", ic.source)
+
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		dir := filepath.Dir(resizedPath)
 		os.Mkdir(dir, 0700)
