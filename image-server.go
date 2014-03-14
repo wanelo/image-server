@@ -47,7 +47,7 @@ func downloadAndSaveOriginal(ic *ImageConfiguration) {
 	}
 }
 
-func createWithMagick(ic *ImageConfiguration, resizedPath string, width string, height string, format string) {
+func createWithMagick(ic *ImageConfiguration, resizedPath string) {
 	fullSizePath := ic.OriginalImagePath()
 	start := time.Now()
 	im, err := magick.DecodeFile(fullSizePath)
@@ -57,10 +57,7 @@ func createWithMagick(ic *ImageConfiguration, resizedPath string, width string, 
 	}
 	defer im.Dispose()
 
-	w, _ := strconv.Atoi(width)
-	h, _ := strconv.Atoi(height)
-
-	im2, err := im.CropResize(w, h, magick.FHamming, magick.CSCenter)
+	im2, err := im.CropResize(ic.width, ic.height, magick.FHamming, magick.CSCenter)
 	if err != nil {
 		log.Panicln(err)
 		return
@@ -71,7 +68,7 @@ func createWithMagick(ic *ImageConfiguration, resizedPath string, width string, 
 
 	info := magick.NewInfo()
 	info.SetQuality(75)
-	info.SetFormat(format)
+	info.SetFormat(ic.format)
 	err = im2.Encode(out, info)
 
 	if err != nil {
@@ -84,10 +81,10 @@ func createWithMagick(ic *ImageConfiguration, resizedPath string, width string, 
 
 func createImages(ic *ImageConfiguration) (path string) {
 	var resizedPath string
-	if ic.height == "0" {
-		resizedPath = "public/generated/" + ic.id + "_x" + ic.width + "." + ic.format
+	if ic.height == 0 {
+		resizedPath = fmt.Sprintf("public/generated/%s_x%d.%s", ic.id, ic.width, ic.format)
 	} else {
-		resizedPath = "public/generated/" + ic.id + "_" + ic.width + "x" + ic.height + "." + ic.format
+		resizedPath = fmt.Sprintf("public/generated/%s_%dx%d.%s", ic.id, ic.width, ic.height, ic.format)
 	}
 
 	log.Printf("Source specified: %s", ic.source)
@@ -96,7 +93,7 @@ func createImages(ic *ImageConfiguration) (path string) {
 		os.Mkdir(dir, 0700)
 
 		downloadAndSaveOriginal(ic)
-		createWithMagick(ic, resizedPath, ic.width, ic.height, ic.format)
+		createWithMagick(ic, resizedPath)
 	}
 
 	return resizedPath
