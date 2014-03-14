@@ -66,6 +66,14 @@ make
 - status page
   - current images processing count
   - current original download count
+- graphite events (https://github.com/marpaia/graphite-golang)
+  - completed
+  - completed with errors
+  - downloaded source from s3
+  - failed downloading from s3
+  - downloaded source from manta
+  - failed downloading from manta
+  - extension
 - configuration options/file
   - port number
   - status page port number
