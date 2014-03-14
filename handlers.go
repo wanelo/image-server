@@ -29,8 +29,8 @@ func widthHandler(w http.ResponseWriter, r *http.Request) {
 
 func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 	ic := buildImageConfiguration(r)
-	fullSizePath := "public/" + ic.id
-	resizedPath := "public/generated/" + ic.id + "_full_size." + ic.format
+	fullSizePath := ic.OriginalImagePath()
+	resizedPath := ic.ResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		downloadAndSaveOriginal(ic)

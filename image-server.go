@@ -39,20 +39,19 @@ func downloadAndSaveOriginal(ic *ImageConfiguration) {
 		defer resp.Body.Close()
 
 		dir := filepath.Dir(path)
-		os.Mkdir(dir, 0700)
+		os.MkdirAll(dir, 0700)
 
 		out, err := os.Create(path)
 		defer out.Close()
 
 		io.Copy(out, resp.Body)
-		elapsed := time.Since(start)
-		log.Printf("Took %s to download image: %s", elapsed, path)
+		log.Printf("Took %s to download image: %s", time.Since(start), path)
 	}
 }
 
-func createWithMagick(ic *ImageConfiguration, resizedPath string) {
-	fullSizePath := ic.OriginalImagePath()
+func createWithMagick(ic *ImageConfiguration) {
 	start := time.Now()
+	fullSizePath := ic.OriginalImagePath()
 	im, err := magick.DecodeFile(fullSizePath)
 	if err != nil {
 		log.Panicln(err)
@@ -65,6 +64,10 @@ func createWithMagick(ic *ImageConfiguration, resizedPath string) {
 		log.Panicln(err)
 		return
 	}
+
+	resizedPath := ic.ResizedImagePath()
+	dir := filepath.Dir(resizedPath)
+	os.MkdirAll(dir, 0700)
 
 	out, err := os.Create(resizedPath)
 	defer out.Close()
@@ -81,15 +84,11 @@ func createWithMagick(ic *ImageConfiguration, resizedPath string) {
 }
 
 func createImages(ic *ImageConfiguration) (path string) {
-	var resizedPath = ic.ResizedImagePath()
-	log.Printf("Source specified: %s", ic.source)
+	resizedPath := ic.ResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		dir := filepath.Dir(resizedPath)
-		os.Mkdir(dir, 0700)
-
 		downloadAndSaveOriginal(ic)
-		createWithMagick(ic, resizedPath)
+		createWithMagick(ic)
 	}
 
 	return resizedPath

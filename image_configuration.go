@@ -26,7 +26,17 @@ func (ic *ImageConfiguration) RemoteImageUrl() string {
 }
 
 func (ic *ImageConfiguration) OriginalImagePath() string {
-	return "public/" + ic.id
+	return "public/product/" + ic.id + "/original"
+}
+
+func (ic *ImageConfiguration) ResizedImagePath() string {
+	if ic.width == 0 && ic.height == 0 {
+		return "public/generated/" + ic.id + "/full_size." + ic.format
+	} else if ic.height == 0 {
+		return fmt.Sprintf("public/product/%s/w%d.%s", ic.id, ic.width, ic.format)
+	} else {
+		return fmt.Sprintf("public/product/%s/%dx%d.%s", ic.id, ic.width, ic.height, ic.format)
+	}
 }
 
 func (ic *ImageConfiguration) MagickInfo() *magick.Info {
@@ -34,14 +44,6 @@ func (ic *ImageConfiguration) MagickInfo() *magick.Info {
 	info.SetQuality(75)
 	info.SetFormat(ic.format)
 	return info
-}
-
-func (ic *ImageConfiguration) ResizedImagePath() string {
-	if ic.height == 0 {
-		return fmt.Sprintf("public/generated/%s_x%d.%s", ic.id, ic.width, ic.format)
-	} else {
-		return fmt.Sprintf("public/generated/%s_%dx%d.%s", ic.id, ic.width, ic.height, ic.format)
-	}
 }
 
 func buildImageConfiguration(r *http.Request) *ImageConfiguration {
