@@ -24,7 +24,8 @@ func main() {
 	http.ListenAndServe(":7000", nil)
 }
 
-func downloadAndSaveOriginal(ic *ImageConfiguration, path string, productId string, source string) {
+func downloadAndSaveOriginal(ic *ImageConfiguration) {
+	path := ic.OriginalImagePath()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		start := time.Now()
 
@@ -47,7 +48,8 @@ func downloadAndSaveOriginal(ic *ImageConfiguration, path string, productId stri
 	}
 }
 
-func createWithMagick(fullSizePath string, resizedPath string, width string, height string, format string) {
+func createWithMagick(ic *ImageConfiguration, resizedPath string, width string, height string, format string) {
+	fullSizePath := ic.OriginalImagePath()
 	start := time.Now()
 	im, err := magick.DecodeFile(fullSizePath)
 	if err != nil {
@@ -94,28 +96,11 @@ func createImages(ic *ImageConfiguration) (path string) {
 		dir := filepath.Dir(resizedPath)
 		os.Mkdir(dir, 0700)
 
-		originalPath := "public/" + ic.id
-		downloadAndSaveOriginal(ic, originalPath, ic.id, ic.source)
-		createWithMagick(originalPath, resizedPath, ic.width, ic.height, ic.format)
+		downloadAndSaveOriginal(ic)
+		createWithMagick(ic, resizedPath, ic.width, ic.height, ic.format)
 	}
 
 	return resizedPath
-}
-
-type ImageConfiguration struct {
-	id     string
-	width  string
-	height string
-	format string
-	source string
-}
-
-func (ic *ImageConfiguration) RemoteImageUrl() string {
-	if ic.source != "" {
-		return ic.source
-	} else {
-		return "http://cdn-s3-2.wanelo.com/product/image/" + ic.id + "/original.jpg"
-	}
 }
 
 func buildImageConfiguration(r *http.Request) *ImageConfiguration {
@@ -158,7 +143,7 @@ func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 	resizedPath := "public/generated/" + ic.id + "_full_size." + ic.format
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(ic, fullSizePath, ic.id, ic.source)
+		downloadAndSaveOriginal(ic)
 
 		im, err := magick.DecodeFile(fullSizePath)
 		if err != nil {
