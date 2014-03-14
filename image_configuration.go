@@ -32,12 +32,14 @@ func (ic *ImageConfiguration) OriginalImagePath() string {
 }
 
 func (ic *ImageConfiguration) ResizedImagePath() string {
+	dir := fmt.Sprintf("public/%s/%s/%s", ic.model, ic.imageType, ic.id)
+
 	if ic.width == 0 && ic.height == 0 {
-		return "public/" + ic.model + "/" + ic.imageType + "/" + ic.id + "/full_size." + ic.format
+		return dir + "/full_size." + ic.format
 	} else if ic.height == 0 {
-		return fmt.Sprintf("public/%s/%s/%s/w%d.%s", ic.model, ic.imageType, ic.id, ic.width, ic.format)
+		return fmt.Sprintf("%s/w%d.%s", dir, ic.width, ic.format)
 	} else {
-		return fmt.Sprintf("public/%s/%s/%s/%dx%d.%s", ic.model, ic.imageType, ic.id, ic.width, ic.height, ic.format)
+		return fmt.Sprintf("%s/%dx%d.%s", dir, ic.width, ic.height, ic.format)
 	}
 }
 
