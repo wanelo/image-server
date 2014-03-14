@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+const (
+	DEFAULT_PORT string = "7000"
+)
+
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/product/image/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.{format}", rectangleHandler).Methods("GET")
@@ -18,8 +22,8 @@ func main() {
 	r.HandleFunc("/product/image/{id:[0-9]+}/w{width:[0-9]+}.{format}", widthHandler).Methods("GET")
 	r.HandleFunc("/product/image/{id:[0-9]+}/full_size.{format}", fullSizeHandler).Methods("GET")
 	http.Handle("/", r)
-	log.Println("Listening on port 7000...")
-	http.ListenAndServe(":7000", nil)
+	log.Println("Listening on port", DEFAULT_PORT, "...")
+	http.ListenAndServe(":"+DEFAULT_PORT, nil)
 }
 
 func downloadAndSaveOriginal(ic *ImageConfiguration) {
