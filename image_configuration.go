@@ -14,7 +14,7 @@ type ImageConfiguration struct {
 	height    int
 	format    string
 	source    string
-	quality   int
+	quality   uint
 	model     string
 	imageType string
 }
@@ -43,7 +43,7 @@ func (ic *ImageConfiguration) ResizedImagePath() string {
 
 func (ic *ImageConfiguration) MagickInfo() *magick.Info {
 	info := magick.NewInfo()
-	info.SetQuality(75)
+	info.SetQuality(ic.quality)
 	info.SetFormat(ic.format)
 	return info
 }
@@ -60,6 +60,7 @@ func buildImageConfiguration(r *http.Request) *ImageConfiguration {
 	ic.height, _ = strconv.Atoi(params["height"])
 	ic.format = params["format"]
 	ic.source = qs.Get("source")
+	ic.quality = 75
 
 	return ic
 }
