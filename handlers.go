@@ -1,30 +1,37 @@
 package main
 
 import (
+	"fmt"
 	"github.com/rainycape/magick"
 	"log"
 	"net/http"
 	"os"
 )
 
+func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
+	resizedPath, err := createImages(ic)
+	if err != nil {
+		errorHandler(w, r, http.StatusNotFound)
+		return
+	}
+	http.ServeFile(w, r, resizedPath)
+}
+
 func rectangleHandler(w http.ResponseWriter, r *http.Request) {
 	ic := buildImageConfiguration(r)
-	resizedPath := createImages(ic)
-	http.ServeFile(w, r, resizedPath)
+	imageHandler(ic, w, r)
 }
 
 func squareHandler(w http.ResponseWriter, r *http.Request) {
 	ic := buildImageConfiguration(r)
 	ic.height = ic.width
-	resizedPath := createImages(ic)
-	http.ServeFile(w, r, resizedPath)
+	imageHandler(ic, w, r)
 }
 
 func widthHandler(w http.ResponseWriter, r *http.Request) {
 	ic := buildImageConfiguration(r)
 	ic.height = 0
-	resizedPath := createImages(ic)
-	http.ServeFile(w, r, resizedPath)
+	imageHandler(ic, w, r)
 }
 
 func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
@@ -55,4 +62,11 @@ func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.ServeFile(w, r, resizedPath)
+}
+
+func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+	w.WriteHeader(status)
+	if status == http.StatusNotFound {
+		fmt.Fprint(w, "404 page not found --")
+	}
 }

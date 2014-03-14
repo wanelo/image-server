@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rainycape/magick"
 	"io"
@@ -26,15 +27,19 @@ func main() {
 	http.ListenAndServe(":"+DEFAULT_PORT, nil)
 }
 
-func downloadAndSaveOriginal(ic *ImageConfiguration) {
+func downloadAndSaveOriginal(ic *ImageConfiguration) error {
 	path := ic.OriginalImagePath()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		start := time.Now()
 
 		remoteUrl := ic.RemoteImageUrl()
 		resp, err := http.Get(remoteUrl)
-		if err != nil {
-			log.Fatal(err)
+
+		log.Printf("response code %d", resp.StatusCode)
+		if err != nil || resp.StatusCode != 200 {
+			log.Printf("Unable to download image: %s, status code: %d", remoteUrl, resp.StatusCode)
+			log.Println(err)
+			return fmt.Errorf("Unable to download image: %s, status code: %d", remoteUrl, resp.StatusCode)
 		}
 		defer resp.Body.Close()
 
@@ -43,10 +48,16 @@ func downloadAndSaveOriginal(ic *ImageConfiguration) {
 
 		out, err := os.Create(path)
 		defer out.Close()
+		if err != nil {
+			log.Printf("Unable to create file: %s", path)
+			log.Println(err)
+			return fmt.Errorf("Unable to create file: %s", path)
+		}
 
 		io.Copy(out, resp.Body)
 		log.Printf("Took %s to download image: %s", time.Since(start), path)
 	}
+	return nil
 }
 
 func createWithMagick(ic *ImageConfiguration) {
@@ -83,13 +94,19 @@ func createWithMagick(ic *ImageConfiguration) {
 	log.Printf("Took %s to generate image: %s", elapsed, resizedPath)
 }
 
-func createImages(ic *ImageConfiguration) (path string) {
+func createImages(ic *ImageConfiguration) (string, error) {
 	resizedPath := ic.ResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(ic)
+		err := downloadAndSaveOriginal(ic)
+		log.Printf("what errors? %v", err)
+		if err != nil {
+			log.Printf("--something happened, skipping creation")
+			return "", err
+		}
+
 		createWithMagick(ic)
 	}
 
-	return resizedPath
+	return resizedPath, nil
 }
