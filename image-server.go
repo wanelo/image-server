@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rainycape/magick"
@@ -17,8 +18,10 @@ var (
 )
 
 func main() {
+	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
+
 	var err error
-	serverConfiguration, err = NewServerConfiguration("config/production.json")
+	serverConfiguration, err = NewServerConfiguration("config/" + *environment + ".json")
 	if err != nil {
 		log.Println(err)
 	}
@@ -30,7 +33,7 @@ func main() {
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/w{width:[0-9]+}.{format}", widthHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/full_size.{format}", fullSizeHandler).Methods("GET")
 	http.Handle("/", r)
-	log.Println("Listening on port", serverConfiguration.ServerPort, "...")
+	log.Println("starting in "+*environment, "on http://0.0.0.0:"+serverConfiguration.ServerPort)
 	http.ListenAndServe(":"+serverConfiguration.ServerPort, nil)
 }
 
