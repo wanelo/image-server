@@ -14,6 +14,20 @@ To run the compiled executable
 ./bin/image-server
 ```
 
+## Configuration
+
+Example of json configuration on `config/production.json`
+```json
+{
+  "server_port": "7000",
+  "status_port": "7001",
+  "source_domain": "http://cdn-s3-2.wanelo.com",
+  "whitelisted_extensions": ["jpg", "png", "webp"],
+  "maximum_width": 1000
+}
+
+```
+
 ### Sample images
 
 **Image Types**
@@ -60,9 +74,11 @@ make
 ```
 
 ## Pending
-
+- accept flags with
+  - environment `-e production`, default will be `development`
 - save processed images into manta
-- ability to update the source of the image
+- ~~ability to update the source of the image [done]~~
+- only allow whitelisted formats
 - status page
   - current images processing count
   - current original download count
@@ -74,11 +90,10 @@ make
   - downloaded source from manta
   - failed downloading from manta
   - extension
-- configuration options/file
-  - port number
-  - status page port number
-  - max dimensions
-  - environments
-    - S3 url
-  - whitelist image extensions
+- ~~configuration options/file~~
+  - ~~port number [done]~~
+  - ~~status page port number [done]~~
+  - ~~max dimensions [done]~~
+  - ~~source domain [done]~~
+  - ~~whitelist image extensions [done]~~
 - keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
