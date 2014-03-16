@@ -78,10 +78,7 @@ make
 ```
 
 ## Pending
-- accept flags with
-  - environment `-e production`, default will be `development`
 - save processed images into manta
-- ~~ability to update the source of the image [done]~~
 - only allow whitelisted formats
 - status page
   - current images processing count
@@ -94,10 +91,16 @@ make
   - downloaded source from manta
   - failed downloading from manta
   - extension
+- keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
+
+- ~~error handling [done]~~
+- ~~accept flags with environment `-e production` [done]~~
+  - ~~default will be `development`~~
+- ~~ability to overwrite the source of the image [done]~~
+  - ~~by passing query parameter `source`~~
 - ~~configuration options/file~~
   - ~~port number [done]~~
   - ~~status page port number [done]~~
   - ~~max dimensions [done]~~
   - ~~source domain [done]~~
   - ~~whitelist image extensions [done]~~
-- keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
