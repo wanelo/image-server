@@ -105,10 +105,6 @@ func createWithMagick(ic *ImageConfiguration) {
 }
 
 func createImages(ic *ImageConfiguration) (string, error) {
-	if ic.width > serverConfiguration.MaximumWidth {
-		return "", fmt.Errorf("Maximum width is: %v\n", serverConfiguration.MaximumWidth)
-	}
-
 	resizedPath := ic.ResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {

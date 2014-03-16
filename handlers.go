@@ -9,6 +9,11 @@ import (
 )
 
 func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
+	if ic.width > serverConfiguration.MaximumWidth {
+		err := fmt.Errorf("Maximum width is: %v\n", serverConfiguration.MaximumWidth)
+		errorHandler(err, w, r, http.StatusNotAcceptable)
+		return
+	}
 	resizedPath, err := createImages(ic)
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound)

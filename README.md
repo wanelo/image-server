@@ -50,6 +50,12 @@ Example of json configuration on `config/production.json`
     Rectangle
     http://localhost:7000/user/avatar/3589782/300x400.jpg
 
+## Error Handling
+
+Few errors will cause the server to return error pages
+
+- Source image is not found: NotFound (404)
+- Image requested is larger than maximum_width: NotAcceptable (406)
 
 ## Development
 
@@ -63,8 +69,6 @@ To download dependencies
 ```bash
 make deps
 ```
-
-
 
 ## Compilation
 
