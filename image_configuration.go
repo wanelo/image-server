@@ -23,7 +23,7 @@ func (ic *ImageConfiguration) RemoteImageUrl() string {
 	if ic.source != "" {
 		return ic.source
 	} else {
-		return "http://cdn-s3-2.wanelo.com/" + ic.model + "/" + ic.imageType + "/" + ic.id + "/original.jpg"
+		return serverConfiguration.SourceDomain + "/" + ic.model + "/" + ic.imageType + "/" + ic.id + "/original.jpg"
 	}
 }
 

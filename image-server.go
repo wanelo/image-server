@@ -12,19 +12,26 @@ import (
 	"time"
 )
 
-const (
-	DEFAULT_PORT string = "7000"
+var (
+	serverConfiguration *ServerConfiguration
 )
 
 func main() {
+	var err error
+	serverConfiguration, err = NewServerConfiguration("config/production.json")
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(serverConfiguration)
+
 	r := mux.NewRouter()
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.{format}", rectangleHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/x{width:[0-9]+}.{format}", squareHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/w{width:[0-9]+}.{format}", widthHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/full_size.{format}", fullSizeHandler).Methods("GET")
 	http.Handle("/", r)
-	log.Println("Listening on port", DEFAULT_PORT, "...")
-	http.ListenAndServe(":"+DEFAULT_PORT, nil)
+	log.Println("Listening on port", serverConfiguration.ServerPort, "...")
+	http.ListenAndServe(":"+serverConfiguration.ServerPort, nil)
 }
 
 func downloadAndSaveOriginal(ic *ImageConfiguration) error {
@@ -95,6 +102,10 @@ func createWithMagick(ic *ImageConfiguration) {
 }
 
 func createImages(ic *ImageConfiguration) (string, error) {
+	if ic.width > serverConfiguration.MaximumWidth {
+		return "", fmt.Errorf("Maximum width is: %v\n", serverConfiguration.MaximumWidth)
+	}
+
 	resizedPath := ic.ResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {

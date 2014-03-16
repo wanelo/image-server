@@ -11,7 +11,7 @@ import (
 func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
 	resizedPath, err := createImages(ic)
 	if err != nil {
-		errorHandler(w, r, http.StatusNotFound)
+		errorHandler(err, w, r, http.StatusNotFound)
 		return
 	}
 	http.ServeFile(w, r, resizedPath)
@@ -64,9 +64,9 @@ func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, resizedPath)
 }
 
-func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+func errorHandler(err error, w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
 	if status == http.StatusNotFound {
-		fmt.Fprint(w, "404 page not found --")
+		fmt.Fprint(w, "404 image not available. ", err)
 	}
 }
