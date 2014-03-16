@@ -45,7 +45,7 @@ Prerequisites
 brew install imagemagick --with-webp
 ```
 
-To download dependencies 
+To download dependencies
 ```bash
 make deps
 ```
@@ -81,4 +81,4 @@ make
   - environments
     - S3 url
   - whitelist image extensions
-
+- keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
