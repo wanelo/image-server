@@ -18,7 +18,9 @@ var (
 )
 
 func main() {
+
 	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
+	flag.Parse()
 
 	var err error
 	serverConfiguration, err = NewServerConfiguration("config/" + *environment + ".json")
