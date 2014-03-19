@@ -29,6 +29,8 @@ func main() {
 	}
 	log.Println(serverConfiguration)
 
+	InitializeManta()
+
 	r := mux.NewRouter()
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.{format}", rectangleHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/x{width:[0-9]+}.{format}", squareHandler).Methods("GET")
