@@ -31,8 +31,12 @@ func (ic *ImageConfiguration) OriginalImagePath() string {
 	return "public/" + ic.model + "/" + ic.imageType + "/" + ic.id + "/original"
 }
 
+func (ic *ImageConfiguration) DestinationDirectory() string {
+	return fmt.Sprintf("public/%s/%s/%s", ic.model, ic.imageType, ic.id)
+}
+
 func (ic *ImageConfiguration) ResizedImagePath() string {
-	dir := fmt.Sprintf("public/%s/%s/%s", ic.model, ic.imageType, ic.id)
+	dir := ic.DestinationDirectory()
 
 	if ic.width == 0 && ic.height == 0 {
 		return dir + "/full_size." + ic.format
