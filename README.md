@@ -11,7 +11,7 @@ go run *.go
 
 To run the compiled executable
 ```
-./bin/image-server
+./bin/image-server -e production
 ```
 
 ## Configuration
