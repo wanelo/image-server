@@ -20,7 +20,7 @@ func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request
 		return
 	}
 	http.ServeFile(w, r, resizedPath)
-	CreateMantaDirectory()
+	ic.CreateMantaDirectory()
 }
 
 func rectangleHandler(w http.ResponseWriter, r *http.Request) {

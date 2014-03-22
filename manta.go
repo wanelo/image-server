@@ -27,26 +27,22 @@ func NewMantaClient() *manta.Client {
 	return manta.New(client)
 }
 
-func CreateMantaDirectory() {
-	opts := manta.ListDirectoryOpts{100, ""}
-	files, err := mantaConfig.Client.ListDirectory("", opts)
-	if err != nil {
-		log.Fatalf("Error listing directory on manta: %s", err.Error())
-	}
-	log.Printf("Files: %v", files)
-
-	/*	dir := "test_directory"
-		err = mantaClient.PutDirectory(dir)
+func (ic *ImageConfiguration) CreateMantaDirectory() {
+	/*
+		opts := manta.ListDirectoryOpts{100, ""}
+		files, err := mantaConfig.Client.ListDirectory("", opts)
 		if err != nil {
-			log.Fatalf("Error creating directory on manta: %s", err.Error())
+			log.Fatalf("Error listing directory on manta: %s", err.Error())
 		}
+		log.Printf("Files: %v", files)
+	*/
 
-		dir = "../" + ic.DestinationDirectory()
+	/*	dir := "../" + ic.DestinationDirectory()*/
+	dir := "../public/images"
+	log.Printf("Creating directory on manta: %s", dir)
 
-		log.Printf("Creating directory on manta: %s", dir)
-
-		err = mantaClient.PutDirectory(dir)
-		if err != nil {
-			log.Fatalf("Error creating directory on manta: %s", err.Error())
-		}*/
+	err := mantaConfig.Client.PutDirectory("/wanelo/public/images")
+	if err != nil {
+		log.Fatalf("Error creating directory on manta: %s", err.Error())
+	}
 }
