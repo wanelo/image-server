@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/joyent/gocommon/client"
-	"github.com/joyent/gocommon/jpc"
-	"github.com/joyent/gomanta/manta"
 	"log"
+
+	"github.com/richardiux/gocommon/client"
+	"github.com/richardiux/gocommon/jpc"
+	"github.com/richardiux/gomanta/manta"
 )
 
 type Manta struct {
@@ -28,20 +29,10 @@ func NewMantaClient() *manta.Client {
 }
 
 func (ic *ImageConfiguration) CreateMantaDirectory() {
-	/*
-		opts := manta.ListDirectoryOpts{100, ""}
-		files, err := mantaConfig.Client.ListDirectory("", opts)
-		if err != nil {
-			log.Fatalf("Error listing directory on manta: %s", err.Error())
-		}
-		log.Printf("Files: %v", files)
-	*/
-
-	/*	dir := "../" + ic.DestinationDirectory()*/
-	dir := "../public/images"
+	dir := "public/images"
 	log.Printf("Creating directory on manta: %s", dir)
 
-	err := mantaConfig.Client.PutDirectory("/wanelo/public/images")
+	err := mantaConfig.Client.PutDirectory(dir)
 	if err != nil {
 		log.Fatalf("Error creating directory on manta: %s", err.Error())
 	}
