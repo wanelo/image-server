@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/rainycape/magick"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/rainycape/magick"
 )
 
 type ImageConfiguration struct {
@@ -54,19 +55,20 @@ func (ic *ImageConfiguration) MagickInfo() *magick.Info {
 	return info
 }
 
-func buildImageConfiguration(r *http.Request) *ImageConfiguration {
-	ic := new(ImageConfiguration)
+func newImageConfiguration(r *http.Request) *ImageConfiguration {
 	params := mux.Vars(r)
 	qs := r.URL.Query()
+	width, _ := strconv.Atoi(params["width"])
+	height, _ := strconv.Atoi(params["height"])
 
-	ic.model = params["model"]
-	ic.imageType = params["imageType"]
-	ic.id = params["id"]
-	ic.width, _ = strconv.Atoi(params["width"])
-	ic.height, _ = strconv.Atoi(params["height"])
-	ic.format = params["format"]
-	ic.source = qs.Get("source")
-	ic.quality = 75
-
-	return ic
+	return &ImageConfiguration{
+		model:     params["model"],
+		imageType: params["imageType"],
+		id:        params["id"],
+		format:    params["format"],
+		source:    qs.Get("source"),
+		quality:   75,
+		width:     width,
+		height:    height,
+	}
 }

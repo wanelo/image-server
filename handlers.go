@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/rainycape/magick"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/rainycape/magick"
 )
 
 func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
@@ -24,24 +25,24 @@ func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request
 }
 
 func rectangleHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
+	ic := newImageConfiguration(r)
 	imageHandler(ic, w, r)
 }
 
 func squareHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
+	ic := newImageConfiguration(r)
 	ic.height = ic.width
 	imageHandler(ic, w, r)
 }
 
 func widthHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
+	ic := newImageConfiguration(r)
 	ic.height = 0
 	imageHandler(ic, w, r)
 }
 
 func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
-	ic := buildImageConfiguration(r)
+	ic := newImageConfiguration(r)
 	fullSizePath := ic.OriginalImagePath()
 	resizedPath := ic.ResizedImagePath()
 
