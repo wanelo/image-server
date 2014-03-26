@@ -9,6 +9,7 @@ all: deps
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
 	@go build
 	@mv image-server bin/
+	@go test -v ./...
 
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
