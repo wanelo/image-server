@@ -14,7 +14,7 @@ type Manta struct {
 
 var mantaConfig Manta
 
-func InitializeManta() {
+func initializeManta() {
 	mantaConfig.Client = NewMantaClient()
 }
 

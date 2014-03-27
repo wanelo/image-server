@@ -28,18 +28,18 @@ func main() {
 		log.Panicln(err)
 	}
 
-	InitializeManta()
-	InitializeRouter(serverConfiguration)
+	initializeManta()
+	initializeRouter(serverConfiguration)
 }
 
-func InitializeRouter(serverConfiguration *ServerConfiguration) {
+func initializeRouter(serverConfiguration *ServerConfiguration) {
 	r := mux.NewRouter()
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.{format}", rectangleHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/x{width:[0-9]+}.{format}", squareHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/w{width:[0-9]+}.{format}", widthHandler).Methods("GET")
 	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/full_size.{format}", fullSizeHandler).Methods("GET")
 	http.Handle("/", r)
-	log.Println("starting in " + serverConfiguration.Environment, "on http://0.0.0.0:" + serverConfiguration.ServerPort)
+	log.Println("starting in "+serverConfiguration.Environment, "on http://0.0.0.0:"+serverConfiguration.ServerPort)
 	http.ListenAndServe(":"+serverConfiguration.ServerPort, nil)
 }
 
