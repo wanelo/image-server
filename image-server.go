@@ -26,7 +26,7 @@ func main() {
 	var err error
 	serverConfiguration, err = loadServerConfiguration("config/" + *environment + ".json")
 	if err != nil {
-		log.Println(err)
+		log.Panicln(err)
 	}
 
 	InitializeManta()
