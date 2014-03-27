@@ -6,7 +6,7 @@ The default port number is 7000
 
 To start the server under development
 ```bash
-go run *.go
+make run
 ```
 
 To run the compiled executable

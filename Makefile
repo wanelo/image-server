@@ -11,6 +11,9 @@ all: deps
 	@mv image-server bin/
 	@go test -v ./...
 
+run:
+	@go run `ls *.go | grep -v _test.go` 
+
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
 	@go get -d -v ./...
