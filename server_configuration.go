@@ -15,8 +15,8 @@ type ServerConfiguration struct {
 	MaximumWidth          int      `json:"maximum_width"`
 }
 
-func NewServerConfiguration(configPath string) (*ServerConfiguration, error) {
-	configFile, err := ioutil.ReadFile(configPath)
+func loadServerConfiguration(path string) (*ServerConfiguration, error) {
+	configFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("configuration error: %v\n", err)
 	}

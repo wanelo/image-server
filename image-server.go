@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/rainycape/magick"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/rainycape/magick"
 )
 
 var (
@@ -23,11 +24,10 @@ func main() {
 	flag.Parse()
 
 	var err error
-	serverConfiguration, err = NewServerConfiguration("config/" + *environment + ".json")
+	serverConfiguration, err = loadServerConfiguration("config/" + *environment + ".json")
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(serverConfiguration)
 
 	InitializeManta()
 
