@@ -12,6 +12,7 @@ type ServerConfiguration struct {
 	SourceDomain          string   `json:"source_domain"`
 	WhitelistedExtensions []string `json:"whitelisted_extensions"`
 	MaximumWidth          int      `json:"maximum_width"`
+	MantaBasePath         string   `json:"manta_base_path"`
 	Environment           string
 }
 

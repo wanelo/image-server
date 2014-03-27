@@ -29,10 +29,10 @@ func NewMantaClient() *manta.Client {
 }
 
 func (ic *ImageConfiguration) CreateMantaDirectory() {
-	dir := "public/images"
-	log.Printf("Creating directory on manta: %s", dir)
+	baseDir := serverConfiguration.MantaBasePath
+	log.Printf("Creating directory on manta: %s", baseDir)
 
-	err := mantaConfig.Client.PutDirectory(dir)
+	err := mantaConfig.Client.PutDirectory(baseDir)
 	if err != nil {
 		log.Fatalf("Error creating directory on manta: %s", err.Error())
 	}
