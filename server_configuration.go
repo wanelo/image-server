@@ -13,9 +13,11 @@ type ServerConfiguration struct {
 	SourceDomain          string   `json:"source_domain"`
 	WhitelistedExtensions []string `json:"whitelisted_extensions"`
 	MaximumWidth          int      `json:"maximum_width"`
+	Environment           string
 }
 
-func loadServerConfiguration(path string) (*ServerConfiguration, error) {
+func loadServerConfiguration(environment string) (*ServerConfiguration, error) {
+	path := "config/" + environment + ".json"
 	configFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("configuration error: %v\n", err)
