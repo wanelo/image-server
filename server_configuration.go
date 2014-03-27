@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 )
 
 type ServerConfiguration struct {
@@ -25,7 +24,7 @@ func loadServerConfiguration(environment string) (*ServerConfiguration, error) {
 
 	var config *ServerConfiguration
 	json.Unmarshal(configFile, &config)
+	config.Environment = environment
 
-	log.Printf(" Config: %v", config)
 	return config, nil
 }
