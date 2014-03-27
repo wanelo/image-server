@@ -13,7 +13,7 @@ import (
 )
 
 func downloadAndSaveOriginal(ic *ImageConfiguration) error {
-	path := ic.OriginalImagePath()
+	path := ic.LocalOriginalImagePath()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		start := time.Now()
 
@@ -41,13 +41,17 @@ func downloadAndSaveOriginal(ic *ImageConfiguration) error {
 
 		io.Copy(out, resp.Body)
 		log.Printf("Took %s to download image: %s", time.Since(start), path)
+
+		go func() {
+			sendToManta(path, ic.MantaOriginalImagePath())
+		}()
 	}
 	return nil
 }
 
 func createWithMagick(ic *ImageConfiguration) {
 	start := time.Now()
-	fullSizePath := ic.OriginalImagePath()
+	fullSizePath := ic.LocalOriginalImagePath()
 	im, err := magick.DecodeFile(fullSizePath)
 	if err != nil {
 		log.Panicln(err)
@@ -61,7 +65,7 @@ func createWithMagick(ic *ImageConfiguration) {
 		return
 	}
 
-	resizedPath := ic.ResizedImagePath()
+	resizedPath := ic.LocalResizedImagePath()
 	dir := filepath.Dir(resizedPath)
 	os.MkdirAll(dir, 0700)
 
@@ -77,10 +81,14 @@ func createWithMagick(ic *ImageConfiguration) {
 	}
 	elapsed := time.Since(start)
 	log.Printf("Took %s to generate image: %s", elapsed, resizedPath)
+
+	go func() {
+		sendToManta(resizedPath, ic.MantaResizedImagePath())
+	}()
 }
 
 func createImages(ic *ImageConfiguration) (string, error) {
-	resizedPath := ic.ResizedImagePath()
+	resizedPath := ic.LocalResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		err := downloadAndSaveOriginal(ic)

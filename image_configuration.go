@@ -24,28 +24,42 @@ func (ic *ImageConfiguration) RemoteImageUrl() string {
 	if ic.source != "" {
 		return ic.source
 	} else {
-		return serverConfiguration.SourceDomain + "/" + ic.model + "/" + ic.imageType + "/" + ic.id + "/original.jpg"
+		return serverConfiguration.SourceDomain + "/" + ic.ImageDirectory() + "/original.jpg"
 	}
 }
 
-func (ic *ImageConfiguration) OriginalImagePath() string {
-	return "public/" + ic.model + "/" + ic.imageType + "/" + ic.id + "/original"
-}
-
-func (ic *ImageConfiguration) DestinationDirectory() string {
-	return fmt.Sprintf("public/%s/%s/%s", ic.model, ic.imageType, ic.id)
-}
-
-func (ic *ImageConfiguration) ResizedImagePath() string {
-	dir := ic.DestinationDirectory()
-
+func (ic *ImageConfiguration) ImageName() string {
 	if ic.width == 0 && ic.height == 0 {
-		return dir + "/full_size." + ic.format
+		return "full_size." + ic.format
 	} else if ic.height == 0 {
-		return fmt.Sprintf("%s/w%d.%s", dir, ic.width, ic.format)
+		return fmt.Sprintf("w%d.%s", ic.width, ic.format)
 	} else {
-		return fmt.Sprintf("%s/%dx%d.%s", dir, ic.width, ic.height, ic.format)
+		return fmt.Sprintf("%dx%d.%s", ic.width, ic.height, ic.format)
 	}
+}
+
+func (ic *ImageConfiguration) ImageDirectory() string {
+	return fmt.Sprintf("%s/%s/%s", ic.model, ic.imageType, ic.id)
+}
+
+func (ic *ImageConfiguration) LocalDestinationDirectory() string {
+	return "public/" + ic.ImageDirectory()
+}
+
+func (ic *ImageConfiguration) LocalOriginalImagePath() string {
+	return ic.LocalDestinationDirectory() + "/original"
+}
+
+func (ic *ImageConfiguration) LocalResizedImagePath() string {
+	return ic.LocalDestinationDirectory() + "/" + ic.ImageName()
+}
+
+func (ic *ImageConfiguration) MantaOriginalImagePath() string {
+	return ic.LocalDestinationDirectory() + "/original"
+}
+
+func (ic *ImageConfiguration) MantaResizedImagePath() string {
+	return ic.LocalDestinationDirectory() + "/" + ic.ImageName()
 }
 
 func (ic *ImageConfiguration) MagickInfo() *magick.Info {

@@ -21,7 +21,6 @@ func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request
 		return
 	}
 	http.ServeFile(w, r, resizedPath)
-	ic.CreateMantaDirectory()
 }
 
 func rectangleHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,8 +42,8 @@ func widthHandler(w http.ResponseWriter, r *http.Request) {
 
 func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 	ic := newImageConfiguration(r)
-	fullSizePath := ic.OriginalImagePath()
-	resizedPath := ic.ResizedImagePath()
+	fullSizePath := ic.LocalOriginalImagePath()
+	resizedPath := ic.LocalResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		downloadAndSaveOriginal(ic)

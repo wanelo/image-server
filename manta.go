@@ -15,10 +15,23 @@ type Manta struct {
 var mantaConfig Manta
 
 func initializeManta() {
-	mantaConfig.Client = NewMantaClient()
+	mantaConfig.Client = newMantaClient()
+
+	go func() {
+		ensureBasePath()
+	}()
 }
 
-func NewMantaClient() *manta.Client {
+func sendToManta(source string, destination string) {
+
+}
+
+func ensureBasePath() {
+	baseDir := serverConfiguration.MantaBasePath
+	createMantaDirectory(baseDir)
+}
+
+func newMantaClient() *manta.Client {
 	creds, err := jpc.CompleteCredentialsFromEnv("")
 	if err != nil {
 		log.Fatalf("Error reading credentials for manta: %s", err.Error())
@@ -28,12 +41,10 @@ func NewMantaClient() *manta.Client {
 	return manta.New(client)
 }
 
-func (ic *ImageConfiguration) CreateMantaDirectory() {
-	baseDir := serverConfiguration.MantaBasePath
-	log.Printf("Creating directory on manta: %s", baseDir)
-
-	err := mantaConfig.Client.PutDirectory(baseDir)
+func createMantaDirectory(path string) {
+	err := mantaConfig.Client.PutDirectory(path)
 	if err != nil {
 		log.Fatalf("Error creating directory on manta: %s", err.Error())
 	}
+	log.Printf("Created directory on manta: %s", path)
 }
