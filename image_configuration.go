@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/rainycape/magick"
 )
 
 type ImageConfiguration struct {
@@ -55,18 +54,11 @@ func (ic *ImageConfiguration) LocalResizedImagePath() string {
 }
 
 func (ic *ImageConfiguration) MantaOriginalImagePath() string {
-	return ic.LocalDestinationDirectory() + "/original"
+	return serverConfiguration.MantaBasePath + "/original"
 }
 
 func (ic *ImageConfiguration) MantaResizedImagePath() string {
-	return ic.LocalDestinationDirectory() + "/" + ic.ImageName()
-}
-
-func (ic *ImageConfiguration) MagickInfo() *magick.Info {
-	info := magick.NewInfo()
-	info.SetQuality(ic.quality)
-	info.SetFormat(ic.format)
-	return info
+	return serverConfiguration.MantaBasePath + "/" + ic.ImageName()
 }
 
 func newImageConfiguration(r *http.Request) *ImageConfiguration {

@@ -2,11 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"os"
-
-	"github.com/rainycape/magick"
 )
 
 func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
@@ -15,7 +11,7 @@ func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request
 		errorHandler(err, w, r, http.StatusNotAcceptable)
 		return
 	}
-	resizedPath, err := createImages(ic)
+	resizedPath, err := createImage(ic)
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound)
 		return
@@ -42,31 +38,11 @@ func widthHandler(w http.ResponseWriter, r *http.Request) {
 
 func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
 	ic := newImageConfiguration(r)
-	fullSizePath := ic.LocalOriginalImagePath()
-	resizedPath := ic.LocalResizedImagePath()
-
-	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(ic)
-
-		im, err := magick.DecodeFile(fullSizePath)
-		if err != nil {
-			log.Panicln(err)
-			return
-		}
-		defer im.Dispose()
-
-		out, err := os.Create(resizedPath)
-		defer out.Close()
-
-		info := ic.MagickInfo()
-		err = im.Encode(out, info)
-
-		if err != nil {
-			log.Panicln(err)
-			return
-		}
+	resizedPath, err := createFullSizeImage(ic)
+	if err != nil {
+		errorHandler(err, w, r, http.StatusNotFound)
+		return
 	}
-
 	http.ServeFile(w, r, resizedPath)
 }
 

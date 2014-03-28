@@ -87,14 +87,13 @@ func createWithMagick(ic *ImageConfiguration) {
 	}()
 }
 
-func createImages(ic *ImageConfiguration) (string, error) {
+func createImage(ic *ImageConfiguration) (string, error) {
 	resizedPath := ic.LocalResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 		err := downloadAndSaveOriginal(ic)
-		log.Printf("what errors? %v", err)
 		if err != nil {
-			log.Printf("--something happened, skipping creation")
+			log.Println(err)
 			return "", err
 		}
 
@@ -102,4 +101,39 @@ func createImages(ic *ImageConfiguration) (string, error) {
 	}
 
 	return resizedPath, nil
+}
+
+func createFullSizeImage(ic *ImageConfiguration) (string, error) {
+	fullSizePath := ic.LocalOriginalImagePath()
+	resizedPath := ic.LocalResizedImagePath()
+
+	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
+		downloadAndSaveOriginal(ic)
+
+		im, err := magick.DecodeFile(fullSizePath)
+		if err != nil {
+			log.Println(err)
+			return "", err
+		}
+		defer im.Dispose()
+
+		out, err := os.Create(resizedPath)
+		defer out.Close()
+
+		info := ic.MagickInfo()
+		err = im.Encode(out, info)
+
+		if err != nil {
+			log.Println(err)
+			return "", err
+		}
+	}
+	return resizedPath, nil
+}
+
+func (ic *ImageConfiguration) MagickInfo() *magick.Info {
+	info := magick.NewInfo()
+	info.SetQuality(ic.quality)
+	info.SetFormat(ic.format)
+	return info
 }
