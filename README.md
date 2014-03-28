@@ -82,6 +82,10 @@ make
 
 ### Required
 
+- deploy on smartos
+- chef cookbook for deployment
+- configure fastly
+
 - Move default compression to configuration
 - Optimize image generation. Make files smaller. Want to replicate all current configurations.
 - Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.
@@ -109,7 +113,7 @@ make
   - current images processing count
   - current original download count
 - keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
-- Allow to have multiple compressions: x50-c60.jpg
+- Allow to have variable compressions: x50-c60.jpg
 
 ### Done
 - ~~save processed images into manta~~
