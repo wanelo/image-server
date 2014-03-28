@@ -79,11 +79,12 @@ make
 ```
 
 ## Pending
-- save processed images into manta
-- only allow whitelisted formats
-- status page
-  - current images processing count
-  - current original download count
+
+### Required
+
+- Move default compression to configuration
+- Optimize image generation. Make files smaller. Want to replicate all current configurations.
+- Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.
 - graphite events (https://github.com/marpaia/graphite-golang)
   - completed
   - completed with errors
@@ -92,8 +93,26 @@ make
   - downloaded source from manta
   - failed downloading from manta
   - extension
-- keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
 
+### Needs discussion
+
+- Upload to S3. This way we don't need to reprocess most images. 
+- Ability to have manta jobs to create new versions. First list all product Ids already stored in manta. Map: split into smaller batches. A CLI will be needed for this. 
+- Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
+
+
+### After Release
+
+- only allow whitelisted formats: jpg, png, webp
+
+- status page
+  - current images processing count
+  - current original download count
+- keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
+- Allow to have multiple compressions: x50-c60.jpg
+
+### Done
+- ~~save processed images into manta~~
 - ~~error handling [done]~~
 - ~~accept flags with environment `-e production` [done]~~
   - ~~default will be `development`~~
