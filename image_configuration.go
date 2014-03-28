@@ -54,11 +54,11 @@ func (ic *ImageConfiguration) LocalResizedImagePath() string {
 }
 
 func (ic *ImageConfiguration) MantaOriginalImagePath() string {
-	return serverConfiguration.MantaBasePath + "/original"
+	return serverConfiguration.MantaBasePath + "/" + ic.ImageDirectory() + "/original"
 }
 
 func (ic *ImageConfiguration) MantaResizedImagePath() string {
-	return serverConfiguration.MantaBasePath + "/" + ic.ImageName()
+	return serverConfiguration.MantaBasePath + "/" + ic.ImageDirectory() + "/" + ic.ImageName()
 }
 
 func newImageConfiguration(r *http.Request) *ImageConfiguration {
