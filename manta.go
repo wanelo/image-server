@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
+	"path"
 	"path/filepath"
 
 	"github.com/richardiux/gocommon/client"
@@ -19,19 +21,30 @@ func initializeManta() {
 	mantaConfig.Client = newMantaClient()
 
 	go func() {
-		ensureManataBasePath()
+		ensureMantaBasePath()
 	}()
 }
 
 func sendToManta(source string, destination string) {
-	err := ensureMantaImageDirectory(destination)
+	path, objectName := path.Split(destination)
+	err := ensureMantaImageDirectory(path)
 	if err != nil {
+		log.Printf("Manta::sentToManta unable to create directory %s", path)
 		return
 	}
+	object, err := ioutil.ReadFile(source)
+	if err != nil {
+		log.Printf("Manta::sentToManta unable to read file %s", source)
+		return
+	}
+	err = mantaConfig.Client.PutObject(path, objectName, object)
+	if err != nil {
+		log.Printf("Error uploading image to manta: %s", err)
+	}
+
 }
 
-func ensureMantaImageDirectory(destination string) err {
-	dir := filepath.Dir(destination)
+func ensureMantaImageDirectory(dir string) error {
 	err := createMantaDirectory(dir)
 	if err != nil {
 		//  need to create sub directories
@@ -40,7 +53,11 @@ func ensureMantaImageDirectory(destination string) err {
 		err = createMantaDirectory(dir3)
 		err = createMantaDirectory(dir2)
 		err = createMantaDirectory(dir)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func ensureMantaBasePath() {
