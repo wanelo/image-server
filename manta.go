@@ -6,8 +6,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/richardiux/gocommon/client"
-	"github.com/richardiux/gocommon/jpc"
+	"github.com/joyent/gocommon/client"
+	"github.com/joyent/gocommon/jpc"
 	"github.com/richardiux/gomanta/manta"
 )
 
