@@ -82,10 +82,6 @@ make
 
 ### Required
 
-- deploy on smartos
-- chef cookbook for deployment
-- configure fastly
-
 - Move default compression to configuration
 - Optimize image generation. Make files smaller. Want to replicate all current configurations.
 - Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.
@@ -97,23 +93,24 @@ make
   - downloaded source from manta
   - failed downloading from manta
   - extension
-
-### Needs discussion
-
-- Upload to S3. This way we don't need to reprocess most images. 
-- Ability to have manta jobs to create new versions. First list all product Ids already stored in manta. Map: split into smaller batches. A CLI will be needed for this. 
-- Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
-
+- deploy to smartos
+- chef cookbook for deployment
+- configure fastly
 
 ### After Release
 
+- Zero-downtime restart: http://rcrowley.org/talks/strange-loop-2013.html#27
 - only allow whitelisted formats: jpg, png, webp
-
 - status page
   - current images processing count
   - current original download count
 - keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
 - Allow to have variable compressions: x50-c60.jpg
+
+### Needs discussion
+
+- Ability to have manta jobs to create new versions. First list all product Ids already stored in manta. Map: split into smaller batches. A CLI will be needed for this. 
+- Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
 
 ### Done
 - ~~save processed images into manta~~
