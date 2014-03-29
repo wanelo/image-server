@@ -1,12 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/gorilla/mux"
-)
+import "fmt"
 
 type ImageConfiguration struct {
 	id        string
@@ -59,22 +53,4 @@ func (ic *ImageConfiguration) MantaOriginalImagePath() string {
 
 func (ic *ImageConfiguration) MantaResizedImagePath() string {
 	return serverConfiguration.MantaBasePath + "/" + ic.ImageDirectory() + "/" + ic.ImageName()
-}
-
-func newImageConfiguration(r *http.Request) *ImageConfiguration {
-	params := mux.Vars(r)
-	qs := r.URL.Query()
-	width, _ := strconv.Atoi(params["width"])
-	height, _ := strconv.Atoi(params["height"])
-
-	return &ImageConfiguration{
-		model:     params["model"],
-		imageType: params["imageType"],
-		id:        params["id"],
-		format:    params["format"],
-		source:    qs.Get("source"),
-		quality:   serverConfiguration.DefaultCompression,
-		width:     width,
-		height:    height,
-	}
 }

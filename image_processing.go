@@ -48,6 +48,10 @@ func createWithMagick(ic *ImageConfiguration) {
 }
 
 func createImage(ic *ImageConfiguration) (string, error) {
+	if ic.width == 0 && ic.height == 0 {
+		return createFullSizeImage(ic)
+	}
+
 	resizedPath := ic.LocalResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {

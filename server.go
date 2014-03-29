@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/codegangsta/martini"
 )
 
 var (
@@ -27,12 +27,10 @@ func main() {
 }
 
 func initializeRouter(serverConfiguration *ServerConfiguration) {
-	r := mux.NewRouter()
-	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/{width:[0-9]+}x{height:[0-9]+}.{format}", rectangleHandler).Methods("GET")
-	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/x{width:[0-9]+}.{format}", squareHandler).Methods("GET")
-	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/w{width:[0-9]+}.{format}", widthHandler).Methods("GET")
-	r.HandleFunc("/{model}/{imageType}/{id:[0-9]+}/full_size.{format}", fullSizeHandler).Methods("GET")
-	http.Handle("/", r)
 	log.Println("starting in "+serverConfiguration.Environment, "on http://0.0.0.0:"+serverConfiguration.ServerPort)
-	http.ListenAndServe(":"+serverConfiguration.ServerPort, nil)
+
+	m := martini.Classic()
+	m.Get("/:model/:imageType/:id/:filename", genericImageHandler)
+
+	log.Fatal(http.ListenAndServe(":"+serverConfiguration.ServerPort, m))
 }

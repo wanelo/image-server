@@ -3,7 +3,23 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/codegangsta/martini"
 )
+
+func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter) {
+	ic, err := NameToConfiguration(params["filename"])
+	if err != nil {
+		errorHandler(err, w, r, http.StatusNotFound)
+	}
+	qs := r.URL.Query()
+	ic.model = params["model"]
+	ic.imageType = params["imageType"]
+	ic.id = params["id"]
+	ic.source = qs.Get("source")
+	ic.quality = serverConfiguration.DefaultCompression
+	imageHandler(ic, w, r)
+}
 
 func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
 	if ic.width > serverConfiguration.MaximumWidth {
@@ -12,33 +28,6 @@ func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request
 		return
 	}
 	resizedPath, err := createImage(ic)
-	if err != nil {
-		errorHandler(err, w, r, http.StatusNotFound)
-		return
-	}
-	http.ServeFile(w, r, resizedPath)
-}
-
-func rectangleHandler(w http.ResponseWriter, r *http.Request) {
-	ic := newImageConfiguration(r)
-	imageHandler(ic, w, r)
-}
-
-func squareHandler(w http.ResponseWriter, r *http.Request) {
-	ic := newImageConfiguration(r)
-	ic.height = ic.width
-	imageHandler(ic, w, r)
-}
-
-func widthHandler(w http.ResponseWriter, r *http.Request) {
-	ic := newImageConfiguration(r)
-	ic.height = 0
-	imageHandler(ic, w, r)
-}
-
-func fullSizeHandler(w http.ResponseWriter, r *http.Request) {
-	ic := newImageConfiguration(r)
-	resizedPath, err := createFullSizeImage(ic)
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound)
 		return
