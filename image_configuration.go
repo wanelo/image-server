@@ -73,7 +73,7 @@ func newImageConfiguration(r *http.Request) *ImageConfiguration {
 		id:        params["id"],
 		format:    params["format"],
 		source:    qs.Get("source"),
-		quality:   75,
+		quality:   serverConfiguration.DefaultCompression,
 		width:     width,
 		height:    height,
 	}

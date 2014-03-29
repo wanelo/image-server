@@ -13,6 +13,7 @@ type ServerConfiguration struct {
 	WhitelistedExtensions []string `json:"whitelisted_extensions"`
 	MaximumWidth          int      `json:"maximum_width"`
 	MantaBasePath         string   `json:"manta_base_path"`
+	DefaultCompression    uint     `json:"default_compression"`
 	Environment           string
 }
 

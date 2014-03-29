@@ -82,7 +82,6 @@ make
 
 ### Required
 
-- Move default compression to configuration
 - Optimize image generation. Make files smaller. Want to replicate all current configurations.
 - Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.
 - graphite events (https://github.com/marpaia/graphite-golang)
@@ -109,10 +108,11 @@ make
 
 ### Needs discussion
 
-- Ability to have manta jobs to create new versions. First list all product Ids already stored in manta. Map: split into smaller batches. A CLI will be needed for this. 
+- Ability to have manta jobs to create new versions. First list all product Ids already stored in manta. Map: split into smaller batches. A CLI will be needed for this.
 - Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
 
 ### Done
+- ~~Move default compression to configuration~~
 - ~~save processed images into manta~~
 - ~~error handling [done]~~
 - ~~accept flags with environment `-e production` [done]~~
