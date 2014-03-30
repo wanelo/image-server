@@ -11,60 +11,14 @@ import (
 	"github.com/richardiux/gomanta/manta"
 )
 
-type Manta struct {
+type MantaAdapter struct {
 	Client *manta.Client
 }
 
-var mantaConfig Manta
-
-func initializeManta(ipc chan *ImageConfiguration) {
-	mantaConfig.Client = newMantaClient()
-	ensureMantaBasePath()
-
-	for {
-		ic := <-ipc
-		sendToManta(ic.LocalResizedImagePath(), ic.MantaResizedImagePath())
-	}
-}
-
-func sendToManta(source string, destination string) {
-	path, objectName := path.Split(destination)
-	err := ensureMantaImageDirectory(path)
-	if err != nil {
-		log.Printf("Manta::sentToManta unable to create directory %s", path)
-		return
-	}
-	object, err := ioutil.ReadFile(source)
-	if err != nil {
-		log.Printf("Manta::sentToManta unable to read file %s", source)
-		return
-	}
-	err = mantaConfig.Client.PutObject(path, objectName, object)
-	if err != nil {
-		log.Printf("Error uploading image to manta: %s", err)
-	}
-
-}
-
-func ensureMantaImageDirectory(dir string) error {
-	err := createMantaDirectory(dir)
-	if err != nil {
-		//  need to create sub directories
-		dir2 := filepath.Dir(dir)
-		dir3 := filepath.Dir(dir2)
-		err = createMantaDirectory(dir3)
-		err = createMantaDirectory(dir2)
-		err = createMantaDirectory(dir)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func ensureMantaBasePath() {
-	baseDir := serverConfiguration.MantaBasePath
-	createMantaDirectory(baseDir)
+func initializeManta(sc *ServerConfiguration) {
+	m := &MantaAdapter{Client: newMantaClient()}
+	m.ensureBasePath()
+	sc.DataStore = m
 }
 
 func newMantaClient() *manta.Client {
@@ -77,8 +31,47 @@ func newMantaClient() *manta.Client {
 	return manta.New(client)
 }
 
-func createMantaDirectory(path string) error {
-	err := mantaConfig.Client.PutDirectory(path)
+func (m *MantaAdapter) upload(source string, destination string) {
+	path, objectName := path.Split(destination)
+	err := m.ensureDirectory(path)
+	if err != nil {
+		log.Printf("Manta::sentToManta unable to create directory %s", path)
+		return
+	}
+	object, err := ioutil.ReadFile(source)
+	if err != nil {
+		log.Printf("Manta::sentToManta unable to read file %s", source)
+		return
+	}
+	err = m.Client.PutObject(path, objectName, object)
+	if err != nil {
+		log.Printf("Error uploading image to manta: %s", err)
+	}
+}
+
+func (m *MantaAdapter) ensureDirectory(dir string) error {
+	err := m.createDirectory(dir)
+	if err != nil {
+		//  need to create sub directories
+		dir2 := filepath.Dir(dir)
+		dir3 := filepath.Dir(dir2)
+		err = m.createDirectory(dir3)
+		err = m.createDirectory(dir2)
+		err = m.createDirectory(dir)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *MantaAdapter) ensureBasePath() {
+	baseDir := serverConfiguration.MantaBasePath
+	m.createDirectory(baseDir)
+}
+
+func (m *MantaAdapter) createDirectory(path string) error {
+	err := m.Client.PutDirectory(path)
 	if err != nil {
 		log.Printf("Error creating directory on manta: %s", path)
 		return err

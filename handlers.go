@@ -7,7 +7,7 @@ import (
 	"github.com/codegangsta/martini"
 )
 
-func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter, ipc chan *ImageConfiguration) {
+func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter, sc *ServerConfiguration) {
 	ic, err := NameToConfiguration(params["filename"])
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound)
@@ -17,19 +17,21 @@ func genericImageHandler(params martini.Params, r *http.Request, w http.Response
 	ic.imageType = params["imageType"]
 	ic.id = params["id"]
 	ic.source = qs.Get("source")
-	ic.quality = serverConfiguration.DefaultCompression
-	imageHandler(ic, w, r)
+	ic.quality = sc.DefaultCompression
+	imageHandler(sc, ic, w, r)
 
-	ipc <- ic
+	go func() {
+		sc.Events.ImageProcessed <- ic
+	}()
 }
 
-func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
-	if ic.width > serverConfiguration.MaximumWidth {
-		err := fmt.Errorf("Maximum width is: %v\n", serverConfiguration.MaximumWidth)
+func imageHandler(sc *ServerConfiguration, ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
+	if ic.width > sc.MaximumWidth {
+		err := fmt.Errorf("Maximum width is: %v\n", sc.MaximumWidth)
 		errorHandler(err, w, r, http.StatusNotAcceptable)
 		return
 	}
-	resizedPath, err := createImage(ic)
+	resizedPath, err := ic.createImage(sc)
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound)
 		return

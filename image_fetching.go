@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func downloadAndSaveOriginal(ic *ImageConfiguration) error {
+func downloadAndSaveOriginal(ic *ImageConfiguration, sc *ServerConfiguration) error {
 	path := ic.LocalOriginalImagePath()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		start := time.Now()
@@ -41,7 +41,7 @@ func downloadAndSaveOriginal(ic *ImageConfiguration) error {
 		log.Printf("Took %s to download image: %s", time.Since(start), path)
 
 		go func() {
-			sendToManta(path, ic.MantaOriginalImagePath())
+			sc.Events.OriginalDownloaded <- ic
 		}()
 	}
 	return nil

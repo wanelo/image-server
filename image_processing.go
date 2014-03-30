@@ -9,6 +9,25 @@ import (
 	"github.com/rainycape/magick"
 )
 
+func (ic *ImageConfiguration) createImage(sc *ServerConfiguration) (string, error) {
+	if ic.width == 0 && ic.height == 0 {
+		return createFullSizeImage(ic, sc)
+	}
+
+	resizedPath := ic.LocalResizedImagePath()
+	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
+		err := downloadAndSaveOriginal(ic, sc)
+		if err != nil {
+			log.Println(err)
+			return "", err
+		}
+
+		createWithMagick(ic)
+	}
+
+	return resizedPath, nil
+}
+
 func createWithMagick(ic *ImageConfiguration) {
 	start := time.Now()
 	fullSizePath := ic.LocalOriginalImagePath()
@@ -44,32 +63,12 @@ func createWithMagick(ic *ImageConfiguration) {
 
 }
 
-func createImage(ic *ImageConfiguration) (string, error) {
-	if ic.width == 0 && ic.height == 0 {
-		return createFullSizeImage(ic)
-	}
-
-	resizedPath := ic.LocalResizedImagePath()
-
-	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		err := downloadAndSaveOriginal(ic)
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
-
-		createWithMagick(ic)
-	}
-
-	return resizedPath, nil
-}
-
-func createFullSizeImage(ic *ImageConfiguration) (string, error) {
+func createFullSizeImage(ic *ImageConfiguration, sc *ServerConfiguration) (string, error) {
 	fullSizePath := ic.LocalOriginalImagePath()
 	resizedPath := ic.LocalResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(ic)
+		downloadAndSaveOriginal(ic, sc)
 
 		im, err := magick.DecodeFile(fullSizePath)
 		if err != nil {

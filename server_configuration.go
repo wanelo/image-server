@@ -15,6 +15,13 @@ type ServerConfiguration struct {
 	MantaBasePath         string   `json:"manta_base_path"`
 	DefaultCompression    uint     `json:"default_compression"`
 	Environment           string
+	Events                *EventChannels
+	DataStore             *MantaAdapter
+}
+
+type EventChannels struct {
+	ImageProcessed     chan *ImageConfiguration
+	OriginalDownloaded chan *ImageConfiguration
 }
 
 func loadServerConfiguration(environment string) (*ServerConfiguration, error) {
@@ -27,6 +34,9 @@ func loadServerConfiguration(environment string) (*ServerConfiguration, error) {
 	var config *ServerConfiguration
 	json.Unmarshal(configFile, &config)
 	config.Environment = environment
-
+	config.Events = &EventChannels{
+		ImageProcessed:     make(chan *ImageConfiguration),
+		OriginalDownloaded: make(chan *ImageConfiguration),
+	}
 	return config, nil
 }
