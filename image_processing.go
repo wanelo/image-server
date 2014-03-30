@@ -42,9 +42,6 @@ func createWithMagick(ic *ImageConfiguration) {
 	elapsed := time.Since(start)
 	log.Printf("Took %s to generate image: %s", elapsed, resizedPath)
 
-	go func() {
-		sendToManta(resizedPath, ic.MantaResizedImagePath())
-	}()
 }
 
 func createImage(ic *ImageConfiguration) (string, error) {

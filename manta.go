@@ -17,12 +17,14 @@ type Manta struct {
 
 var mantaConfig Manta
 
-func initializeManta() {
+func initializeManta(ipc chan *ImageConfiguration) {
 	mantaConfig.Client = newMantaClient()
+	ensureMantaBasePath()
 
-	go func() {
-		ensureMantaBasePath()
-	}()
+	for {
+		ic := <-ipc
+		sendToManta(ic.LocalResizedImagePath(), ic.MantaResizedImagePath())
+	}
 }
 
 func sendToManta(source string, destination string) {

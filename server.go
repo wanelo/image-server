@@ -22,15 +22,17 @@ func main() {
 		log.Panicln(err)
 	}
 
-	initializeManta()
-	initializeRouter(serverConfiguration)
+	imageProcessedChannel := make(chan *ImageConfiguration)
+	go initializeManta(imageProcessedChannel)
+	initializeRouter(serverConfiguration, imageProcessedChannel)
 }
 
-func initializeRouter(serverConfiguration *ServerConfiguration) {
-	log.Println("starting in "+serverConfiguration.Environment, "on http://0.0.0.0:"+serverConfiguration.ServerPort)
+func initializeRouter(sc *ServerConfiguration, ipc chan *ImageConfiguration) {
+	log.Println("starting in "+sc.Environment, "on http://0.0.0.0:"+sc.ServerPort)
 
 	m := martini.Classic()
+	m.Map(ipc)
 	m.Get("/:model/:imageType/:id/:filename", genericImageHandler)
 
-	log.Fatal(http.ListenAndServe(":"+serverConfiguration.ServerPort, m))
+	log.Fatal(http.ListenAndServe(":"+sc.ServerPort, m))
 }

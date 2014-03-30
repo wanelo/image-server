@@ -7,7 +7,7 @@ import (
 	"github.com/codegangsta/martini"
 )
 
-func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter) {
+func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter, ipc chan *ImageConfiguration) {
 	ic, err := NameToConfiguration(params["filename"])
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound)
@@ -19,6 +19,8 @@ func genericImageHandler(params martini.Params, r *http.Request, w http.Response
 	ic.source = qs.Get("source")
 	ic.quality = serverConfiguration.DefaultCompression
 	imageHandler(ic, w, r)
+
+	ipc <- ic
 }
 
 func imageHandler(ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {

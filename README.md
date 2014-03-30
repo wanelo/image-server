@@ -81,9 +81,7 @@ make
 ## Pending
 
 ### Required
-
 - Optimize image generation. Make files smaller. Want to replicate all current configurations.
-- Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.
 - graphite events (https://github.com/marpaia/graphite-golang)
   - completed
   - completed with errors
@@ -92,6 +90,8 @@ make
   - downloaded source from manta
   - failed downloading from manta
   - extension
+
+### Operations/Deployment
 - deploy to smartos
 - chef cookbook for deployment
 - configure fastly
@@ -112,6 +112,7 @@ make
 - Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
 
 ### Done
+- ~~Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.~~
 - ~~Move default compression to configuration~~
 - ~~save processed images into manta~~
 - ~~error handling [done]~~
