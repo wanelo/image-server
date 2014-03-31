@@ -24,6 +24,7 @@ func main() {
 
 	go func() {
 		initializeManta(serverConfiguration)
+		initializeGraphite(serverConfiguration)
 		initializeEventListeners(serverConfiguration)
 	}()
 
