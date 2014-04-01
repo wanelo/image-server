@@ -1,5 +1,7 @@
 # Image Server
 
+[![Build Status](https://magnum.travis-ci.com/wanelo/image-server.svg?token=xxYxjHDAXkDK41qZ1dqA&branch=master)](https://magnum.travis-ci.com/wanelo/image-server)
+
 ## Usage
 
 The default port number is 7000
