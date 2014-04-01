@@ -8,5 +8,5 @@
   "default_compression": 75,
   "graphite_enabled": false,
   "graphite_port": 7777,
-  "graphite_host": "localhost",
+  "graphite_host": "localhost"
 }
