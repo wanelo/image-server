@@ -6,6 +6,7 @@ type ImageConfiguration struct {
 	id        string
 	width     int
 	height    int
+	filename  string
 	format    string
 	source    string
 	quality   uint
@@ -18,16 +19,6 @@ func (ic *ImageConfiguration) RemoteImageUrl() string {
 		return ic.source
 	} else {
 		return serverConfiguration.SourceDomain + "/" + ic.ImageDirectory() + "/original.jpg"
-	}
-}
-
-func (ic *ImageConfiguration) ImageName() string {
-	if ic.width == 0 && ic.height == 0 {
-		return "full_size." + ic.format
-	} else if ic.height == 0 {
-		return fmt.Sprintf("w%d.%s", ic.width, ic.format)
-	} else {
-		return fmt.Sprintf("%dx%d.%s", ic.width, ic.height, ic.format)
 	}
 }
 
@@ -44,7 +35,7 @@ func (ic *ImageConfiguration) LocalOriginalImagePath() string {
 }
 
 func (ic *ImageConfiguration) LocalResizedImagePath() string {
-	return ic.LocalDestinationDirectory() + "/" + ic.ImageName()
+	return ic.LocalDestinationDirectory() + "/" + ic.filename
 }
 
 func (ic *ImageConfiguration) MantaOriginalImagePath() string {
@@ -52,5 +43,5 @@ func (ic *ImageConfiguration) MantaOriginalImagePath() string {
 }
 
 func (ic *ImageConfiguration) MantaResizedImagePath() string {
-	return serverConfiguration.MantaBasePath + "/" + ic.ImageDirectory() + "/" + ic.ImageName()
+	return serverConfiguration.MantaBasePath + "/" + ic.ImageDirectory() + "/" + ic.filename
 }
