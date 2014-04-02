@@ -80,18 +80,37 @@ make deps
 make
 ```
 
+## Graphite Events
+
+A local cache was not found and the image was processed. This also tracks count of images sent to remote store.
+```
+stats.image_server.image_request
+```
+
+In addition, the format is tracked (jpg, gif, webp)
+```
+stats.image_server.image_request.jpg
+```
+
+Request failed to return an image
+```
+stats.image_server.image_request_fail
+```
+
+Every download from original source, and a 404 was returned
+```
+stats.image_server.original_downloaded
+```
+
+The original image is not available, and a 404 was returned
+```
+stats.image_server.original_unavailable
+```
+
 ## Pending
 
 ### Required
 - Optimize image generation. Make files smaller. Want to replicate all current configurations.
-- graphite events (https://github.com/marpaia/graphite-golang)
-  - completed
-  - completed with errors
-  - downloaded source from s3
-  - failed downloading from s3
-  - downloaded source from manta
-  - failed downloading from manta
-  - extension
 
 ### Operations/Deployment
 - deploy to smartos
@@ -114,6 +133,12 @@ make
 - Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
 
 ### Done
+- ~~graphite events (https://github.com/marpaia/graphite-golang)~~
+  - ~~image processed~~
+  - ~~image processed by extension~~
+  - ~~original downloaded~~
+  - ~~failed downloading from s3~~
+  - ~~completed with errors~~
 - ~~Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.~~
 - ~~Move default compression to configuration~~
 - ~~save processed images into manta~~

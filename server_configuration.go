@@ -26,8 +26,10 @@ type ServerConfiguration struct {
 }
 
 type EventChannels struct {
-	ImageProcessed     chan *ImageConfiguration
-	OriginalDownloaded chan *ImageConfiguration
+	ImageProcessed              chan *ImageConfiguration
+	ImageProcessedWithErrors    chan *ImageConfiguration
+	OriginalDownloaded          chan *ImageConfiguration
+	OriginalDownloadUnavailable chan *ImageConfiguration
 }
 
 func loadServerConfiguration(environment string) (*ServerConfiguration, error) {

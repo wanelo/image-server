@@ -22,6 +22,9 @@ func downloadAndSaveOriginal(ic *ImageConfiguration, sc *ServerConfiguration) er
 		if err != nil || resp.StatusCode != 200 {
 			log.Printf("Unable to download image: %s, status code: %d", remoteUrl, resp.StatusCode)
 			log.Println(err)
+			go func() {
+				sc.Events.OriginalDownloadUnavailable <- ic
+			}()
 			return fmt.Errorf("Unable to download image: %s, status code: %d", remoteUrl, resp.StatusCode)
 		}
 		defer resp.Body.Close()
