@@ -5,6 +5,6 @@
   "whitelisted_extensions": ["jpg", "png", "webp"],
   "maximum_width": 1000,
   "manta_base_path": "public/images/test",
-  "default_compression": 75,
+  "default_quality": 75,
   "graphite_enabled": false
 }

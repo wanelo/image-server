@@ -53,6 +53,13 @@ Example of json configuration on `config/production.json`
     Rectangle
     http://localhost:7000/user/avatar/3589782/300x400.jpg
 
+**Quality**
+
+The default compression of the image can modified by appending `-q` and the desired quality `1-100`.
+
+    Square with quality 50
+    http://localhost:7000/user/avatar/3589782/x600-q50.jpg
+
 ## Error Handling
 
 Few errors will cause the server to return error pages
@@ -125,7 +132,6 @@ stats.image_server.original_unavailable
   - current images processing count
   - current original download count
 - keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
-- Allow to have variable compressions: x50-c60.jpg
 
 ### Needs discussion
 
@@ -133,6 +139,7 @@ stats.image_server.original_unavailable
 - Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
 
 ### Done
+- ~~Allow to have variable compressions: x50-q60.jpg~~
 - ~~graphite events (https://github.com/marpaia/graphite-golang)~~
   - ~~image processed~~
   - ~~image processed by extension~~
