@@ -118,6 +118,7 @@ stats.image_server.original_unavailable
 
 ### Required
 - Optimize image generation. Make files smaller. Want to replicate all current configurations.
+- Default background color needs to be white (for transparent gifs, etc)
 
 ### Operations/Deployment
 - deploy to smartos
