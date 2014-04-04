@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/richardiux/magick"
+	"github.com/rainycape/magick"
 )
 
 func (ic *ImageConfiguration) createImage(sc *ServerConfiguration) (string, error) {
