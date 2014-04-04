@@ -3,5 +3,8 @@ language: go
 go:
   - 1.2
 
+before_script:
+  - sudo apt-get install giflib-dbg
+
 notifications:
   webhooks: 'http://ci.wanelo.com/projects/2ae19e1a-5c2c-47dc-b081-6fcbe56d135d/status'
