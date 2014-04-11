@@ -15,10 +15,10 @@ type MantaAdapter struct {
 	Client *manta.Client
 }
 
-func initializeManta(sc *ServerConfiguration) {
+func initializeManta(sc *ServerConfiguration) *MantaAdapter {
 	m := &MantaAdapter{Client: newMantaClient()}
 	m.ensureBasePath()
-	sc.DataStore = m
+	return m
 }
 
 func newMantaClient() *manta.Client {
@@ -31,7 +31,10 @@ func newMantaClient() *manta.Client {
 	return manta.New(client)
 }
 
-func (m *MantaAdapter) upload(source string, destination string) {
+func (m *MantaAdapter) upload(ic *ImageConfiguration) {
+	source := ic.LocalResizedImagePath()
+	destination := ic.MantaResizedImagePath()
+
 	path, objectName := path.Split(destination)
 	err := m.ensureDirectory(path)
 	if err != nil {

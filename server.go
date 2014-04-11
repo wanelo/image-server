@@ -26,9 +26,12 @@ func main() {
 	imageProcessings = make(map[string][]chan ImageProcessingResult)
 
 	go func() {
+		mantaAdapter := initializeManta(serverConfiguration)
+		uwc := UploadWorkers(mantaAdapter.upload, serverConfiguration.MantaConcurrency)
+
 		initializeManta(serverConfiguration)
 		initializeGraphite(serverConfiguration)
-		initializeEventListeners(serverConfiguration)
+		initializeEventListeners(serverConfiguration, uwc)
 	}()
 
 	initializeRouter(serverConfiguration)

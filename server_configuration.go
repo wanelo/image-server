@@ -15,6 +15,7 @@ type ServerConfiguration struct {
 	WhitelistedExtensions []string `json:"whitelisted_extensions"`
 	MaximumWidth          int      `json:"maximum_width"`
 	MantaBasePath         string   `json:"manta_base_path"`
+	MantaConcurrency      int      `json:"manta_concurrency"`
 	DefaultQuality        uint     `json:"default_quality"`
 	GraphiteEnabled       bool     `json:"graphite_enabled"`
 	GraphiteHost          string   `json:"graphite_host"`
@@ -22,7 +23,6 @@ type ServerConfiguration struct {
 	Graphite              *graphite.Graphite
 	Environment           string
 	Events                *EventChannels
-	DataStore             *MantaAdapter
 }
 
 type EventChannels struct {

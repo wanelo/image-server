@@ -1,16 +1,16 @@
 package main
 
-func initializeEventListeners(sc *ServerConfiguration) {
-	go handleImageProcessed(sc)
+func initializeEventListeners(sc *ServerConfiguration, uwc chan *UploadWork) {
+	go handleImageProcessed(sc, uwc)
 	go handleImageProcessedWithErrors(sc)
-	go handleOriginalDownloaded(sc)
+	go handleOriginalDownloaded(sc, uwc)
 	go handleOriginalDownloadUnavailable(sc)
 }
 
-func handleImageProcessed(sc *ServerConfiguration) {
+func handleImageProcessed(sc *ServerConfiguration, uwc chan *UploadWork) {
 	for {
 		ic := <-sc.Events.ImageProcessed
-		sc.DataStore.upload(ic.LocalResizedImagePath(), ic.MantaResizedImagePath())
+		uwc <- &UploadWork{ic}
 		sc.Graphite.SimpleSend("stats.image_server.image_request", "1")
 		sc.Graphite.SimpleSend("stats.image_server.image_request."+ic.format, "1")
 	}
@@ -23,10 +23,10 @@ func handleImageProcessedWithErrors(sc *ServerConfiguration) {
 	}
 }
 
-func handleOriginalDownloaded(sc *ServerConfiguration) {
+func handleOriginalDownloaded(sc *ServerConfiguration, uwc chan *UploadWork) {
 	for {
 		ic := <-sc.Events.OriginalDownloaded
-		sc.DataStore.upload(ic.LocalOriginalImagePath(), ic.MantaOriginalImagePath())
+		uwc <- &UploadWork{ic}
 		sc.Graphite.SimpleSend("stats.image_server.original_downloaded", "1")
 	}
 }
