@@ -25,26 +25,30 @@ func (ic *ImageConfiguration) createImage(sc *ServerConfiguration) (string, erro
 			return "", err
 		}
 
-		createWithMagick(ic)
+		err = createWithMagick(ic)
+		if err != nil {
+			log.Println(err)
+			return "", err
+		}
 	}
 
 	return resizedPath, nil
 }
 
-func createWithMagick(ic *ImageConfiguration) {
+func createWithMagick(ic *ImageConfiguration) error {
 	start := time.Now()
 	fullSizePath := ic.LocalOriginalImagePath()
 	im, err := magick.DecodeFile(fullSizePath)
 	if err != nil {
-		log.Panicln(err)
-		return
+		log.Println(err)
+		return err
 	}
 	defer im.Dispose()
 
 	im2, err := im.CropResize(ic.width, ic.height, magick.FHamming, magick.CSCenter)
 	if err != nil {
-		log.Panicln(err)
-		return
+		log.Println(err)
+		return err
 	}
 
 	resizedPath := ic.LocalResizedImagePath()
@@ -58,12 +62,13 @@ func createWithMagick(ic *ImageConfiguration) {
 	err = im2.Encode(out, info)
 
 	if err != nil {
-		log.Panicln(err)
-		return
+		log.Println(err)
+		return err
 	}
 	elapsed := time.Since(start)
 	log.Printf("Took %s to generate image: %s", elapsed, resizedPath)
 
+	return nil
 }
 
 func createFullSizeImage(ic *ImageConfiguration, sc *ServerConfiguration) (string, error) {
