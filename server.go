@@ -22,6 +22,8 @@ func main() {
 		log.Panicln(err)
 	}
 
+	imageDownloads = make(map[string][]chan error)
+
 	go func() {
 		initializeManta(serverConfiguration)
 		initializeGraphite(serverConfiguration)

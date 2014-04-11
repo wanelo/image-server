@@ -16,7 +16,10 @@ func (ic *ImageConfiguration) createImage(sc *ServerConfiguration) (string, erro
 
 	resizedPath := ic.LocalResizedImagePath()
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		err := downloadAndSaveOriginal(ic, sc)
+		c := make(chan error)
+		go fetchOriginal(c, ic, sc)
+
+		err = <-c
 		if err != nil {
 			log.Println(err)
 			return "", err

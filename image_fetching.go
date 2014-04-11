@@ -10,6 +10,27 @@ import (
 	"time"
 )
 
+var imageDownloads map[string][]chan error
+
+// Even if simultaneous calls request the same image, only the first one will download
+// the image, and will then notify all requesters. The channel returns an error object
+func fetchOriginal(c chan error, ic *ImageConfiguration, sc *ServerConfiguration) {
+	key := ic.RemoteImageUrl()
+	_, present := imageDownloads[key]
+
+	if present {
+		imageDownloads[key] = append(imageDownloads[key], c)
+	} else {
+		imageDownloads[key] = []chan error{c}
+
+		err := downloadAndSaveOriginal(ic, sc)
+		for _, cc := range imageDownloads[key] {
+			cc <- err
+		}
+		delete(imageDownloads, key)
+	}
+}
+
 func downloadAndSaveOriginal(ic *ImageConfiguration, sc *ServerConfiguration) error {
 	path := ic.LocalOriginalImagePath()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
