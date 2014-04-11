@@ -59,7 +59,13 @@ func (m *MantaAdapter) ensureDirectory(dir string) error {
 		dir2 := filepath.Dir(dir)
 		dir3 := filepath.Dir(dir2)
 		err = m.createDirectory(dir3)
+		if err != nil {
+			return err
+		}
 		err = m.createDirectory(dir2)
+		if err != nil {
+			return err
+		}
 		err = m.createDirectory(dir)
 		if err != nil {
 			return err
