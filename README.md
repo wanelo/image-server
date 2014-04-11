@@ -114,6 +114,14 @@ The original image is not available, and a 404 was returned
 stats.image_server.original_unavailable
 ```
 
+## Benchmarks
+
+Make sure your computer can handle enough simultaneous connections. MacOS X by default allows 128. Need a lot more!
+
+```shell
+$ sudo sysctl -w kern.ipc.somaxconn=2048
+```
+
 ## Pending
 
 ### Required
