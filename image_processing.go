@@ -16,10 +16,8 @@ func (ic *ImageConfiguration) createImage(sc *ServerConfiguration) (string, erro
 
 	resizedPath := ic.LocalResizedImagePath()
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		c := make(chan error)
-		go fetchOriginal(c, ic, sc)
 
-		err = <-c
+		err = fetchOriginal(ic, sc)
 		if err != nil {
 			log.Println(err)
 			return "", err
@@ -76,7 +74,12 @@ func createFullSizeImage(ic *ImageConfiguration, sc *ServerConfiguration) (strin
 	resizedPath := ic.LocalResizedImagePath()
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-		downloadAndSaveOriginal(ic, sc)
+
+		err = fetchOriginal(ic, sc)
+		if err != nil {
+			log.Println(err)
+			return "", err
+		}
 
 		im, err := magick.DecodeFile(fullSizePath)
 		if err != nil {
