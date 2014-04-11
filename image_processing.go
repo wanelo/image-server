@@ -9,7 +9,38 @@ import (
 	"github.com/rainycape/magick"
 )
 
+type ImageProcessingResult struct {
+	resizedPath string
+	err         error
+}
+
+var imageProcessings map[string][]chan ImageProcessingResult
+
 func (ic *ImageConfiguration) createImage(sc *ServerConfiguration) (string, error) {
+	c := make(chan ImageProcessingResult)
+	go ic.uniqueCreateImage(c, sc)
+	ipr := <-c
+	return ipr.resizedPath, ipr.err
+}
+
+func (ic *ImageConfiguration) uniqueCreateImage(c chan ImageProcessingResult, sc *ServerConfiguration) {
+	key := ic.LocalResizedImagePath()
+	_, present := imageProcessings[key]
+
+	if present {
+		imageProcessings[key] = append(imageProcessings[key], c)
+	} else {
+		imageProcessings[key] = []chan ImageProcessingResult{c}
+
+		imagePath, err := ic.downloadAndProcessImage(sc)
+		for _, cc := range imageProcessings[key] {
+			cc <- ImageProcessingResult{imagePath, err}
+		}
+		delete(imageProcessings, key)
+	}
+}
+
+func (ic *ImageConfiguration) downloadAndProcessImage(sc *ServerConfiguration) (string, error) {
 	if ic.width == 0 && ic.height == 0 {
 		return createFullSizeImage(ic, sc)
 	}

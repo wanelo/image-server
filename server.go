@@ -23,6 +23,7 @@ func main() {
 	}
 
 	imageDownloads = make(map[string][]chan error)
+	imageProcessings = make(map[string][]chan ImageProcessingResult)
 
 	go func() {
 		initializeManta(serverConfiguration)
