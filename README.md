@@ -155,7 +155,6 @@ to increase them [permanently](https://coderwall.com/p/lfjoaq)
 ### After Release
 
 - Zero-downtime restart: http://rcrowley.org/talks/strange-loop-2013.html#27
-- only allow whitelisted formats: jpg, png, webp
 - status page
   - current images processing count
   - current original download count
@@ -167,6 +166,7 @@ to increase them [permanently](https://coderwall.com/p/lfjoaq)
 - Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
 
 ### Done
+- ~~only allow whitelisted formats: jpg, png, webp~~
 - ~~Allow to have variable compressions: x50-q60.jpg~~
 - ~~graphite events (https://github.com/marpaia/graphite-golang)~~
   - ~~image processed~~

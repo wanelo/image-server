@@ -25,8 +25,8 @@ func genericImageHandler(params martini.Params, r *http.Request, w http.Response
 }
 
 func imageHandler(sc *ServerConfiguration, ic *ImageConfiguration, w http.ResponseWriter, r *http.Request) {
-	if ic.width > sc.MaximumWidth {
-		err := fmt.Errorf("Maximum width is: %v\n", sc.MaximumWidth)
+	allowed, err := allowedImage(sc, ic)
+	if !allowed {
 		errorHandler(err, w, r, http.StatusNotAcceptable, sc, ic)
 		return
 	}
@@ -47,4 +47,20 @@ func errorHandler(err error, w http.ResponseWriter, r *http.Request, status int,
 	go func() {
 		sc.Events.ImageProcessedWithErrors <- ic
 	}()
+}
+
+func allowedImage(sc *ServerConfiguration, ic *ImageConfiguration) (bool, error) {
+	// verify maximum width
+	if ic.width > sc.MaximumWidth {
+		err := fmt.Errorf("maximum width is: %v\n", sc.MaximumWidth)
+		return false, err
+	}
+
+	// verify image format
+	for _, ext := range sc.WhitelistedExtensions {
+		if ext == ic.format {
+			return true, nil
+		}
+	}
+	return false, fmt.Errorf("format not allowed %s", ic.format)
 }
