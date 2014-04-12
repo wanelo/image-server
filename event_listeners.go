@@ -1,39 +1,41 @@
 package main
 
-func initializeEventListeners(sc *ServerConfiguration, uwc chan *UploadWork) {
-	go handleImageProcessed(sc, uwc)
-	go handleImageProcessedWithErrors(sc)
-	go handleOriginalDownloaded(sc, uwc)
-	go handleOriginalDownloadUnavailable(sc)
+import "github.com/marpaia/graphite-golang"
+
+func initializeEventListeners(sc *ServerConfiguration, uwc chan *UploadWork, g *graphite.Graphite) {
+	go handleImageProcessed(sc, uwc, g)
+	go handleImageProcessedWithErrors(sc, g)
+	go handleOriginalDownloaded(sc, uwc, g)
+	go handleOriginalDownloadUnavailable(sc, g)
 }
 
-func handleImageProcessed(sc *ServerConfiguration, uwc chan *UploadWork) {
+func handleImageProcessed(sc *ServerConfiguration, uwc chan *UploadWork, g *graphite.Graphite) {
 	for {
 		ic := <-sc.Events.ImageProcessed
 		uwc <- &UploadWork{ic}
-		sc.Graphite.SimpleSend("stats.image_server.image_request", "1")
-		sc.Graphite.SimpleSend("stats.image_server.image_request."+ic.format, "1")
+		g.SimpleSend("stats.image_server.image_request", "1")
+		g.SimpleSend("stats.image_server.image_request."+ic.format, "1")
 	}
 }
 
-func handleImageProcessedWithErrors(sc *ServerConfiguration) {
+func handleImageProcessedWithErrors(sc *ServerConfiguration, g *graphite.Graphite) {
 	for {
 		_ = <-sc.Events.ImageProcessedWithErrors
-		sc.Graphite.SimpleSend("stats.image_server.image_request_fail", "1")
+		g.SimpleSend("stats.image_server.image_request_fail", "1")
 	}
 }
 
-func handleOriginalDownloaded(sc *ServerConfiguration, uwc chan *UploadWork) {
+func handleOriginalDownloaded(sc *ServerConfiguration, uwc chan *UploadWork, g *graphite.Graphite) {
 	for {
 		ic := <-sc.Events.OriginalDownloaded
 		uwc <- &UploadWork{ic}
-		sc.Graphite.SimpleSend("stats.image_server.original_downloaded", "1")
+		g.SimpleSend("stats.image_server.original_downloaded", "1")
 	}
 }
 
-func handleOriginalDownloadUnavailable(sc *ServerConfiguration) {
+func handleOriginalDownloadUnavailable(sc *ServerConfiguration, g *graphite.Graphite) {
 	for {
 		_ = <-sc.Events.OriginalDownloaded
-		sc.Graphite.SimpleSend("stats.image_server.original_unavailable", "1")
+		g.SimpleSend("stats.image_server.original_unavailable", "1")
 	}
 }

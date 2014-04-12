@@ -30,8 +30,8 @@ func main() {
 		uwc := UploadWorkers(mantaAdapter.upload, serverConfiguration.MantaConcurrency)
 
 		initializeManta(serverConfiguration)
-		initializeGraphite(serverConfiguration)
-		initializeEventListeners(serverConfiguration, uwc)
+		graphite := initializeGraphite(serverConfiguration)
+		initializeEventListeners(serverConfiguration, uwc, graphite)
 	}()
 
 	initializeRouter(serverConfiguration)

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
-	"github.com/marpaia/graphite-golang"
 )
 
 type ServerConfiguration struct {
@@ -20,7 +18,6 @@ type ServerConfiguration struct {
 	GraphiteEnabled       bool     `json:"graphite_enabled"`
 	GraphiteHost          string   `json:"graphite_host"`
 	GraphitePort          int      `json:"graphite_port"`
-	Graphite              *graphite.Graphite
 	Environment           string
 	Events                *EventChannels
 }
