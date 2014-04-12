@@ -36,34 +36,37 @@ Example of json configuration on `config/production.json`
 
 ```
 
+## Image Generation
+
 ### Sample images
 
 **Image Types**
 
     User Avatar
-    http://localhost:7000/user/avatar/3589782/w500.jpg
+    GET http://localhost:7000/user/avatar/3589782/w500.jpg
 
     Product
-    http://localhost:7000/product/image/10855050/x400.jpeg
+    GET http://localhost:7000/product/image/10855050/x400.jpeg
 
 
 **Dimensions**
 
     Maximum Width
-    http://localhost:7000/user/avatar/3589782/w500.jpg
+    GET http://localhost:7000/user/avatar/3589782/w500.jpg
 
     Square
-    http://localhost:7000/user/avatar/3589782/x600.jpg
+    GET http://localhost:7000/user/avatar/3589782/x600.jpg
 
     Rectangle
-    http://localhost:7000/user/avatar/3589782/300x400.jpg
+    GET http://localhost:7000/user/avatar/3589782/300x400.jpg
 
 **Quality**
 
 The default compression of the image can modified by appending `-q` and the desired quality `1-100`.
 
     Square with quality 50
-    http://localhost:7000/user/avatar/3589782/x600-q50.jpg
+    GET http://localhost:7000/user/avatar/3589782/x600-q50.jpg
+
 ### Multi Size Processing
 
 This is useful for pre-generating images and saving them to the configured file store.
@@ -151,21 +154,19 @@ to increase them [permanently](https://coderwall.com/p/lfjoaq)
 ## Pending
 
 ### Required
-- Optimize image generation. Make files smaller. Want to replicate all current configurations.
+- Strip metadata
 - Default background color needs to be white (for transparent gifs, etc)
 
 ### Operations/Deployment
-- deploy to smartos
-- chef cookbook for deployment
-- configure fastly
+- Chef cookbook for generating servers
 
 ### After Release
 
 - Zero-downtime restart: http://rcrowley.org/talks/strange-loop-2013.html#27
-- status page
+- Configuration reload with signal
+- Status page
   - current images processing count
   - current original download count
-- keep track of the image dimension statistics by image type, dimension, and extension (product image, user avatar). When an image is requested, other popular sizes can be generated in the background after the request. Images created on the background should not count towards statistics.
 
 ### Needs discussion
 
