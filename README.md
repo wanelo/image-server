@@ -64,6 +64,13 @@ The default compression of the image can modified by appending `-q` and the desi
 
     Square with quality 50
     http://localhost:7000/user/avatar/3589782/x600-q50.jpg
+### Multi Size Processing
+
+This is useful for pre-generating images and saving them to the configured file store.
+The request returs success after the original image is the file store.
+Image outputs are generated after the request is complete.
+
+    POST http://localhost:7000/user/avatar/3589782?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
 
 ## Error Handling
 
