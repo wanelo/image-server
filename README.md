@@ -26,7 +26,12 @@ Example of json configuration on `config/production.json`
   "source_domain": "http://cdn-s3-2.wanelo.com",
   "whitelisted_extensions": ["jpg", "png", "webp"],
   "maximum_width": 1000,
-  "manta_base_path": "public/images/production"
+  "manta_base_path": "public/images/production",
+  "manta_concurrency": 10,
+  "default_quality": 75,
+  "graphite_enabled": false,
+  "graphite_port": 7777,
+  "graphite_host": "localhost"
 }
 
 ```
@@ -121,6 +126,20 @@ Make sure your computer can handle enough simultaneous connections. MacOS X by d
 ```shell
 $ sudo sysctl -w kern.ipc.somaxconn=2048
 ```
+
+Also need to increase the limit of maximum open files
+
+To find out the limits on your computer:
+```shell
+launchctl limit
+```
+
+Increase the limits!
+```shell
+launchctl limit maxfiles 400000 1000000
+```
+
+to increase them [permanently](https://coderwall.com/p/lfjoaq)
 
 ## Pending
 
