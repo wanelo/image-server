@@ -6,10 +6,15 @@ import (
 	"net/http"
 
 	"github.com/go-martini/martini"
+	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/events"
+	httpFetcher "github.com/wanelo/image-server/fetcher/http"
+	"github.com/wanelo/image-server/processor/magick"
+	"github.com/wanelo/image-server/uploader"
 )
 
 var (
-	serverConfiguration *ServerConfiguration
+	serverConfiguration *core.ServerConfiguration
 )
 
 func main() {
@@ -17,27 +22,27 @@ func main() {
 	flag.Parse()
 
 	var err error
-	serverConfiguration, err = loadServerConfiguration(*environment)
+	serverConfiguration, err = core.LoadServerConfiguration(*environment)
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	imageDownloads = make(map[string][]chan error)
-	imageProcessings = make(map[string][]chan ImageProcessingResult)
+	httpFetcher.ImageDownloads = make(map[string][]chan error)
+	magick.ImageProcessings = make(map[string][]chan magick.ImageProcessingResult)
 
 	go func() {
 		mantaAdapter := initializeManta(serverConfiguration)
-		uwc := UploadWorkers(mantaAdapter.upload, serverConfiguration.MantaConcurrency)
+		uwc := uploader.UploadWorkers(mantaAdapter.upload, serverConfiguration.MantaConcurrency)
 
 		initializeManta(serverConfiguration)
 		graphite := initializeGraphite(serverConfiguration)
-		initializeEventListeners(serverConfiguration, uwc, graphite)
+		events.InitializeEventListeners(serverConfiguration, uwc, graphite)
 	}()
 
 	initializeRouter(serverConfiguration)
 }
 
-func initializeRouter(sc *ServerConfiguration) {
+func initializeRouter(sc *core.ServerConfiguration) {
 	log.Println("starting in "+sc.Environment, "on http://0.0.0.0:"+sc.ServerPort)
 
 	m := martini.Classic()

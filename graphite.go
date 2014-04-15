@@ -4,9 +4,10 @@ import (
 	"log"
 
 	"github.com/marpaia/graphite-golang"
+	"github.com/wanelo/image-server/core"
 )
 
-func initializeGraphite(sc *ServerConfiguration) *graphite.Graphite {
+func initializeGraphite(sc *core.ServerConfiguration) *graphite.Graphite {
 
 	var err error
 	var g *graphite.Graphite

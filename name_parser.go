@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+
+	"github.com/wanelo/image-server/core"
 )
 
-func NameToConfiguration(sc *ServerConfiguration, filename string) (*ImageConfiguration, error) {
+func NameToConfiguration(sc *core.ServerConfiguration, filename string) (*core.ImageConfiguration, error) {
 	var w, h, q, f string
 	var quality uint
 
@@ -29,7 +31,7 @@ func NameToConfiguration(sc *ServerConfiguration, filename string) (*ImageConfig
 		w, h, q, f = "0", "0", m[1], m[2]
 	} else {
 		// return error
-		return &ImageConfiguration{}, fmt.Errorf("Unsupported")
+		return &core.ImageConfiguration{}, fmt.Errorf("unsupported")
 	}
 
 	width, _ := strconv.Atoi(w)
@@ -42,5 +44,5 @@ func NameToConfiguration(sc *ServerConfiguration, filename string) (*ImageConfig
 		quality = sc.DefaultQuality
 	}
 
-	return &ImageConfiguration{width: width, height: height, quality: quality, format: f, filename: filename}, nil
+	return &core.ImageConfiguration{Width: width, Height: height, Quality: quality, Format: f, Filename: filename}, nil
 }

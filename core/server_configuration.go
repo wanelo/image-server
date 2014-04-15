@@ -1,0 +1,51 @@
+package core
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+)
+
+// ServerConfiguration struct
+// Most of this configuration comes from json config
+type ServerConfiguration struct {
+	ServerPort            string   `json:"server_port"`
+	StatusPort            string   `json:"status_port"`
+	SourceDomain          string   `json:"source_domain"`
+	WhitelistedExtensions []string `json:"whitelisted_extensions"`
+	MaximumWidth          int      `json:"maximum_width"`
+	MantaBasePath         string   `json:"manta_base_path"`
+	MantaConcurrency      int      `json:"manta_concurrency"`
+	DefaultQuality        uint     `json:"default_quality"`
+	GraphiteEnabled       bool     `json:"graphite_enabled"`
+	GraphiteHost          string   `json:"graphite_host"`
+	GraphitePort          int      `json:"graphite_port"`
+	Environment           string
+	Events                *EventChannels
+}
+
+// EventChannels struct
+// Available image processing/downloading events
+type EventChannels struct {
+	ImageProcessed              chan *ImageConfiguration
+	ImageProcessedWithErrors    chan *ImageConfiguration
+	OriginalDownloaded          chan *ImageConfiguration
+	OriginalDownloadUnavailable chan *ImageConfiguration
+}
+
+func LoadServerConfiguration(environment string) (*ServerConfiguration, error) {
+	path := "config/" + environment + ".json"
+	configFile, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("configuration error: %v\n", err)
+	}
+
+	var config *ServerConfiguration
+	json.Unmarshal(configFile, &config)
+	config.Environment = environment
+	config.Events = &EventChannels{
+		ImageProcessed:     make(chan *ImageConfiguration),
+		OriginalDownloaded: make(chan *ImageConfiguration),
+	}
+	return config, nil
+}

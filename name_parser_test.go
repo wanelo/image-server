@@ -1,27 +1,31 @@
 package main
 
-import "testing"
+import (
+	"testing"
 
-func ensureImageConfiguration(t *testing.T, ic *ImageConfiguration, w int, h int, q uint, f string) {
-	if ic.width != w {
-		t.Errorf("expected %v to be %v", ic.width, w)
+	"github.com/wanelo/image-server/core"
+)
+
+func ensureImageConfiguration(t *testing.T, ic *core.ImageConfiguration, w int, h int, q uint, f string) {
+	if ic.Width != w {
+		t.Errorf("expected %v to be %v", ic.Width, w)
 
 	}
-	if ic.height != h {
-		t.Errorf("expected %v to be %v", ic.width, h)
+	if ic.Height != h {
+		t.Errorf("expected %v to be %v", ic.Width, h)
 	}
-	if ic.quality != q {
-		t.Errorf("expected %v to be %v", ic.quality, q)
+	if ic.Quality != q {
+		t.Errorf("expected %v to be %v", ic.Quality, q)
 	}
-	if ic.format != f {
-		t.Errorf("expected %v to be %v", ic.format, f)
+	if ic.Format != f {
+		t.Errorf("expected %v to be %v", ic.Format, f)
 	}
 }
 
-var sc *ServerConfiguration
+var sc *core.ServerConfiguration
 
 func init() {
-	sc, _ = loadServerConfiguration("test")
+	sc, _ = core.LoadServerConfiguration("test")
 }
 
 // Use the default quality

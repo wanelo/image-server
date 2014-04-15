@@ -1,36 +1,40 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/wanelo/image-server/core"
+)
 
 func TestAllowedImageValid(t *testing.T) {
-  fmts := []string{"jpg"}
-  sc := &ServerConfiguration{MaximumWidth: 1000, WhitelistedExtensions: fmts}
-  ic := &ImageConfiguration{width: 1000, format: "jpg"}
+	fmts := []string{"jpg"}
+	sc := &core.ServerConfiguration{MaximumWidth: 1000, WhitelistedExtensions: fmts}
+	ic := &core.ImageConfiguration{Width: 1000, Format: "jpg"}
 
-  allowed, _ := allowedImage(sc, ic)
-  if allowed == false {
-    t.Errorf("expected true")
-  }
+	allowed, _ := allowedImage(sc, ic)
+	if allowed == false {
+		t.Errorf("expected true")
+	}
 }
 
 func TestAllowedImageTooWide(t *testing.T) {
-  fmts := []string{"jpg"}
-  sc := &ServerConfiguration{MaximumWidth: 1000, WhitelistedExtensions: fmts}
-  ic := &ImageConfiguration{width: 1001, format: "jpg"}
+	fmts := []string{"jpg"}
+	sc := &core.ServerConfiguration{MaximumWidth: 1000, WhitelistedExtensions: fmts}
+	ic := &core.ImageConfiguration{Width: 1001, Format: "jpg"}
 
-  allowed, _ := allowedImage(sc, ic)
-  if allowed == true {
-    t.Errorf("expected false")
-  }
+	allowed, _ := allowedImage(sc, ic)
+	if allowed == true {
+		t.Errorf("expected false")
+	}
 }
 
 func TestAllowedImageInvalidFormat(t *testing.T) {
-  fmts := []string{"jpg"}
-  sc := &ServerConfiguration{MaximumWidth: 1000, WhitelistedExtensions: fmts}
-  ic := &ImageConfiguration{width: 100, format: "pdf"}
+	fmts := []string{"jpg"}
+	sc := &core.ServerConfiguration{MaximumWidth: 1000, WhitelistedExtensions: fmts}
+	ic := &core.ImageConfiguration{Width: 100, Format: "pdf"}
 
-  allowed, _ := allowedImage(sc, ic)
-  if allowed == true {
-    t.Errorf("expected false")
-  }
+	allowed, _ := allowedImage(sc, ic)
+	if allowed == true {
+		t.Errorf("expected false")
+	}
 }

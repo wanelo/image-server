@@ -9,13 +9,14 @@ import (
 	"github.com/joyent/gocommon/client"
 	"github.com/joyent/gocommon/jpc"
 	"github.com/richardiux/gomanta/manta"
+	"github.com/wanelo/image-server/core"
 )
 
 type MantaAdapter struct {
 	Client *manta.Client
 }
 
-func initializeManta(sc *ServerConfiguration) *MantaAdapter {
+func initializeManta(sc *core.ServerConfiguration) *MantaAdapter {
 	m := &MantaAdapter{Client: newMantaClient()}
 	m.ensureBasePath()
 	return m
@@ -31,9 +32,9 @@ func newMantaClient() *manta.Client {
 	return manta.New(client)
 }
 
-func (m *MantaAdapter) upload(ic *ImageConfiguration) {
+func (m *MantaAdapter) upload(ic *core.ImageConfiguration) {
 	source := ic.LocalResizedImagePath()
-	destination := ic.MantaResizedImagePath()
+	destination := serverConfiguration.MantaResizedImagePath(ic)
 
 	path, objectName := path.Split(destination)
 	err := m.ensureDirectory(path)
