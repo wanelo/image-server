@@ -6,11 +6,12 @@ import (
 
 	"github.com/go-martini/martini"
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/parser"
 	"github.com/wanelo/image-server/processor/magick"
 )
 
 func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter, sc *core.ServerConfiguration) {
-	ic, err := NameToConfiguration(sc, params["filename"])
+	ic, err := parser.NameToConfiguration(sc, params["filename"])
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound, sc, ic)
 	}

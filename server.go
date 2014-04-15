@@ -22,7 +22,8 @@ func main() {
 	flag.Parse()
 
 	var err error
-	serverConfiguration, err = core.LoadServerConfiguration(*environment)
+	path := "config/" + *environment + ".json"
+	serverConfiguration, err = core.LoadServerConfiguration(path)
 	if err != nil {
 		log.Panicln(err)
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 )
 
 // ServerConfiguration struct
@@ -20,7 +21,7 @@ type ServerConfiguration struct {
 	GraphiteEnabled       bool     `json:"graphite_enabled"`
 	GraphiteHost          string   `json:"graphite_host"`
 	GraphitePort          int      `json:"graphite_port"`
-	Environment           string
+	Environment           string   `json:"environment"`
 	Events                *EventChannels
 }
 
@@ -33,16 +34,15 @@ type EventChannels struct {
 	OriginalDownloadUnavailable chan *ImageConfiguration
 }
 
-func LoadServerConfiguration(environment string) (*ServerConfiguration, error) {
-	path := "config/" + environment + ".json"
+func LoadServerConfiguration(path string) (*ServerConfiguration, error) {
 	configFile, err := ioutil.ReadFile(path)
 	if err != nil {
+		log.Panicln(err)
 		return nil, fmt.Errorf("configuration error: %v\n", err)
 	}
 
 	var config *ServerConfiguration
 	json.Unmarshal(configFile, &config)
-	config.Environment = environment
 	config.Events = &EventChannels{
 		ImageProcessed:     make(chan *ImageConfiguration),
 		OriginalDownloaded: make(chan *ImageConfiguration),

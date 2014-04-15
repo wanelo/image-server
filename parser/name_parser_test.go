@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"testing"
@@ -25,7 +25,8 @@ func ensureImageConfiguration(t *testing.T, ic *core.ImageConfiguration, w int, 
 var sc *core.ServerConfiguration
 
 func init() {
-	sc, _ = core.LoadServerConfiguration("test")
+	path := "../config/test.json"
+	sc, _ = core.LoadServerConfiguration(path)
 }
 
 // Use the default quality
