@@ -11,6 +11,7 @@ import (
 	httpFetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/processor/magick"
 	"github.com/wanelo/image-server/uploader"
+	"github.com/wanelo/image-server/uploader/manta"
 )
 
 var (
@@ -32,10 +33,8 @@ func main() {
 	magick.ImageProcessings = make(map[string][]chan magick.ImageProcessingResult)
 
 	go func() {
-		mantaAdapter := initializeManta(serverConfiguration)
-		uwc := uploader.UploadWorkers(mantaAdapter.upload, serverConfiguration.MantaConcurrency)
-
-		initializeManta(serverConfiguration)
+		mantaAdapter := manta.InitializeManta(serverConfiguration)
+		uwc := uploader.UploadWorkers(mantaAdapter.Upload, serverConfiguration.MantaConcurrency)
 		graphite := initializeGraphite(serverConfiguration)
 		events.InitializeEventListeners(serverConfiguration, uwc, graphite)
 	}()
