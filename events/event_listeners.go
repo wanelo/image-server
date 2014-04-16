@@ -6,7 +6,8 @@ import (
 	"github.com/wanelo/image-server/uploader"
 )
 
-func InitializeEventListeners(sc *core.ServerConfiguration, uwc chan *uploader.UploadWork, g *graphite.Graphite) {
+func InitializeEventListeners(sc *core.ServerConfiguration, uwc chan *uploader.UploadWork) {
+	g := initializeGraphite(sc)
 	go handleImageProcessed(sc, uwc, g)
 	go handleImageProcessedWithErrors(sc, g)
 	go handleOriginalDownloaded(sc, uwc, g)

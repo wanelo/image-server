@@ -35,8 +35,7 @@ func main() {
 	go func() {
 		mantaAdapter := manta.InitializeManta(serverConfiguration)
 		uwc := uploader.UploadWorkers(mantaAdapter.Upload, serverConfiguration.MantaConcurrency)
-		graphite := initializeGraphite(serverConfiguration)
-		events.InitializeEventListeners(serverConfiguration, uwc, graphite)
+		events.InitializeEventListeners(serverConfiguration, uwc)
 	}()
 
 	initializeRouter(serverConfiguration)
