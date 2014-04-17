@@ -11,19 +11,23 @@ import (
 	"github.com/wanelo/image-server/fetcher/http"
 )
 
+type Processor struct {
+	ServerConfiguration *core.ServerConfiguration
+}
+
+func (p *Processor) CreateImage(ic *core.ImageConfiguration) (string, error) {
+	c := make(chan ImageProcessingResult)
+	go uniqueCreateImage(c, p.ServerConfiguration, ic)
+	ipr := <-c
+	return ipr.resizedPath, ipr.err
+}
+
 type ImageProcessingResult struct {
 	resizedPath string
 	err         error
 }
 
 var ImageProcessings map[string][]chan ImageProcessingResult
-
-func CreateImage(sc *core.ServerConfiguration, ic *core.ImageConfiguration) (string, error) {
-	c := make(chan ImageProcessingResult)
-	go uniqueCreateImage(c, sc, ic)
-	ipr := <-c
-	return ipr.resizedPath, ipr.err
-}
 
 func uniqueCreateImage(c chan ImageProcessingResult, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
 	key := ic.LocalResizedImagePath()

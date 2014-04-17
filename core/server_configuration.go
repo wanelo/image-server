@@ -23,6 +23,7 @@ type ServerConfiguration struct {
 	GraphitePort          int      `json:"graphite_port"`
 	Environment           string   `json:"environment"`
 	Events                *EventChannels
+	Adapters              *Adapters
 }
 
 // EventChannels struct

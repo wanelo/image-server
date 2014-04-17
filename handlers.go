@@ -7,7 +7,6 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/parser"
-	"github.com/wanelo/image-server/processor/magick"
 )
 
 func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter, sc *core.ServerConfiguration) {
@@ -33,7 +32,8 @@ func imageHandler(sc *core.ServerConfiguration, ic *core.ImageConfiguration, w h
 		errorHandler(err, w, r, http.StatusNotAcceptable, sc, ic)
 		return
 	}
-	resizedPath, err := magick.CreateImage(sc, ic)
+
+	resizedPath, err := sc.Adapters.Processor.CreateImage(ic)
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound, sc, ic)
 		return

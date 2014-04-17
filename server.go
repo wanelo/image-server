@@ -14,17 +14,16 @@ import (
 	"github.com/wanelo/image-server/uploader/manta"
 )
 
-var (
-	serverConfiguration *core.ServerConfiguration
-)
-
 func main() {
 	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
 	flag.Parse()
 
-	var err error
 	path := "config/" + *environment + ".json"
-	serverConfiguration, err = core.LoadServerConfiguration(path)
+	serverConfiguration, err := core.LoadServerConfiguration(path)
+	adapters := &core.Adapters{}
+	adapters.Processor = &magick.Processor{serverConfiguration}
+	serverConfiguration.Adapters = adapters
+
 	if err != nil {
 		log.Panicln(err)
 	}
