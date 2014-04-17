@@ -9,7 +9,8 @@ import (
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/events"
 	httpFetcher "github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/processor/magick"
+	"github.com/wanelo/image-server/processor"
+	"github.com/wanelo/image-server/processor/native"
 	"github.com/wanelo/image-server/uploader"
 	"github.com/wanelo/image-server/uploader/manta"
 )
@@ -21,7 +22,7 @@ func main() {
 	path := "config/" + *environment + ".json"
 	serverConfiguration, err := core.LoadServerConfiguration(path)
 	adapters := &core.Adapters{}
-	adapters.Processor = &magick.Processor{serverConfiguration}
+	adapters.Processor = &native.Processor{serverConfiguration}
 	serverConfiguration.Adapters = adapters
 
 	if err != nil {
@@ -29,7 +30,7 @@ func main() {
 	}
 
 	httpFetcher.ImageDownloads = make(map[string][]chan error)
-	magick.ImageProcessings = make(map[string][]chan magick.ImageProcessingResult)
+	processor.ImageProcessings = make(map[string][]chan processor.ImageProcessingResult)
 
 	go func() {
 		mantaAdapter := manta.InitializeManta(serverConfiguration)

@@ -9,6 +9,7 @@ import (
 	m "github.com/rainycape/magick"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher/http"
+	"github.com/wanelo/image-server/processor"
 )
 
 type Processor struct {
@@ -16,33 +17,26 @@ type Processor struct {
 }
 
 func (p *Processor) CreateImage(ic *core.ImageConfiguration) (string, error) {
-	c := make(chan ImageProcessingResult)
+	c := make(chan processor.ImageProcessingResult)
 	go uniqueCreateImage(c, p.ServerConfiguration, ic)
 	ipr := <-c
-	return ipr.resizedPath, ipr.err
+	return ipr.ResizedPath, ipr.Error
 }
 
-type ImageProcessingResult struct {
-	resizedPath string
-	err         error
-}
-
-var ImageProcessings map[string][]chan ImageProcessingResult
-
-func uniqueCreateImage(c chan ImageProcessingResult, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
+func uniqueCreateImage(c chan processor.ImageProcessingResult, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
 	key := ic.LocalResizedImagePath()
-	_, present := ImageProcessings[key]
+	_, present := processor.ImageProcessings[key]
 
 	if present {
-		ImageProcessings[key] = append(ImageProcessings[key], c)
+		processor.ImageProcessings[key] = append(processor.ImageProcessings[key], c)
 	} else {
-		ImageProcessings[key] = []chan ImageProcessingResult{c}
+		processor.ImageProcessings[key] = []chan processor.ImageProcessingResult{c}
 
 		imagePath, err := downloadAndProcessImage(sc, ic)
-		for _, cc := range ImageProcessings[key] {
-			cc <- ImageProcessingResult{imagePath, err}
+		for _, cc := range processor.ImageProcessings[key] {
+			cc <- processor.ImageProcessingResult{imagePath, err}
 		}
-		delete(ImageProcessings, key)
+		delete(processor.ImageProcessings, key)
 	}
 }
 
@@ -54,7 +48,7 @@ func downloadAndProcessImage(sc *core.ServerConfiguration, ic *core.ImageConfigu
 	resizedPath := ic.LocalResizedImagePath()
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 
-		err = http.FetchOriginal(ic, sc)
+		err = http.FetchOriginal(sc, ic)
 		if err != nil {
 			log.Println(err)
 			return "", err
@@ -112,7 +106,7 @@ func createFullSizeImage(ic *core.ImageConfiguration, sc *core.ServerConfigurati
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 
-		err = http.FetchOriginal(ic, sc)
+		err = http.FetchOriginal(sc, ic)
 		if err != nil {
 			log.Println(err)
 			return "", err

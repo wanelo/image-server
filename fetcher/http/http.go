@@ -14,15 +14,15 @@ import (
 
 var ImageDownloads map[string][]chan error
 
-func FetchOriginal(ic *core.ImageConfiguration, sc *core.ServerConfiguration) error {
+func FetchOriginal(sc *core.ServerConfiguration, ic *core.ImageConfiguration) error {
 	c := make(chan error)
-	go uniqueFetchOriginal(c, ic, sc)
+	go uniqueFetchOriginal(c, sc, ic)
 	return <-c
 }
 
 // Even if simultaneous calls request the same image, only the first one will download
 // the image, and will then notify all requesters. The channel returns an error object
-func uniqueFetchOriginal(c chan error, ic *core.ImageConfiguration, sc *core.ServerConfiguration) {
+func uniqueFetchOriginal(c chan error, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
 	key := sc.RemoteImageURL(ic)
 	_, present := ImageDownloads[key]
 
