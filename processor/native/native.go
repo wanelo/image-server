@@ -3,10 +3,13 @@ package native
 import (
 	"image"
 	"image/jpeg"
+	"log"
 	"os"
 
 	"code.google.com/p/graphics-go/graphics"
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/fetcher/http"
+	"github.com/wanelo/image-server/processor"
 )
 
 type Processor struct {
@@ -14,11 +17,50 @@ type Processor struct {
 }
 
 func (p *Processor) CreateImage(ic *core.ImageConfiguration) (string, error) {
-	err := createResizedImage(p.ServerConfiguration, ic)
-	return ic.LocalResizedImagePath(), err
+	c := make(chan processor.ImageProcessingResult)
+	go uniqueCreateImage(c, p.ServerConfiguration, ic)
+	ipr := <-c
+	return ipr.ResizedPath, ipr.Error
 }
 
-func createResizedImage(sc *core.ServerConfiguration, ic *core.ImageConfiguration) error {
+func uniqueCreateImage(c chan processor.ImageProcessingResult, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
+	key := ic.LocalResizedImagePath()
+	_, present := processor.ImageProcessings[key]
+
+	if present {
+		processor.ImageProcessings[key] = append(processor.ImageProcessings[key], c)
+	} else {
+		processor.ImageProcessings[key] = []chan processor.ImageProcessingResult{c}
+
+		imagePath, err := downloadAndProcessImage(sc, ic)
+		for _, cc := range processor.ImageProcessings[key] {
+			cc <- processor.ImageProcessingResult{imagePath, err}
+		}
+		delete(processor.ImageProcessings, key)
+	}
+}
+
+func downloadAndProcessImage(sc *core.ServerConfiguration, ic *core.ImageConfiguration) (string, error) {
+	resizedPath := ic.LocalResizedImagePath()
+	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
+
+		err = http.FetchOriginal(sc, ic)
+		if err != nil {
+			log.Println(err)
+			return "", err
+		}
+
+		err = createResizedImage(ic)
+		if err != nil {
+			log.Println(err)
+			return "", err
+		}
+	}
+
+	return resizedPath, nil
+}
+
+func createResizedImage(ic *core.ImageConfiguration) error {
 	fullSizePath := ic.LocalOriginalImagePath()
 	resizedPath := ic.LocalResizedImagePath()
 

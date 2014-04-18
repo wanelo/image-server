@@ -54,7 +54,7 @@ func downloadAndProcessImage(sc *core.ServerConfiguration, ic *core.ImageConfigu
 			return "", err
 		}
 
-		err = createWithMagick(ic)
+		err = createResizedImage(ic)
 		if err != nil {
 			log.Println(err)
 			return "", err
@@ -64,7 +64,7 @@ func downloadAndProcessImage(sc *core.ServerConfiguration, ic *core.ImageConfigu
 	return resizedPath, nil
 }
 
-func createWithMagick(ic *core.ImageConfiguration) error {
+func createResizedImage(ic *core.ImageConfiguration) error {
 	start := time.Now()
 	fullSizePath := ic.LocalOriginalImagePath()
 	im, err := m.DecodeFile(fullSizePath)
