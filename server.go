@@ -10,7 +10,7 @@ import (
 	"github.com/wanelo/image-server/events"
 	httpFetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/processor"
-	"github.com/wanelo/image-server/processor/native"
+	"github.com/wanelo/image-server/processor/cli"
 	"github.com/wanelo/image-server/uploader"
 	"github.com/wanelo/image-server/uploader/manta"
 )
@@ -22,7 +22,7 @@ func main() {
 	path := "config/" + *environment + ".json"
 	serverConfiguration, err := core.LoadServerConfiguration(path)
 	adapters := &core.Adapters{}
-	adapters.Processor = &native.Processor{serverConfiguration}
+	adapters.Processor = &cli.Processor{serverConfiguration}
 	serverConfiguration.Adapters = adapters
 
 	if err != nil {
