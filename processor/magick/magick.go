@@ -48,7 +48,7 @@ func downloadAndProcessImage(sc *core.ServerConfiguration, ic *core.ImageConfigu
 	resizedPath := ic.LocalResizedImagePath()
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 
-		err = http.FetchOriginal(sc, ic)
+		err = http.FetchOriginal(ic)
 		if err != nil {
 			log.Println(err)
 			return "", err
@@ -106,7 +106,7 @@ func createFullSizeImage(ic *core.ImageConfiguration, sc *core.ServerConfigurati
 
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
 
-		err = http.FetchOriginal(sc, ic)
+		err = http.FetchOriginal(ic)
 		if err != nil {
 			log.Println(err)
 			return "", err
