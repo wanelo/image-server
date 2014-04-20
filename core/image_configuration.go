@@ -30,7 +30,7 @@ func (ic *ImageConfiguration) ImageDirectory() string {
 }
 
 func (ic *ImageConfiguration) LocalDestinationDirectory() string {
-	return "public/" + ic.ImageDirectory()
+	return ic.ServerConfiguration.LocalBasePath + "/" + ic.ImageDirectory()
 }
 
 func (ic *ImageConfiguration) LocalOriginalImagePath() string {

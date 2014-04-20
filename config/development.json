@@ -4,6 +4,7 @@
   "source_domain": "http://cdn-s3-2.wanelo.com",
   "whitelisted_extensions": ["jpg", "png", "webp"],
   "maximum_width": 1000,
+  "local_base_path": "public",
   "manta_base_path": "public/images/development",
   "manta_concurrency": 10,
   "default_quality": 75,
