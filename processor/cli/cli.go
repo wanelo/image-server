@@ -4,8 +4,11 @@ import (
 	"container/list"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher/http"
@@ -92,6 +95,22 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 
 		args.PushBack("-gravity")
 		args.PushBack("center")
+
+		cols, rows, err := originalDimensions(ic)
+
+		if err == nil && (ic.Width != cols || ic.Height != rows) {
+			w := float64(ic.Width) / float64(cols)
+			h := float64(ic.Height) / float64(rows)
+			scale := math.Max(w, h)
+			c := scale * (float64(cols) + 0.5)
+			c = math.Floor(c + 0.5) // Round
+			r := scale * (float64(rows) + 0.5)
+			r = math.Floor(r + 0.5) // Round
+
+			args.PushBack("-resize")
+			args.PushBack(fmt.Sprintf("%dx%d", int(c), int(r)))
+		}
+
 	} else if ic.Width > 0 {
 		args.PushBack("-resize")
 		args.PushBack(fmt.Sprintf("%d", ic.Width))
@@ -101,6 +120,30 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 	args.PushBack(ic.LocalResizedImagePath())
 
 	return convertArgumentsToSlice(args)
+}
+
+func originalDimensions(ic *core.ImageConfiguration) (int, int, error) {
+	args := []string{"-format", "\"%[fx:w]x%[fx:h]\"", ic.LocalOriginalImagePath()}
+	out, err := exec.Command("identify", args...).Output()
+	dimensions := fmt.Sprintf("%s", out)
+
+	if err != nil {
+		return 0, 0, err
+	}
+
+	d := strings.Split(dimensions, "x")
+
+	w, err := strconv.Atoi(d[0])
+	if err != nil {
+		return 0, 0, err
+	}
+
+	h, err := strconv.Atoi(d[1])
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return w, h, nil
 }
 
 func convertArgumentsToSlice(arguments *list.List) []string {
