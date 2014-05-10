@@ -62,6 +62,16 @@ func (ma *MantaAdapter) ensureDirectory(dir string) error {
 		//  need to create sub directories
 		dir2 := filepath.Dir(dir)
 		dir3 := filepath.Dir(dir2)
+		dir4 := filepath.Dir(dir3)
+		dir5 := filepath.Dir(dir4)
+		err = ma.createDirectory(dir5)
+		if err != nil {
+			return err
+		}
+		err = ma.createDirectory(dir4)
+		if err != nil {
+			return err
+		}
 		err = ma.createDirectory(dir3)
 		if err != nil {
 			return err
