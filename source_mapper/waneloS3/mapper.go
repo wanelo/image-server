@@ -21,7 +21,6 @@ func (m *SourceMapper) RemoteImageURL(ic *core.ImageConfiguration) string {
 }
 
 func (m *SourceMapper) imageDirectory(ic *core.ImageConfiguration) string {
-	id := base62.Decode("ofrA")
-	// fmt.Printf("Decoded %s to %d", ic.ID, id)
+	id := base62.Decode(ic.ID)
 	return fmt.Sprintf("%s/%d", m.ServerConfiguration.NamespaceMappings[ic.Namespace], id)
 }
