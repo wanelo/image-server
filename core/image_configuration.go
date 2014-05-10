@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // ImageConfiguration struct
 // Properties used to generate new image
@@ -13,20 +16,19 @@ type ImageConfiguration struct {
 	Format              string
 	Source              string
 	Quality             uint
-	Model               string
-	ImageType           string
-}
-
-// RemoteImageURL returns a URL string for original image
-func (ic *ImageConfiguration) RemoteImageURL() string {
-	if ic.Source != "" {
-		return ic.Source
-	}
-	return ic.ServerConfiguration.SourceDomain + "/" + ic.ImageDirectory() + "/original.jpg"
+	Namespace           string
 }
 
 func (ic *ImageConfiguration) ImageDirectory() string {
-	return fmt.Sprintf("%s/%s/%s", ic.Model, ic.ImageType, ic.ID)
+	id := strings.Join(ic.IDPartitions(), "/")
+
+	return fmt.Sprintf("%s/%s", ic.Namespace, id)
+}
+
+func (ic *ImageConfiguration) IDPartitions() []string {
+	digits := fmt.Sprintf("%06s", ic.ID)
+
+	return []string{digits[0:2], digits[2:4], digits[4:6]}
 }
 
 func (ic *ImageConfiguration) LocalDestinationDirectory() string {

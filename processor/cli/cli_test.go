@@ -9,9 +9,9 @@ import (
 
 func TestFullSizeImage(t *testing.T) {
 	sc := &core.ServerConfiguration{MaximumWidth: 1000, LocalBasePath: "public"}
-	ic := &core.ImageConfiguration{ServerConfiguration: sc, Width: 0, Height: 0, Format: "jpg", Quality: 85, Model: "test", ImageType: "image", ID: "11032603", Filename: "full_size.jpg"}
+	ic := &core.ImageConfiguration{ServerConfiguration: sc, Width: 0, Height: 0, Format: "jpg", Quality: 85, Namespace: "test", ID: "ofrA", Filename: "full_size.jpg"}
 
-	expected := []string{"-format", "jpg", "-flatten", "-background", "rgba\\(255,255,255,1\\)", "-quality", "85", "public/test/image/11032603/original", "public/test/image/11032603/full_size.jpg"}
+	expected := []string{"-format", "jpg", "-flatten", "-background", "rgba\\(255,255,255,1\\)", "-quality", "85", "public/test/00/of/rA/original", "public/test/00/of/rA/full_size.jpg"}
 
 	command := commandArgs(ic)
 	if !reflect.DeepEqual(expected, command) {
@@ -21,9 +21,9 @@ func TestFullSizeImage(t *testing.T) {
 
 func TestImageWithWidth(t *testing.T) {
 	sc := &core.ServerConfiguration{MaximumWidth: 1000, LocalBasePath: "public"}
-	ic := &core.ImageConfiguration{ServerConfiguration: sc, Width: 600, Height: 0, Format: "jpg", Quality: 85, Model: "test", ImageType: "image", ID: "11032603", Filename: "w600.jpg"}
+	ic := &core.ImageConfiguration{ServerConfiguration: sc, Width: 600, Height: 0, Format: "jpg", Quality: 85, Namespace: "test", ID: "ofrA", Filename: "w600.jpg"}
 
-	expected := []string{"-format", "jpg", "-flatten", "-background", "rgba\\(255,255,255,1\\)", "-quality", "85", "-resize", "600", "public/test/image/11032603/original", "public/test/image/11032603/w600.jpg"}
+	expected := []string{"-format", "jpg", "-flatten", "-background", "rgba\\(255,255,255,1\\)", "-quality", "85", "-resize", "600", "public/test/00/of/rA/original", "public/test/00/of/rA/w600.jpg"}
 
 	command := commandArgs(ic)
 	if !reflect.DeepEqual(expected, command) {
@@ -33,9 +33,9 @@ func TestImageWithWidth(t *testing.T) {
 
 func TestImageWithWidthAndHeight(t *testing.T) {
 	sc := &core.ServerConfiguration{MaximumWidth: 1000, LocalBasePath: "public"}
-	ic := &core.ImageConfiguration{ServerConfiguration: sc, Width: 600, Height: 500, Format: "jpg", Quality: 85, Model: "test", ImageType: "image", ID: "11032603", Filename: "600x500.jpg"}
+	ic := &core.ImageConfiguration{ServerConfiguration: sc, Width: 600, Height: 500, Format: "jpg", Quality: 85, Namespace: "test", ID: "ofrA", Filename: "600x500.jpg"}
 
-	expected := []string{"-format", "jpg", "-flatten", "-background", "rgba\\(255,255,255,1\\)", "-quality", "85", "-extent", "600x500", "public/test/image/11032603/original", "public/test/image/11032603/600x500.jpg"}
+	expected := []string{"-format", "jpg", "-flatten", "-background", "rgba\\(255,255,255,1\\)", "-quality", "85", "-extent", "600x500", "-gravity", "center", "public/test/00/of/rA/original", "public/test/00/of/rA/600x500.jpg"}
 
 	command := commandArgs(ic)
 	if !reflect.DeepEqual(expected, command) {

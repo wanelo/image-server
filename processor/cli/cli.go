@@ -75,8 +75,6 @@ func createResizedImage(ic *core.ImageConfiguration) error {
 func commandArgs(ic *core.ImageConfiguration) []string {
 	args := list.New()
 
-	/*	args.PushBack("convert")*/
-
 	args.PushBack("-format")
 	args.PushBack(ic.Format)
 
@@ -91,6 +89,9 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 	if ic.Height > 0 && ic.Width > 0 {
 		args.PushBack("-extent")
 		args.PushBack(fmt.Sprintf("%dx%d", ic.Width, ic.Height))
+
+		args.PushBack("-gravity")
+		args.PushBack("center")
 	} else if ic.Width > 0 {
 		args.PushBack("-resize")
 		args.PushBack(fmt.Sprintf("%d", ic.Width))

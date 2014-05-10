@@ -11,6 +11,7 @@ import (
 	httpFetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/processor/cli"
+	sm "github.com/wanelo/image-server/source_mapper/waneloS3"
 	"github.com/wanelo/image-server/uploader"
 	"github.com/wanelo/image-server/uploader/manta"
 )
@@ -21,9 +22,17 @@ func main() {
 
 	path := "config/" + *environment + ".json"
 	serverConfiguration, err := core.LoadServerConfiguration(path)
-	adapters := &core.Adapters{}
-	adapters.Processor = &cli.Processor{serverConfiguration}
+
+	adapters := &core.Adapters{
+		Processor:    &cli.Processor{serverConfiguration},
+		SourceMapper: &sm.SourceMapper{serverConfiguration},
+	}
+
 	serverConfiguration.Adapters = adapters
+
+	mappings := make(map[string]string)
+	mappings["p"] = "product/image"
+	serverConfiguration.NamespaceMappings = mappings
 
 	if err != nil {
 		log.Panicln(err)
@@ -46,7 +55,7 @@ func initializeRouter(sc *core.ServerConfiguration) {
 
 	m := martini.Classic()
 	m.Map(sc)
-	m.Get("/:model/:imageType/:id/:filename", genericImageHandler)
+	m.Get("/:namespace/:id1/:id2/:id3/:filename", genericImageHandler)
 
 	log.Fatal(http.ListenAndServe(":"+sc.ServerPort, m))
 }

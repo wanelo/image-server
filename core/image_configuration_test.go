@@ -1,14 +1,16 @@
 package core
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
-func TestRemoteImageURL(t *testing.T) {
-	sc := &ServerConfiguration{SourceDomain: "http://cdn-s3-2.wanelo.com"}
-	ic := &ImageConfiguration{ServerConfiguration: sc, Model: "product", ImageType: "image", ID: "55"}
-	url := ic.RemoteImageURL()
-	expectedURL := "http://cdn-s3-2.wanelo.com/product/image/55/original.jpg"
+func TestImageIDPartitions(t *testing.T) {
+	ic := &ImageConfiguration{ID: "00ofrA"}
+	partitions := ic.IDPartitions()
+	expected := []string{"00", "of", "rA"}
 
-	if url != expectedURL {
-		t.Errorf("expected %s to be %s", url, expectedURL)
+	if !reflect.DeepEqual(expected, partitions) {
+		t.Errorf("expected\n%v got\n%v", expected, partitions)
 	}
 }

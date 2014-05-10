@@ -15,10 +15,10 @@ func genericImageHandler(params martini.Params, r *http.Request, w http.Response
 		errorHandler(err, w, r, http.StatusNotFound, ic)
 	}
 	qs := r.URL.Query()
+
 	ic.ServerConfiguration = sc
-	ic.Model = params["model"]
-	ic.ImageType = params["imageType"]
-	ic.ID = params["id"]
+	ic.Namespace = params["namespace"]
+	ic.ID = params["id1"] + params["id2"] + params["id3"]
 	ic.Source = qs.Get("source")
 	imageHandler(ic, w, r)
 

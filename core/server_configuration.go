@@ -23,6 +23,7 @@ type ServerConfiguration struct {
 	GraphiteHost          string   `json:"graphite_host"`
 	GraphitePort          int      `json:"graphite_port"`
 	Environment           string   `json:"environment"`
+	NamespaceMappings     map[string]string
 	Events                *EventChannels
 	Adapters              *Adapters
 }
@@ -34,6 +35,11 @@ type EventChannels struct {
 	ImageProcessedWithErrors    chan *ImageConfiguration
 	OriginalDownloaded          chan *ImageConfiguration
 	OriginalDownloadUnavailable chan *ImageConfiguration
+}
+
+type NamespaceMapping struct {
+	Namespace string
+	Source    string
 }
 
 func LoadServerConfiguration(path string) (*ServerConfiguration, error) {

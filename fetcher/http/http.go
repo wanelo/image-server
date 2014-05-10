@@ -23,7 +23,8 @@ func FetchOriginal(ic *core.ImageConfiguration) error {
 // Even if simultaneous calls request the same image, only the first one will download
 // the image, and will then notify all requesters. The channel returns an error object
 func uniqueFetchOriginal(c chan error, ic *core.ImageConfiguration) {
-	key := ic.RemoteImageURL()
+	key := ic.ServerConfiguration.Adapters.SourceMapper.RemoteImageURL(ic)
+
 	_, present := ImageDownloads[key]
 
 	if present {
@@ -44,7 +45,7 @@ func downloadAndSaveOriginal(ic *core.ImageConfiguration) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		start := time.Now()
 
-		remoteURL := ic.RemoteImageURL()
+		remoteURL := ic.ServerConfiguration.Adapters.SourceMapper.RemoteImageURL(ic)
 		resp, err := gohttp.Get(remoteURL)
 
 		log.Printf("response code %d", resp.StatusCode)
