@@ -83,19 +83,7 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 
 	args.PushBack("-flatten")
 
-	args.PushBack("-background")
-	args.PushBack("rgba\\(255,255,255,1\\)")
-
-	args.PushBack("-quality")
-	args.PushBack(fmt.Sprintf("%d", ic.Quality))
-
 	if ic.Height > 0 && ic.Width > 0 {
-		args.PushBack("-extent")
-		args.PushBack(fmt.Sprintf("%dx%d", ic.Width, ic.Height))
-
-		args.PushBack("-gravity")
-		args.PushBack("center")
-
 		cols, rows, err := originalDimensions(ic)
 
 		if err == nil && (ic.Width != cols || ic.Height != rows) {
@@ -107,14 +95,28 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 			r := scale * (float64(rows) + 0.5)
 			r = math.Floor(r + 0.5) // Round
 
+			resizeVal := fmt.Sprintf("%dx%d", int(c), int(r))
+
 			args.PushBack("-resize")
-			args.PushBack(fmt.Sprintf("%dx%d", int(c), int(r)))
+			args.PushBack(resizeVal)
 		}
+
+		args.PushBack("-extent")
+		args.PushBack(fmt.Sprintf("%dx%d", ic.Width, ic.Height))
+
+		args.PushBack("-gravity")
+		args.PushBack("center")
 
 	} else if ic.Width > 0 {
 		args.PushBack("-resize")
 		args.PushBack(fmt.Sprintf("%d", ic.Width))
 	}
+
+	args.PushBack("-background")
+	args.PushBack("rgba\\(255,255,255,1\\)")
+
+	args.PushBack("-quality")
+	args.PushBack(fmt.Sprintf("%d", ic.Quality))
 
 	args.PushBack(ic.LocalOriginalImagePath())
 	args.PushBack(ic.LocalResizedImagePath())
@@ -123,7 +125,7 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 }
 
 func originalDimensions(ic *core.ImageConfiguration) (int, int, error) {
-	args := []string{"-format", "\"%[fx:w]x%[fx:h]\"", ic.LocalOriginalImagePath()}
+	args := []string{"-format", "%[fx:w]x%[fx:h]", ic.LocalOriginalImagePath()}
 	out, err := exec.Command("identify", args...).Output()
 	dimensions := fmt.Sprintf("%s", out)
 
@@ -132,14 +134,15 @@ func originalDimensions(ic *core.ImageConfiguration) (int, int, error) {
 	}
 
 	d := strings.Split(dimensions, "x")
-
 	w, err := strconv.Atoi(d[0])
 	if err != nil {
+		fmt.Printf("Can't convert width to integer: %s\n", d[0])
 		return 0, 0, err
 	}
 
 	h, err := strconv.Atoi(d[1])
 	if err != nil {
+		fmt.Printf("Can't convert height to integer: %s\n", d[1])
 		return 0, 0, err
 	}
 
