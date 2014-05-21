@@ -1,0 +1,13 @@
+{
+  "server_port": "7000",
+  "status_port": "7001",
+  "source_domain": "http://cdn-s3-2.wanelo.com",
+  "whitelisted_extensions": ["jpg", "png", "webp"],
+  "maximum_width": 1000,
+  "local_base_path": "test/images",
+  "manta_base_path": "public/images/test",
+  "manta_concurrency": 3,
+  "default_quality": 75,
+  "graphite_enabled": false,
+  "environment": "test"
+}

@@ -75,6 +75,22 @@ Image outputs are generated after the request is complete.
 
     POST http://localhost:7000/user/avatar/3589782?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
 
+## CLI
+
+Allows to create a range of images in parallel
+```shell
+images -namespace p -outputs x300.jpg,x300.webp -start 1000000 -end 1001000
+```
+
+## Manta CLI
+
+Allows to download a range of images in parallel
+```shell
+images-manta -start 10000000 -end 10001000 -concurrency 100
+```
+
+
+
 ## Error Handling
 
 Few errors will cause the server to return error pages
