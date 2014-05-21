@@ -56,6 +56,7 @@ func initializeRouter(sc *core.ServerConfiguration) {
 	m := martini.Classic()
 	m.Map(sc)
 	m.Get("/:namespace/:id1/:id2/:id3/:filename", genericImageHandler)
+	m.Post("/:namespace/:id1/:id2/:id3", multiImageHandler)
 
 	log.Fatal(http.ListenAndServe(":"+sc.ServerPort, m))
 }
