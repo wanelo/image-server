@@ -1,5 +1,4 @@
 {
-  "server_port": "7000",
   "source_domain": "http://wanelo.s3.amazonaws.com",
   "maximum_width": 1000,
   "local_base_path": "public",

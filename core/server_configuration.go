@@ -10,7 +10,6 @@ import (
 // ServerConfiguration struct
 // Most of this configuration comes from json config
 type ServerConfiguration struct {
-	ServerPort            string   `json:"server_port"`
 	SourceDomain          string   `json:"source_domain"`
 	WhitelistedExtensions []string `json:"whitelisted_extensions"`
 	MaximumWidth          int      `json:"maximum_width"`

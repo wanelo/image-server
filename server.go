@@ -19,6 +19,7 @@ import (
 
 func main() {
 	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
+	port := flag.String("p", "7000", "Specifies the environment to run this server under (test/development/production).")
 	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
 	flag.Parse()
 
@@ -50,16 +51,16 @@ func main() {
 		events.InitializeEventListeners(serverConfiguration, uwc)
 	}()
 
-	initializeRouter(serverConfiguration)
+	initializeRouter(serverConfiguration, *port)
 }
 
-func initializeRouter(sc *core.ServerConfiguration) {
-	log.Println("starting in "+sc.Environment, "on http://0.0.0.0:"+sc.ServerPort)
+func initializeRouter(sc *core.ServerConfiguration, port string) {
+	log.Println("starting in "+sc.Environment, "on http://0.0.0.0:"+port)
 
 	m := martini.Classic()
 	m.Map(sc)
 	m.Get("/:namespace/:id1/:id2/:id3/:filename", genericImageHandler)
 	m.Post("/:namespace/:id1/:id2/:id3", multiImageHandler)
 
-	log.Fatal(http.ListenAndServe(":"+sc.ServerPort, m))
+	log.Fatal(http.ListenAndServe(":"+port, m))
 }
