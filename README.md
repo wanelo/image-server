@@ -24,7 +24,6 @@ Example of json configuration on `config/production.json`
   "server_port": "7000",
   "status_port": "7001",
   "source_domain": "http://cdn-s3-2.wanelo.com",
-  "whitelisted_extensions": ["jpg", "png", "webp"],
   "maximum_width": 1000,
   "manta_base_path": "public/images/production",
   "manta_concurrency": 10,

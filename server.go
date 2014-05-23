@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/go-martini/martini"
 	"github.com/wanelo/image-server/core"
@@ -18,6 +19,7 @@ import (
 
 func main() {
 	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
+	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
 	flag.Parse()
 
 	path := "config/" + *environment + ".json"
@@ -28,6 +30,7 @@ func main() {
 		SourceMapper: &sm.SourceMapper{serverConfiguration},
 	}
 
+  serverConfiguration.WhitelistedExtensions = strings.Split(*whitelistedExtensions, ",")
 	serverConfiguration.Adapters = adapters
 
 	mappings := make(map[string]string)

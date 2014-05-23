@@ -2,7 +2,6 @@
   "server_port": "7000",
   "status_port": "7001",
   "source_domain": "http://wanelo.s3.amazonaws.com",
-  "whitelisted_extensions": ["jpg", "png", "webp"],
   "maximum_width": 1000,
   "local_base_path": "public",
   "default_quality": 75,
