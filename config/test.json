@@ -1,6 +1,5 @@
 {
   "server_port": "7000",
-  "status_port": "7001",
   "source_domain": "http://cdn-s3-2.wanelo.com",
   "maximum_width": 1000,
   "local_base_path": "test/images",
