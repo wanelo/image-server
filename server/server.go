@@ -33,6 +33,7 @@ func main() {
 
   serverConfiguration.WhitelistedExtensions = strings.Split(*whitelistedExtensions, ",")
 	serverConfiguration.Adapters = adapters
+	serverConfiguration.Environment = *environment
 
 	mappings := make(map[string]string)
 	mappings["p"] = "product/image"

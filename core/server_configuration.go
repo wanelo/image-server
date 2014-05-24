@@ -20,7 +20,7 @@ type ServerConfiguration struct {
 	GraphiteEnabled       bool     `json:"graphite_enabled"`
 	GraphiteHost          string   `json:"graphite_host"`
 	GraphitePort          int      `json:"graphite_port"`
-	Environment           string   `json:"environment"`
+	Environment           string
 	NamespaceMappings     map[string]string
 	Events                *EventChannels
 	Adapters              *Adapters

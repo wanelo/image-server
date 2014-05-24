@@ -5,6 +5,5 @@
   "manta_base_path": "public/images/test",
   "manta_concurrency": 3,
   "default_quality": 75,
-  "graphite_enabled": false,
-  "environment": "test"
+  "graphite_enabled": false
 }
