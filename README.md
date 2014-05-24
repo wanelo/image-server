@@ -170,9 +170,6 @@ to increase them [permanently](https://coderwall.com/p/lfjoaq)
 - Strip metadata
 - Default background color needs to be white (for transparent gifs, etc)
 
-### Operations/Deployment
-- Chef cookbook for generating servers
-
 ### After Release
 
 - Zero-downtime restart: http://rcrowley.org/talks/strange-loop-2013.html#27
@@ -180,32 +177,3 @@ to increase them [permanently](https://coderwall.com/p/lfjoaq)
 - Status page
   - current images processing count
   - current original download count
-
-### Needs discussion
-
-- Ability to have manta jobs to create new versions. First list all product Ids already stored in manta. Map: split into smaller batches. A CLI will be needed for this.
-- Split into subdirectories in manta? Currently all product Ids are on one level. Difficult to list files.
-
-### Done
-- ~~only allow whitelisted formats: jpg, png, webp~~
-- ~~Allow to have variable compressions: x50-q60.jpg~~
-- ~~graphite events (https://github.com/marpaia/graphite-golang)~~
-  - ~~image processed~~
-  - ~~image processed by extension~~
-  - ~~original downloaded~~
-  - ~~failed downloading from s3~~
-  - ~~completed with errors~~
-- ~~Limit the number of simultaneous manta uploads. Channels can be used instead of go routines.~~
-- ~~Move default compression to configuration~~
-- ~~save processed images into manta~~
-- ~~error handling [done]~~
-- ~~accept flags with environment `-e production` [done]~~
-  - ~~default will be `development`~~
-- ~~ability to overwrite the source of the image [done]~~
-  - ~~by passing query parameter `source`~~
-- ~~configuration options/file~~
-  - ~~port number [done]~~
-  - ~~status page port number [done]~~
-  - ~~max dimensions [done]~~
-  - ~~source domain [done]~~
-  - ~~whitelist image extensions [done]~~
