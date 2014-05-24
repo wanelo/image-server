@@ -13,7 +13,7 @@ type ServerConfiguration struct {
 	SourceDomain          string   `json:"source_domain"`
 	WhitelistedExtensions []string `json:"whitelisted_extensions"`
 	MaximumWidth          int      `json:"maximum_width"`
-	LocalBasePath         string   `json:"local_base_path"`
+	LocalBasePath         string
 	MantaBasePath         string   `json:"manta_base_path"`
 	MantaConcurrency      int      `json:"manta_concurrency"`
 	DefaultQuality        uint     `json:"default_quality"`

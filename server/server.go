@@ -21,6 +21,7 @@ func main() {
 	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
 	port := flag.String("p", "7000", "Specifies the environment to run this server under (test/development/production).")
 	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
+	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
 	flag.Parse()
 
 	path := "config/" + *environment + ".json"
@@ -34,6 +35,7 @@ func main() {
   serverConfiguration.WhitelistedExtensions = strings.Split(*whitelistedExtensions, ",")
 	serverConfiguration.Adapters = adapters
 	serverConfiguration.Environment = *environment
+	serverConfiguration.LocalBasePath = *localBasePath
 
 	mappings := make(map[string]string)
 	mappings["p"] = "product/image"

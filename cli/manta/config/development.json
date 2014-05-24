@@ -1,7 +1,6 @@
 {
   "source_domain": "http://wanelo.s3.amazonaws.com",
   "maximum_width": 1000,
-  "local_base_path": "public",
   "default_quality": 75,
   "graphite_enabled": false,
   "graphite_port": 7777,

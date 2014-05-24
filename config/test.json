@@ -1,7 +1,6 @@
 {
   "source_domain": "http://cdn-s3-2.wanelo.com",
   "maximum_width": 1000,
-  "local_base_path": "test/images",
   "manta_base_path": "public/images/test",
   "manta_concurrency": 3,
   "default_quality": 75,
