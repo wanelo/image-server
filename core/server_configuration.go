@@ -17,9 +17,8 @@ type ServerConfiguration struct {
 	MantaBasePath         string   `json:"manta_base_path"`
 	MantaConcurrency      int      `json:"manta_concurrency"`
 	DefaultQuality        uint     `json:"default_quality"`
-	GraphiteEnabled       bool     `json:"graphite_enabled"`
-	GraphiteHost          string   `json:"graphite_host"`
-	GraphitePort          int      `json:"graphite_port"`
+	GraphiteHost          string
+	GraphitePort          int
 	Environment           string
 	NamespaceMappings     map[string]string
 	Events                *EventChannels

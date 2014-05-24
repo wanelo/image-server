@@ -22,6 +22,9 @@ func main() {
 	port := flag.String("p", "7000", "Specifies the environment to run this server under (test/development/production).")
 	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
 	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
+	graphitePort := flag.Int("graphite_port", 8125, "Graphite port")
+	graphiteHost := flag.String("graphite_host", '127.0.0.1', "Graphite Host")
+
 	flag.Parse()
 
 	path := "config/" + *environment + ".json"
@@ -36,6 +39,8 @@ func main() {
 	serverConfiguration.Adapters = adapters
 	serverConfiguration.Environment = *environment
 	serverConfiguration.LocalBasePath = *localBasePath
+	serverConfiguration.GraphitePort = *graphitePort
+	serverconfiguration.GraphiteHost = *graphiteHost
 
 	mappings := make(map[string]string)
 	mappings["p"] = "product/image"

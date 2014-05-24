@@ -25,10 +25,7 @@ Example of json configuration on `config/production.json`
   "maximum_width": 1000,
   "manta_base_path": "public/images/production",
   "manta_concurrency": 10,
-  "default_quality": 75,
-  "graphite_enabled": false,
-  "graphite_port": 7777,
-  "graphite_host": "localhost"
+  "default_quality": 75
 }
 
 ```
