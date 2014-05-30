@@ -39,14 +39,16 @@ type NamespaceMapping struct {
 
 // ServerConfigurationFromFlags initializes a ServerConfiguration from flags
 func ServerConfigurationFromFlags() (*ServerConfiguration, error) {
-	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
-	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
-	graphitePort := flag.Int("graphite_port", 8125, "Graphite port")
-	graphiteHost := flag.String("graphite_host", "127.0.0.1", "Graphite Host")
-	maximumWidth := flag.Int("maximum_width", 1000, "maximum image width")
-	mantaBasePath := flag.String("manta_base_path", "public/images/development", "base path for manta storage")
-	defaultQuality := flag.Uint("default_quality", 75, "Default image compression quality")
-	sourceDomain := flag.String("source_domain", "http://wanelo.s3.amazonaws.com", "Source domain for images")
+	var (
+		whitelistedExtensions = flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
+		localBasePath         = flag.String("local_base_path", "public", "Directory where the images will be saved")
+		sourceDomain          = flag.String("source_domain", "http://wanelo.s3.amazonaws.com", "Source domain for images")
+		mantaBasePath         = flag.String("manta_base_path", "public/images/development", "base path for manta storage")
+		graphiteHost          = flag.String("graphite_host", "127.0.0.1", "Graphite Host")
+		graphitePort          = flag.Int("graphite_port", 8125, "Graphite port")
+		maximumWidth          = flag.Int("maximum_width", 1000, "maximum image width")
+		defaultQuality        = flag.Uint("default_quality", 75, "Default image compression quality")
+	)
 	flag.Parse()
 
 	sc := &ServerConfiguration{
