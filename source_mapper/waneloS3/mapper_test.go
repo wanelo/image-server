@@ -11,14 +11,20 @@ func TestRemoteImageURL(t *testing.T) {
 	mappings["p"] = "test/image"
 
 	sc := &core.ServerConfiguration{
-		SourceDomain:      "http://example.com",
-		MaximumWidth:      1000,
-		LocalBasePath:     "public",
-		NamespaceMappings: mappings,
+		SourceDomain:  "http://example.com",
+		MaximumWidth:  1000,
+		LocalBasePath: "public",
 	}
 
-	ic := &core.ImageConfiguration{ServerConfiguration: sc, Namespace: "p", ID: "00ofrA"}
-	mapper := SourceMapper{sc}
+	mc := &core.MapperConfiguration{mappings}
+
+	ic := &core.ImageConfiguration{
+		ServerConfiguration: sc,
+		Namespace:           "p",
+		ID:                  "00ofrA",
+	}
+
+	mapper := SourceMapper{mc}
 
 	expected := "http://example.com/test/image/12077300/original.jpg"
 	remoteURL := mapper.RemoteImageURL(ic)

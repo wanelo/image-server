@@ -17,7 +17,6 @@ type ServerConfiguration struct {
 	GraphiteHost          string
 	GraphitePort          int
 	Environment           string
-	NamespaceMappings     map[string]string
 	Events                *EventChannels
 	Adapters              *Adapters
 }
@@ -29,12 +28,6 @@ type EventChannels struct {
 	ImageProcessedWithErrors    chan *ImageConfiguration
 	OriginalDownloaded          chan *ImageConfiguration
 	OriginalDownloadUnavailable chan *ImageConfiguration
-}
-
-// NamespaceMapping Maps a url namespace with a source path i.e 'p' => 'product/images'
-type NamespaceMapping struct {
-	Namespace string
-	Source    string
 }
 
 // ServerConfigurationFromFlags initializes a ServerConfiguration from flags

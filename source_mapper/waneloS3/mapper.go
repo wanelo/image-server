@@ -8,7 +8,7 @@ import (
 )
 
 type SourceMapper struct {
-	ServerConfiguration *core.ServerConfiguration
+	MapperConfiguration *core.MapperConfiguration
 }
 
 // RemoteImageURL returns a URL string for original image
@@ -22,5 +22,5 @@ func (m *SourceMapper) RemoteImageURL(ic *core.ImageConfiguration) string {
 
 func (m *SourceMapper) imageDirectory(ic *core.ImageConfiguration) string {
 	id := base62.Decode(ic.ID)
-	return fmt.Sprintf("%s/%d", m.ServerConfiguration.NamespaceMappings[ic.Namespace], id)
+	return fmt.Sprintf("%s/%d", m.MapperConfiguration.NamespaceMappings[ic.Namespace], id)
 }

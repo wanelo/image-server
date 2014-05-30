@@ -10,7 +10,6 @@ import (
 	"github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/processor/cli"
-	sm "github.com/wanelo/image-server/source_mapper/waneloS3"
 )
 
 type CliConfiguration struct {
@@ -42,14 +41,9 @@ func extractCliConfiguration() *CliConfiguration {
 	serverConfiguration, err := core.ServerConfigurationFromFlags()
 
 	adapters := &core.Adapters{
-		Processor:    &cli.Processor{serverConfiguration},
-		SourceMapper: &sm.SourceMapper{serverConfiguration},
+		Processor: &cli.Processor{serverConfiguration},
 	}
 
-	mappings := make(map[string]string)
-	mappings["p"] = "product/image"
-
-	serverConfiguration.NamespaceMappings = mappings
 	serverConfiguration.Adapters = adapters
 
 	http.ImageDownloads = make(map[string][]chan error)

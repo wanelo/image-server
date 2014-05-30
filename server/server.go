@@ -24,15 +24,15 @@ func main() {
 
 	serverConfiguration, err := core.ServerConfigurationFromFlags()
 
-	adapters := &core.Adapters{
-		Processor:    &cli.Processor{serverConfiguration},
-		SourceMapper: &sm.SourceMapper{serverConfiguration},
-	}
-	serverConfiguration.Adapters = adapters
-
 	mappings := make(map[string]string)
 	mappings["p"] = "product/image"
-	serverConfiguration.NamespaceMappings = mappings
+	mapperConfiguration := &core.MapperConfiguration{mappings}
+
+	adapters := &core.Adapters{
+		Processor:    &cli.Processor{serverConfiguration},
+		SourceMapper: &sm.SourceMapper{mapperConfiguration},
+	}
+	serverConfiguration.Adapters = adapters
 
 	if err != nil {
 		log.Panicln(err)
