@@ -15,7 +15,6 @@ type ServerConfiguration struct {
 	MaximumWidth          int      `json:"maximum_width"`
 	LocalBasePath         string
 	MantaBasePath         string   `json:"manta_base_path"`
-	MantaConcurrency      int      `json:"manta_concurrency"`
 	DefaultQuality        uint     `json:"default_quality"`
 	GraphiteHost          string
 	GraphitePort          int

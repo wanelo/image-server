@@ -24,6 +24,7 @@ func main() {
 	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
 	graphitePort := flag.Int("graphite_port", 8125, "Graphite port")
 	graphiteHost := flag.String("graphite_host", "127.0.0.1", "Graphite Host")
+	mantaConcurrency := *flag.Int("manta_concurrency", 10, "Graphite port")
 
 	flag.Parse()
 
@@ -55,7 +56,7 @@ func main() {
 
 	go func() {
 		mantaAdapter := manta.InitializeManta(serverConfiguration)
-		uwc := uploader.UploadWorkers(mantaAdapter.Upload, serverConfiguration.MantaConcurrency)
+		uwc := uploader.UploadWorkers(mantaAdapter.Upload, mantaConcurrency)
 		events.InitializeEventListeners(serverConfiguration, uwc)
 	}()
 

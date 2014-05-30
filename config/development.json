@@ -2,6 +2,5 @@
   "source_domain": "http://wanelo.s3.amazonaws.com",
   "maximum_width": 1000,
   "manta_base_path": "public/images/development",
-  "manta_concurrency": 10,
   "default_quality": 75
 }

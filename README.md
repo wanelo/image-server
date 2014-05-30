@@ -24,7 +24,6 @@ Example of json configuration on `config/production.json`
   "source_domain": "http://cdn-s3-2.wanelo.com",
   "maximum_width": 1000,
   "manta_base_path": "public/images/production",
-  "manta_concurrency": 10,
   "default_quality": 75
 }
 
