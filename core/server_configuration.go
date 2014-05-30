@@ -1,21 +1,19 @@
 package core
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
+	"flag"
+	"strings"
 )
 
 // ServerConfiguration struct
 // Most of this configuration comes from json config
 type ServerConfiguration struct {
-	SourceDomain          string   `json:"source_domain"`
-	WhitelistedExtensions []string `json:"whitelisted_extensions"`
-	MaximumWidth          int      `json:"maximum_width"`
+	SourceDomain          string
+	WhitelistedExtensions []string
+	MaximumWidth          int
 	LocalBasePath         string
-	MantaBasePath         string   `json:"manta_base_path"`
-	DefaultQuality        uint     `json:"default_quality"`
+	MantaBasePath         string
+	DefaultQuality        uint
 	GraphiteHost          string
 	GraphitePort          int
 	Environment           string
@@ -33,23 +31,33 @@ type EventChannels struct {
 	OriginalDownloadUnavailable chan *ImageConfiguration
 }
 
+// NamespaceMapping Maps a url namespace with a source path i.e 'p' => 'product/images'
 type NamespaceMapping struct {
 	Namespace string
 	Source    string
 }
 
-func LoadServerConfiguration(path string) (*ServerConfiguration, error) {
-	configFile, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Panicln(err)
-		return nil, fmt.Errorf("configuration error: %v\n", err)
-	}
+// ServerConfigurationFromFlags initializes a ServerConfiguration from flags
+func ServerConfigurationFromFlags() (*ServerConfiguration, error) {
+	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
+	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
+	graphitePort := flag.Int("graphite_port", 8125, "Graphite port")
+	graphiteHost := flag.String("graphite_host", "127.0.0.1", "Graphite Host")
+	maximumWidth := flag.Int("maximum_width", 1000, "maximum image width")
+	mantaBasePath := flag.String("manta_base_path", "public/images/development", "base path for manta storage")
+	defaultQuality := flag.Uint("default_quality", 75, "Default image compression quality")
+	sourceDomain := flag.String("source_domain", "http://wanelo.s3.amazonaws.com", "Source domain for images")
+	flag.Parse()
 
-	var config *ServerConfiguration
-	json.Unmarshal(configFile, &config)
-	config.Events = &EventChannels{
-		ImageProcessed:     make(chan *ImageConfiguration),
-		OriginalDownloaded: make(chan *ImageConfiguration),
+	sc := &ServerConfiguration{
+		WhitelistedExtensions: strings.Split(*whitelistedExtensions, ","),
+		LocalBasePath:         *localBasePath,
+		GraphitePort:          *graphitePort,
+		GraphiteHost:          *graphiteHost,
+		MaximumWidth:          *maximumWidth,
+		MantaBasePath:         *mantaBasePath,
+		DefaultQuality:        *defaultQuality,
+		SourceDomain:          *sourceDomain,
 	}
-	return config, nil
+	return sc, nil
 }

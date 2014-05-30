@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/go-martini/martini"
 	"github.com/wanelo/image-server/core"
@@ -18,30 +17,18 @@ import (
 )
 
 func main() {
-	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
 	port := flag.String("p", "7000", "Specifies the environment to run this server under (test/development/production).")
-	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
-	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
-	graphitePort := flag.Int("graphite_port", 8125, "Graphite port")
-	graphiteHost := flag.String("graphite_host", "127.0.0.1", "Graphite Host")
 	mantaConcurrency := *flag.Int("manta_concurrency", 10, "Graphite port")
 
 	flag.Parse()
 
-	path := "config/" + *environment + ".json"
-	serverConfiguration, err := core.LoadServerConfiguration(path)
+	serverConfiguration, err := core.ServerConfigurationFromFlags()
 
 	adapters := &core.Adapters{
 		Processor:    &cli.Processor{serverConfiguration},
 		SourceMapper: &sm.SourceMapper{serverConfiguration},
 	}
-
-	serverConfiguration.WhitelistedExtensions = strings.Split(*whitelistedExtensions, ",")
 	serverConfiguration.Adapters = adapters
-	serverConfiguration.Environment = *environment
-	serverConfiguration.LocalBasePath = *localBasePath
-	serverConfiguration.GraphitePort = *graphitePort
-	serverConfiguration.GraphiteHost = *graphiteHost
 
 	mappings := make(map[string]string)
 	mappings["p"] = "product/image"
@@ -64,7 +51,7 @@ func main() {
 }
 
 func initializeRouter(sc *core.ServerConfiguration, port string) {
-	log.Println("starting in "+sc.Environment, "on http://0.0.0.0:"+port)
+	log.Println("starting server on http://0.0.0.0:" + port)
 
 	m := martini.Classic()
 	m.Map(sc)

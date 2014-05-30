@@ -25,8 +25,9 @@ func ensureImageConfiguration(t *testing.T, ic *core.ImageConfiguration, w int, 
 var sc *core.ServerConfiguration
 
 func init() {
-	path := "../config/test.json"
-	sc, _ = core.LoadServerConfiguration(path)
+	sc = &core.ServerConfiguration{
+		DefaultQuality: 75,
+	}
 }
 
 // Use the default quality

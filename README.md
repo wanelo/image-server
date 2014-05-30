@@ -18,16 +18,7 @@ To run the compiled executable
 
 ## Configuration
 
-Example of json configuration on `config/production.json`
-```json
-{
-  "source_domain": "http://cdn-s3-2.wanelo.com",
-  "maximum_width": 1000,
-  "manta_base_path": "public/images/production",
-  "default_quality": 75
-}
-
-```
+All configuration is passed by flags
 
 ## Image Generation
 

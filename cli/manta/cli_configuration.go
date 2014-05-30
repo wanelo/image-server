@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strings"
-	"fmt"
 
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher/http"
@@ -26,8 +26,6 @@ func extractCliConfiguration() *CliConfiguration {
 	start := flag.Int("start", 0, "")
 	end := flag.Int("end", 0, "")
 	concurrency := flag.Int("concurrency", 20, "")
-	environment := flag.String("e", "development", "Specifies the environment to run this server under (test/development/production).")
-	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
 
 	flag.Parse()
 
@@ -41,8 +39,7 @@ func extractCliConfiguration() *CliConfiguration {
 		fmt.Scanf("%d", end)
 	}
 
-	path := "config/" + *environment + ".json"
-	serverConfiguration, err := core.LoadServerConfiguration(path)
+	serverConfiguration, err := core.ServerConfigurationFromFlags()
 
 	adapters := &core.Adapters{
 		Processor:    &cli.Processor{serverConfiguration},
@@ -54,7 +51,6 @@ func extractCliConfiguration() *CliConfiguration {
 
 	serverConfiguration.NamespaceMappings = mappings
 	serverConfiguration.Adapters = adapters
-	serverConfiguration.LocalBasePath = *localBasePath
 
 	http.ImageDownloads = make(map[string][]chan error)
 	processor.ImageProcessings = make(map[string][]chan processor.ImageProcessingResult)
