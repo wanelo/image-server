@@ -23,7 +23,7 @@ func main() {
 	whitelistedExtensions := flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
 	localBasePath := flag.String("local_base_path", "public", "Directory where the images will be saved")
 	graphitePort := flag.Int("graphite_port", 8125, "Graphite port")
-	graphiteHost := flag.String("graphite_host", '127.0.0.1', "Graphite Host")
+	graphiteHost := flag.String("graphite_host", "127.0.0.1", "Graphite Host")
 
 	flag.Parse()
 
@@ -35,12 +35,12 @@ func main() {
 		SourceMapper: &sm.SourceMapper{serverConfiguration},
 	}
 
-  serverConfiguration.WhitelistedExtensions = strings.Split(*whitelistedExtensions, ",")
+	serverConfiguration.WhitelistedExtensions = strings.Split(*whitelistedExtensions, ",")
 	serverConfiguration.Adapters = adapters
 	serverConfiguration.Environment = *environment
 	serverConfiguration.LocalBasePath = *localBasePath
 	serverConfiguration.GraphitePort = *graphitePort
-	serverconfiguration.GraphiteHost = *graphiteHost
+	serverConfiguration.GraphiteHost = *graphiteHost
 
 	mappings := make(map[string]string)
 	mappings["p"] = "product/image"
