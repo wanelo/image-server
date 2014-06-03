@@ -2,6 +2,7 @@ package core
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 )
 
@@ -53,5 +54,12 @@ func ServerConfigurationFromFlags() (*ServerConfiguration, error) {
 		DefaultQuality:        *defaultQuality,
 		SourceDomain:          *sourceDomain,
 	}
+
+	sc.Events = &EventChannels{
+		ImageProcessed:     make(chan *ImageConfiguration),
+		OriginalDownloaded: make(chan *ImageConfiguration),
+	}
+
+	fmt.Printf("ServerConfiguration: %v", sc)
 	return sc, nil
 }
