@@ -16,7 +16,6 @@ type ServerConfiguration struct {
 	DefaultQuality        uint
 	GraphiteHost          string
 	GraphitePort          int
-	Environment           string
 	Events                *EventChannels
 	Adapters              *Adapters
 }
