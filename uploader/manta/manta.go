@@ -51,6 +51,8 @@ func (ma *MantaAdapter) Upload(ic *core.ImageConfiguration) {
 		return
 	}
 	err = ma.Client.PutObject(path, objectName, object)
+	log.Printf("Uploaded file to manta: %s", destination)
+
 	if err != nil {
 		log.Printf("Error uploading image to manta: %s", err)
 	}
