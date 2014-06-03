@@ -14,10 +14,10 @@ all: deps
 	@go test -v ./...
 
 devserver:
-	@go run `ls server/*.go | grep -v _test.go` -local_base_path public
+	@go run `ls server/*.go | grep -v _test.go`
 
 devcli:
-	@go run `ls cli/manta/*.go | grep -v _test.go` -local_base_path public
+	@go run `ls cli/manta/*.go | grep -v _test.go`
 
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
