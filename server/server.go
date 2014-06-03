@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	port := flag.String("p", "7000", "Specifies the environment to run this server under (test/development/production).")
+	port := *flag.String("p", "7000", "Specifies the server port.")
 	mantaConcurrency := *flag.Int("manta_concurrency", 10, "Graphite port")
 
 	flag.Parse()
@@ -46,7 +46,7 @@ func main() {
 		events.InitializeEventListeners(serverConfiguration, uwc)
 	}()
 
-	initializeRouter(serverConfiguration, *port)
+	initializeRouter(serverConfiguration, port)
 }
 
 func initializeRouter(sc *core.ServerConfiguration, port string) {
