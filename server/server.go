@@ -23,6 +23,9 @@ func main() {
 	flag.Parse()
 
 	serverConfiguration, err := core.ServerConfigurationFromFlags()
+	if err != nil {
+		log.Panicln(err)
+	}
 
 	mappings := make(map[string]string)
 	mappings["p"] = "product/image"
@@ -33,10 +36,6 @@ func main() {
 		SourceMapper: &sm.SourceMapper{mapperConfiguration},
 	}
 	serverConfiguration.Adapters = adapters
-
-	if err != nil {
-		log.Panicln(err)
-	}
 
 	httpFetcher.ImageDownloads = make(map[string][]chan error)
 	processor.ImageProcessings = make(map[string][]chan processor.ImageProcessingResult)
