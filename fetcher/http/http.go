@@ -48,7 +48,6 @@ func downloadAndSaveOriginal(ic *core.ImageConfiguration) error {
 		remoteURL := ic.ServerConfiguration.Adapters.SourceMapper.RemoteImageURL(ic)
 		resp, err := gohttp.Get(remoteURL)
 
-		log.Printf("Downloaded from %s with code %d", remoteURL, resp.StatusCode)
 		if err != nil || resp.StatusCode != 200 {
 			log.Printf("Unable to download image: %s, status code: %d", remoteURL, resp.StatusCode)
 			log.Println(err)
@@ -57,6 +56,7 @@ func downloadAndSaveOriginal(ic *core.ImageConfiguration) error {
 			}()
 			return fmt.Errorf("unable to download image: %s, status code: %d", remoteURL, resp.StatusCode)
 		}
+		log.Printf("Downloaded from %s with code %d", remoteURL, resp.StatusCode)
 		defer resp.Body.Close()
 
 		dir := filepath.Dir(path)
