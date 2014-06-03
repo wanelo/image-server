@@ -2,7 +2,6 @@ package core
 
 import (
 	"flag"
-	"fmt"
 	"strings"
 )
 
@@ -60,6 +59,5 @@ func ServerConfigurationFromFlags() (*ServerConfiguration, error) {
 		OriginalDownloaded: make(chan *ImageConfiguration),
 	}
 
-	fmt.Printf("ServerConfiguration: %v", sc)
 	return sc, nil
 }
