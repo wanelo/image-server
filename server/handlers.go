@@ -24,9 +24,6 @@ func genericImageHandler(params martini.Params, r *http.Request, w http.Response
 	ic.Source = qs.Get("source")
 	imageHandler(ic, w, r)
 
-	go func() {
-		sc.Events.ImageProcessed <- ic
-	}()
 }
 
 func multiImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter, sc *core.ServerConfiguration) {

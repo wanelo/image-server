@@ -41,6 +41,9 @@ func uniqueCreateImage(c chan processor.ImageProcessingResult, ic *core.ImageCon
 			cc <- processor.ImageProcessingResult{imagePath, err}
 		}
 		delete(processor.ImageProcessings, key)
+		go func() {
+			ic.ServerConfiguration.Events.ImageProcessed <- ic
+		}()
 	}
 }
 
