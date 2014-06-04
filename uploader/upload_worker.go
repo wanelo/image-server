@@ -4,20 +4,22 @@ import "github.com/wanelo/image-server/core"
 
 type UploadWork struct {
 	ImageConfiguration *core.ImageConfiguration
+	Func               func(*core.ImageConfiguration)
 }
 
-func UploadWorker(in chan *UploadWork, fn func(*core.ImageConfiguration)) {
+func UploadWorker(in chan *UploadWork) {
 	for {
 		t := <-in
-		fn(t.ImageConfiguration)
+		t.Func(t.ImageConfiguration)
 	}
 }
 
-func UploadWorkers(fn func(*core.ImageConfiguration), concurrency int) chan *UploadWork {
+func UploadWorkers(concurrency uint) chan *UploadWork {
+
 	jobs := make(chan *UploadWork)
 
-	for i := 0; i < concurrency; i++ {
-		go UploadWorker(jobs, fn)
+	for i := uint(0); i < concurrency; i++ {
+		go UploadWorker(jobs)
 	}
 
 	return jobs

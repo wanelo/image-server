@@ -46,3 +46,7 @@ func (ic *ImageConfiguration) LocalResizedImagePath() string {
 func (sc *ServerConfiguration) MantaResizedImagePath(ic *ImageConfiguration) string {
 	return sc.MantaBasePath + "/" + ic.ImageDirectory() + "/" + ic.Filename
 }
+
+func (sc *ServerConfiguration) MantaOriginalImagePath(ic *ImageConfiguration) string {
+	return sc.MantaBasePath + "/" + ic.ImageDirectory() + "/original"
+}

@@ -1,12 +1,16 @@
 package events
 
 import (
+	"log"
+
 	"github.com/marpaia/graphite-golang"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/uploader"
 )
 
-func InitializeEventListeners(sc *core.ServerConfiguration, uwc chan *uploader.UploadWork) {
+// InitializeEventListeners activates all workers that listen to events
+func InitializeEventListeners(sc *core.ServerConfiguration) {
+	uwc := uploader.UploadWorkers(sc.UploaderConcurrency)
 	g := initializeGraphite(sc)
 	go handleImageProcessed(sc, uwc, g)
 	go handleImageProcessedWithErrors(sc, g)
@@ -17,7 +21,10 @@ func InitializeEventListeners(sc *core.ServerConfiguration, uwc chan *uploader.U
 func handleImageProcessed(sc *core.ServerConfiguration, uwc chan *uploader.UploadWork, g *graphite.Graphite) {
 	for {
 		ic := <-sc.Events.ImageProcessed
-		uwc <- &uploader.UploadWork{ic}
+		resizedPath := ic.LocalResizedImagePath()
+		log.Printf("Processed image: %s", resizedPath)
+
+		uwc <- &uploader.UploadWork{ic, sc.Adapters.Uploader.Upload}
 		g.SimpleSend("stats.image_server.image_request", "1")
 		g.SimpleSend("stats.image_server.image_request."+ic.Format, "1")
 	}
@@ -33,7 +40,7 @@ func handleImageProcessedWithErrors(sc *core.ServerConfiguration, g *graphite.Gr
 func handleOriginalDownloaded(sc *core.ServerConfiguration, uwc chan *uploader.UploadWork, g *graphite.Graphite) {
 	for {
 		ic := <-sc.Events.OriginalDownloaded
-		uwc <- &uploader.UploadWork{ic}
+		uwc <- &uploader.UploadWork{ic, sc.Adapters.Uploader.UploadOriginal}
 		g.SimpleSend("stats.image_server.original_downloaded", "1")
 	}
 }

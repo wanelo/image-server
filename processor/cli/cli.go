@@ -73,9 +73,6 @@ func createResizedImage(ic *core.ImageConfiguration) error {
 		return err
 	}
 
-	resizedPath := ic.LocalResizedImagePath()
-	log.Printf("Processed image: %s", resizedPath)
-
 	return nil
 }
 

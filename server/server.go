@@ -12,14 +12,11 @@ import (
 	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/processor/cli"
 	sm "github.com/wanelo/image-server/source_mapper/waneloS3"
-	"github.com/wanelo/image-server/uploader"
 	"github.com/wanelo/image-server/uploader/manta"
 )
 
 func main() {
 	port := *flag.String("p", "7000", "Specifies the server port.")
-	mantaConcurrency := *flag.Int("manta_concurrency", 10, "Graphite port")
-
 	flag.Parse()
 
 	serverConfiguration, err := core.ServerConfigurationFromFlags()
@@ -34,6 +31,7 @@ func main() {
 	adapters := &core.Adapters{
 		Processor:    &cli.Processor{serverConfiguration},
 		SourceMapper: &sm.SourceMapper{mapperConfiguration},
+		Uploader:     manta.InitializeUploader(serverConfiguration),
 	}
 	serverConfiguration.Adapters = adapters
 
@@ -41,9 +39,7 @@ func main() {
 	processor.ImageProcessings = make(map[string][]chan processor.ImageProcessingResult)
 
 	go func() {
-		mantaAdapter := manta.InitializeManta(serverConfiguration)
-		uwc := uploader.UploadWorkers(mantaAdapter.Upload, mantaConcurrency)
-		events.InitializeEventListeners(serverConfiguration, uwc)
+		events.InitializeEventListeners(serverConfiguration)
 	}()
 
 	initializeRouter(serverConfiguration, port)

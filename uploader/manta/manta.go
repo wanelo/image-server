@@ -12,17 +12,17 @@ import (
 	"github.com/wanelo/image-server/core"
 )
 
-type MantaAdapter struct {
+type Uploader struct {
 	Client *m.Client
 }
 
 var serverConfiguration *core.ServerConfiguration
 
-func InitializeManta(sc *core.ServerConfiguration) *MantaAdapter {
+func InitializeUploader(sc *core.ServerConfiguration) *Uploader {
 	serverConfiguration = sc
-	ma := &MantaAdapter{Client: newMantaClient()}
-	ma.ensureBasePath()
-	return ma
+	u := &Uploader{Client: newMantaClient()}
+	go u.ensureBasePath()
+	return u
 }
 
 func newMantaClient() *m.Client {
@@ -35,54 +35,64 @@ func newMantaClient() *m.Client {
 	return m.New(client)
 }
 
-func (ma *MantaAdapter) Upload(ic *core.ImageConfiguration) {
+func (u *Uploader) Upload(ic *core.ImageConfiguration) {
 	source := ic.LocalResizedImagePath()
 	destination := serverConfiguration.MantaResizedImagePath(ic)
+	u.upload(source, destination)
+}
 
+func (u *Uploader) UploadOriginal(ic *core.ImageConfiguration) {
+	source := ic.LocalOriginalImagePath()
+	destination := serverConfiguration.MantaOriginalImagePath(ic)
+	u.upload(source, destination)
+}
+
+func (u *Uploader) upload(source string, destination string) error {
 	path, objectName := path.Split(destination)
-	err := ma.ensureDirectory(path)
+	err := u.ensureDirectory(path)
 	if err != nil {
 		log.Printf("Manta::sentToManta unable to create directory %s", path)
-		return
+		return err
 	}
 	object, err := ioutil.ReadFile(source)
 	if err != nil {
 		log.Printf("Manta::sentToManta unable to read file %s", source)
-		return
+		return err
 	}
-	err = ma.Client.PutObject(path, objectName, object)
+	err = u.Client.PutObject(path, objectName, object)
 	log.Printf("Uploaded file to manta: %s", destination)
 
 	if err != nil {
 		log.Printf("Error uploading image to manta: %s", err)
 	}
+	return err
 }
 
-func (ma *MantaAdapter) ensureDirectory(dir string) error {
-	err := ma.createDirectory(dir)
+func (u *Uploader) ensureDirectory(dir string) error {
+	err := u.createDirectory(dir)
 	if err != nil {
 		//  need to create sub directories
 		dir2 := filepath.Dir(dir)
 		dir3 := filepath.Dir(dir2)
 		dir4 := filepath.Dir(dir3)
 		dir5 := filepath.Dir(dir4)
-		err = ma.createDirectory(dir5)
+		err = u.createDirectory(dir5)
 		if err != nil {
 			return err
 		}
-		err = ma.createDirectory(dir4)
+		err = u.createDirectory(dir4)
 		if err != nil {
 			return err
 		}
-		err = ma.createDirectory(dir3)
+		err = u.createDirectory(dir3)
 		if err != nil {
 			return err
 		}
-		err = ma.createDirectory(dir2)
+		err = u.createDirectory(dir2)
 		if err != nil {
 			return err
 		}
-		err = ma.createDirectory(dir)
+		err = u.createDirectory(dir)
 		if err != nil {
 			return err
 		}
@@ -90,13 +100,13 @@ func (ma *MantaAdapter) ensureDirectory(dir string) error {
 	return nil
 }
 
-func (ma *MantaAdapter) ensureBasePath() {
+func (u *Uploader) ensureBasePath() {
 	baseDir := serverConfiguration.MantaBasePath
-	ma.createDirectory(baseDir)
+	u.createDirectory(baseDir)
 }
 
-func (ma *MantaAdapter) createDirectory(path string) error {
-	err := ma.Client.PutDirectory(path)
+func (u *Uploader) createDirectory(path string) error {
+	err := u.Client.PutDirectory(path)
 	if err != nil {
 		log.Printf("Error creating directory on manta: %s", path)
 		return err

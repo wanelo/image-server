@@ -14,6 +14,7 @@ type ServerConfiguration struct {
 	LocalBasePath         string
 	MantaBasePath         string
 	DefaultQuality        uint
+	UploaderConcurrency   uint
 	GraphiteHost          string
 	GraphitePort          int
 	Events                *EventChannels
@@ -38,8 +39,9 @@ func ServerConfigurationFromFlags() (*ServerConfiguration, error) {
 		mantaBasePath         = flag.String("manta_base_path", "public/images/development", "base path for manta storage")
 		graphiteHost          = flag.String("graphite_host", "127.0.0.1", "Graphite Host")
 		graphitePort          = flag.Int("graphite_port", 8125, "Graphite port")
-		maximumWidth          = flag.Int("maximum_width", 1000, "maximum image width")
+		maximumWidth          = flag.Int("maximum_width", 1000, "Maximum image width")
 		defaultQuality        = flag.Uint("default_quality", 75, "Default image compression quality")
+		uploaderConcurrency   = flag.Uint("uploader_concurrency", 10, "Uploader concurrency")
 	)
 	flag.Parse()
 
@@ -52,6 +54,7 @@ func ServerConfigurationFromFlags() (*ServerConfiguration, error) {
 		MantaBasePath:         *mantaBasePath,
 		DefaultQuality:        *defaultQuality,
 		SourceDomain:          *sourceDomain,
+		UploaderConcurrency:   *uploaderConcurrency,
 	}
 
 	sc.Events = &EventChannels{
