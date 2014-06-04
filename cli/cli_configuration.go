@@ -7,8 +7,6 @@ import (
 	"strings"
 
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/processor/cli"
 )
 
@@ -45,9 +43,6 @@ func extractCliConfiguration() *CliConfiguration {
 	}
 
 	serverConfiguration.Adapters = adapters
-
-	http.ImageDownloads = make(map[string][]chan error)
-	processor.ImageProcessings = make(map[string][]chan processor.ImageProcessingResult)
 
 	if err != nil {
 		log.Panicln(err)

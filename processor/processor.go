@@ -6,3 +6,7 @@ type ImageProcessingResult struct {
 }
 
 var ImageProcessings map[string][]chan ImageProcessingResult
+
+func init() {
+	ImageProcessings = make(map[string][]chan ImageProcessingResult)
+}

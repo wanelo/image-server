@@ -14,6 +14,10 @@ import (
 
 var ImageDownloads map[string][]chan error
 
+func init() {
+	ImageDownloads = make(map[string][]chan error)
+}
+
 func FetchOriginal(ic *core.ImageConfiguration) error {
 	c := make(chan error)
 	go uniqueFetchOriginal(c, ic)

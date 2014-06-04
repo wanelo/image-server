@@ -8,8 +8,6 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/events"
-	httpFetcher "github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/processor/cli"
 	sm "github.com/wanelo/image-server/source_mapper/waneloS3"
 	"github.com/wanelo/image-server/uploader/manta"
@@ -34,9 +32,6 @@ func main() {
 		Uploader:     manta.InitializeUploader(serverConfiguration),
 	}
 	serverConfiguration.Adapters = adapters
-
-	httpFetcher.ImageDownloads = make(map[string][]chan error)
-	processor.ImageProcessings = make(map[string][]chan processor.ImageProcessingResult)
 
 	go func() {
 		events.InitializeEventListeners(serverConfiguration)
