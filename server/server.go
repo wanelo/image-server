@@ -6,37 +6,21 @@ import (
 	"net/http"
 
 	"github.com/go-martini/martini"
+	config "github.com/wanelo/image-server/config/wanelo"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/events"
-	"github.com/wanelo/image-server/processor/cli"
-	sm "github.com/wanelo/image-server/source_mapper/waneloS3"
-	"github.com/wanelo/image-server/uploader/manta"
 )
 
 func main() {
 	port := *flag.String("p", "7000", "Specifies the server port.")
 	flag.Parse()
 
-	serverConfiguration, err := core.ServerConfigurationFromFlags()
+	serverConfiguration, err := config.ServerConfiguration()
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	mappings := make(map[string]string)
-	mappings["p"] = "product/image"
-	mapperConfiguration := &core.MapperConfiguration{mappings}
-
-	adapters := &core.Adapters{
-		Processor:    &cli.Processor{serverConfiguration},
-		SourceMapper: &sm.SourceMapper{mapperConfiguration},
-		Uploader:     manta.InitializeUploader(serverConfiguration),
-	}
-	serverConfiguration.Adapters = adapters
-
-	go func() {
-		events.InitializeEventListeners(serverConfiguration)
-	}()
-
+	go events.InitializeEventListeners(serverConfiguration)
 	initializeRouter(serverConfiguration, port)
 }
 

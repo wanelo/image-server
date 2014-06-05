@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	config "github.com/wanelo/image-server/config/wanelo"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/processor/cli"
 )
@@ -36,7 +37,7 @@ func extractCliConfiguration() *CliConfiguration {
 		fmt.Scanf("%d", end)
 	}
 
-	serverConfiguration, err := core.ServerConfigurationFromFlags()
+	serverConfiguration, err := config.ServerConfiguration()
 
 	adapters := &core.Adapters{
 		Processor: &cli.Processor{serverConfiguration},
