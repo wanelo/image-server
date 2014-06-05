@@ -47,18 +47,9 @@ func multiImageHandler(params martini.Params, r *http.Request, w http.ResponseWr
 			ic.Source = qs.Get("source")
 
 			allowed, _ := allowedImage(ic)
-			if !allowed {
-				return
+			if allowed {
+				sc.Adapters.Processor.CreateImage(ic)
 			}
-
-			_, err = sc.Adapters.Processor.CreateImage(ic)
-			if err != nil {
-				return
-			}
-
-			go func() {
-				sc.Events.ImageProcessed <- ic
-			}()
 		}
 	}()
 
