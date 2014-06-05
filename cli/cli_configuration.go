@@ -8,7 +8,6 @@ import (
 
 	config "github.com/wanelo/image-server/config/wanelo"
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/processor/cli"
 )
 
 type CliConfiguration struct {
@@ -38,12 +37,6 @@ func extractCliConfiguration() *CliConfiguration {
 	}
 
 	serverConfiguration, err := config.ServerConfiguration()
-
-	adapters := &core.Adapters{
-		Processor: &cli.Processor{serverConfiguration},
-	}
-
-	serverConfiguration.Adapters = adapters
 
 	if err != nil {
 		log.Panicln(err)
