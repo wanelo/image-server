@@ -57,7 +57,12 @@ This is useful for pre-generating images and saving them to the configured file 
 The request returs success after the original image is the file store.
 Image outputs are generated after the request is complete.
 
-    POST http://localhost:7000/user/avatar/3589782?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
+    POST http://localhost:7000/p/00/of/rF?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
+
+Example with curl
+```shell
+curl -X POST http://localhost:7000/p/00/of/rF?outputs=x300.jpg,x300.webp
+```
 
 ## CLI
 
