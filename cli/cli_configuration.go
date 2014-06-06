@@ -20,9 +20,12 @@ type CliConfiguration struct {
 }
 
 func extractCliConfiguration() *CliConfiguration {
-	start := flag.Int("start", 0, "")
-	end := flag.Int("end", 0, "")
-	concurrency := flag.Int("concurrency", 20, "")
+	var (
+		start       = flag.Int("start", 0, "")
+		end         = flag.Int("end", 0, "")
+		concurrency = flag.Int("concurrency", 20, "")
+		outputs     = flag.String("outputs", "x200.webp,x200.jpg", "Output files with dimension and compression: 'x300.jpg,x300.webp'")
+	)
 
 	flag.Parse()
 
@@ -44,11 +47,11 @@ func extractCliConfiguration() *CliConfiguration {
 
 	return &CliConfiguration{
 		Namespace:           *flag.String("namespace", "p", "Namespace of images. i.e. 'p'"),
-		Outputs:             strings.Split(*flag.String("outputs", "", ""), ","),
 		Start:               *start,
 		End:                 *end,
 		ServerConfiguration: serverConfiguration,
 		Concurrency:         *concurrency,
+		Outputs:             strings.Split(*outputs, ","),
 	}
 
 }

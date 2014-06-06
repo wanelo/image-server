@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"sync"
-	"time"
 	"bitbucket.org/tebeka/base62"
 
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher/http"
+	"github.com/wanelo/image-server/parser"
 )
 
 // A result is the product of reading and summing a file using MD5.
@@ -21,15 +22,27 @@ type result struct {
 func digester(conf *CliConfiguration, done <-chan struct{}, ids <-chan int, c chan<- result) {
 	for id := range ids { // HLpaths
 		encodedID := base62.Encode(uint64(id))
-		fmt.Println(encodedID)
-		fmt.Println(id)
-
+		sc := conf.ServerConfiguration
 		ic := &core.ImageConfiguration{
-			ServerConfiguration: conf.ServerConfiguration,
+			ServerConfiguration: sc,
 			Namespace:           "p",
 			ID:                  encodedID,
 		}
 		err := http.FetchOriginal(ic)
+
+		for _, filename := range conf.Outputs {
+			ic, err := parser.NameToConfiguration(sc, filename)
+			if err != nil {
+				log.Printf("Error parsing name: %v\n", err)
+				continue
+			}
+
+			ic.ServerConfiguration = sc
+			ic.Namespace = conf.Namespace
+			ic.ID = encodedID
+
+			sc.Adapters.Processor.CreateImage(ic)
+		}
 
 		select {
 		case c <- result{id, err}:
@@ -37,7 +50,6 @@ func digester(conf *CliConfiguration, done <-chan struct{}, ids <-chan int, c ch
 			return
 		}
 
-		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -91,12 +103,12 @@ func main() {
 	// Creates images in a specific range
 	// Returns urls of generated images
 
-	CliConfiguration := extractCliConfiguration()
-	err := createAll(CliConfiguration)
+	cliConfiguration := extractCliConfiguration()
+	err := createAll(cliConfiguration)
 
 	// m, err := MD5All()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 }
