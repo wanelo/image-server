@@ -3,7 +3,7 @@ package events
 import (
 	"log"
 
-	"github.com/marpaia/graphite-golang"
+	graphite "github.com/marpaia/graphite-golang"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/uploader"
 )
