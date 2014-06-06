@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"bitbucket.org/tebeka/base62"
@@ -93,7 +92,7 @@ func createAll(conf *CliConfiguration) error {
 	// End of pipeline. OMIT
 
 	for r := range c {
-		fmt.Println(r.ID)
+		log.Printf("Completed processing image %v", r.ID)
 	}
 
 	return nil
