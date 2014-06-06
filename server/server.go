@@ -8,7 +8,6 @@ import (
 	"github.com/go-martini/martini"
 	config "github.com/wanelo/image-server/config/wanelo"
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/events"
 )
 
 func main() {
@@ -20,7 +19,6 @@ func main() {
 		log.Panicln(err)
 	}
 
-	go events.InitializeEventListeners(serverConfiguration)
 	initializeRouter(serverConfiguration, port)
 }
 
