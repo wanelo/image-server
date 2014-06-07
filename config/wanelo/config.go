@@ -6,8 +6,9 @@ import (
 
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/events"
+	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/processor/cli"
-	sm "github.com/wanelo/image-server/source_mapper/waneloS3"
+	s3 "github.com/wanelo/image-server/source_mapper/waneloS3"
 	"github.com/wanelo/image-server/uploader/manta"
 )
 
@@ -23,9 +24,9 @@ func ServerConfiguration() (*core.ServerConfiguration, error) {
 	}
 
 	adapters := &core.Adapters{
-		Processor:    &cli.Processor{sc},
-		SourceMapper: &sm.SourceMapper{},
-		Uploader:     manta.InitializeUploader(sc),
+		Fetcher:   &fetcher.Fetcher{&s3.SourceMapper{}},
+		Processor: &cli.Processor{sc},
+		Uploader:  manta.InitializeUploader(sc),
 	}
 	sc.Adapters = adapters
 

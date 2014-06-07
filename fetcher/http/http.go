@@ -18,16 +18,24 @@ func init() {
 	ImageDownloads = make(map[string][]chan error)
 }
 
-func FetchOriginal(ic *core.ImageConfiguration) error {
+type Fetcher struct {
+	SourceMapper core.SourceMapper
+}
+
+func (f *Fetcher) FetchOriginal(ic *core.ImageConfiguration) error {
 	c := make(chan error)
-	go uniqueFetchOriginal(c, ic)
+	go f.uniqueFetchOriginal(c, ic)
 	return <-c
+}
+
+func (f *Fetcher) remoteImageURL(ic *core.ImageConfiguration) string {
+	return f.SourceMapper.RemoteImageURL(ic)
 }
 
 // Even if simultaneous calls request the same image, only the first one will download
 // the image, and will then notify all requesters. The channel returns an error object
-func uniqueFetchOriginal(c chan error, ic *core.ImageConfiguration) {
-	key := ic.RemoteImageURL()
+func (f *Fetcher) uniqueFetchOriginal(c chan error, ic *core.ImageConfiguration) {
+	key := f.remoteImageURL(ic)
 
 	_, present := ImageDownloads[key]
 
@@ -36,7 +44,7 @@ func uniqueFetchOriginal(c chan error, ic *core.ImageConfiguration) {
 	} else {
 		ImageDownloads[key] = []chan error{c}
 
-		err := downloadAndSaveOriginal(ic)
+		err := f.downloadAndSaveOriginal(ic)
 		for _, cc := range ImageDownloads[key] {
 			cc <- err
 		}
@@ -44,12 +52,12 @@ func uniqueFetchOriginal(c chan error, ic *core.ImageConfiguration) {
 	}
 }
 
-func downloadAndSaveOriginal(ic *core.ImageConfiguration) error {
+func (f *Fetcher) downloadAndSaveOriginal(ic *core.ImageConfiguration) error {
 	path := ic.LocalOriginalImagePath()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		start := time.Now()
 
-		remoteURL := ic.RemoteImageURL()
+		remoteURL := f.remoteImageURL(ic)
 		resp, err := gohttp.Get(remoteURL)
 
 		if err != nil || resp.StatusCode != 200 {

@@ -1,20 +1,24 @@
 package core
 
 type Adapters struct {
-	Processor    Processor
-	SourceMapper SourceMapper
-	Uploader     Uploader
-}
-
-type Processor interface {
-	CreateImage(*ImageConfiguration) (string, error)
+	Fetcher   Fetcher
+	Processor Processor
+	Uploader  Uploader
 }
 
 type SourceMapper interface {
 	RemoteImageURL(*ImageConfiguration) string
 }
 
+type Fetcher interface {
+	FetchOriginal(*ImageConfiguration) error
+}
+
+type Processor interface {
+	CreateImage(*ImageConfiguration) (string, error)
+}
+
 type Uploader interface {
-	Upload(ic *ImageConfiguration)
-	UploadOriginal(ic *ImageConfiguration)
+	Upload(*ImageConfiguration)
+	UploadOriginal(*ImageConfiguration)
 }

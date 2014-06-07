@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/processor"
 )
 
@@ -50,12 +49,6 @@ func uniqueCreateImage(c chan processor.ImageProcessingResult, ic *core.ImageCon
 func downloadAndProcessImage(ic *core.ImageConfiguration) (string, error) {
 	resizedPath := ic.LocalResizedImagePath()
 	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-
-		err = http.FetchOriginal(ic)
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
 
 		err = createResizedImage(ic)
 		if err != nil {

@@ -6,7 +6,6 @@ import (
 	"bitbucket.org/tebeka/base62"
 
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/parser"
 )
 
@@ -22,12 +21,17 @@ func digester(conf *CliConfiguration, done <-chan struct{}, ids <-chan int, c ch
 	for id := range ids { // HLpaths
 		encodedID := base62.Encode(uint64(id))
 		sc := conf.ServerConfiguration
+		adapters := sc.Adapters
 		ic := &core.ImageConfiguration{
 			ServerConfiguration: sc,
 			Namespace:           "p",
 			ID:                  encodedID,
 		}
-		err := http.FetchOriginal(ic)
+		err := adapters.Fetcher.FetchOriginal(ic)
+		if err != nil {
+			// unable to download original image, skip processing for this image image
+			continue
+		}
 
 		for _, filename := range conf.Outputs {
 			ic, err := parser.NameToConfiguration(sc, filename)

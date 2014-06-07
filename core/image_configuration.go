@@ -43,10 +43,6 @@ func (ic *ImageConfiguration) LocalResizedImagePath() string {
 	return ic.LocalDestinationDirectory() + "/" + ic.Filename
 }
 
-func (ic *ImageConfiguration) RemoteImageURL() string {
-	return ic.ServerConfiguration.Adapters.SourceMapper.RemoteImageURL(ic)
-}
-
 func (sc *ServerConfiguration) MantaResizedImagePath(ic *ImageConfiguration) string {
 	return sc.MantaBasePath + "/" + ic.ImageDirectory() + "/" + ic.Filename
 }

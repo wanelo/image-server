@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-martini/martini"
 	"github.com/wanelo/image-server/core"
-	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/parser"
 )
 
@@ -48,6 +47,10 @@ func multiImageHandler(params martini.Params, r *http.Request, w http.ResponseWr
 
 			allowed, _ := allowedImage(ic)
 			if allowed {
+				err := sc.Adapters.Fetcher.FetchOriginal(ic)
+				if err != nil {
+					return
+				}
 				sc.Adapters.Processor.CreateImage(ic)
 			}
 		}
@@ -59,7 +62,7 @@ func multiImageHandler(params martini.Params, r *http.Request, w http.ResponseWr
 		ID:                  params["id1"] + params["id2"] + params["id3"],
 		Source:              qs.Get("source"),
 	}
-	err := fetcher.FetchOriginal(ic)
+	err := sc.Adapters.Fetcher.FetchOriginal(ic)
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound, ic)
 		return
@@ -74,6 +77,11 @@ func imageHandler(ic *core.ImageConfiguration, w http.ResponseWriter, r *http.Re
 	}
 
 	sc := ic.ServerConfiguration
+	err = sc.Adapters.Fetcher.FetchOriginal(ic)
+	if err != nil {
+		errorHandler(err, w, r, http.StatusNotFound, ic)
+		return
+	}
 	resizedPath, err := sc.Adapters.Processor.CreateImage(ic)
 	if err != nil {
 		errorHandler(err, w, r, http.StatusNotFound, ic)
