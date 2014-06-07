@@ -7,16 +7,11 @@ import (
 )
 
 func TestRemoteImageURL(t *testing.T) {
-	mappings := make(map[string]string)
-	mappings["p"] = "test/image"
-
 	sc := &core.ServerConfiguration{
 		SourceDomain:  "http://example.com",
 		MaximumWidth:  1000,
 		LocalBasePath: "public",
 	}
-
-	mc := &core.MapperConfiguration{mappings}
 
 	ic := &core.ImageConfiguration{
 		ServerConfiguration: sc,
@@ -24,9 +19,9 @@ func TestRemoteImageURL(t *testing.T) {
 		ID:                  "00ofrA",
 	}
 
-	mapper := SourceMapper{mc}
+	mapper := SourceMapper{}
 
-	expected := "http://example.com/test/image/12077300/original.jpg"
+	expected := "http://example.com/product/image/12077300/original.jpg"
 	remoteURL := mapper.RemoteImageURL(ic)
 
 	if expected != remoteURL {

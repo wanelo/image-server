@@ -13,6 +13,26 @@ import (
 
 // ServerConfiguration initializes a ServerConfiguration from flags
 func ServerConfiguration() (*core.ServerConfiguration, error) {
+	sc := configurationFromFlags()
+
+	sc.Events = &core.EventChannels{
+		ImageProcessed:     make(chan *core.ImageConfiguration),
+		OriginalDownloaded: make(chan *core.ImageConfiguration),
+	}
+
+	adapters := &core.Adapters{
+		Processor:    &cli.Processor{sc},
+		SourceMapper: &sm.SourceMapper{},
+		Uploader:     manta.InitializeUploader(sc),
+	}
+	sc.Adapters = adapters
+
+	go events.InitializeEventListeners(sc)
+
+	return sc, nil
+}
+
+func configurationFromFlags() *core.ServerConfiguration {
 	var (
 		whitelistedExtensions = flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
 		localBasePath         = flag.String("local_base_path", "public", "Directory where the images will be saved")
@@ -38,23 +58,5 @@ func ServerConfiguration() (*core.ServerConfiguration, error) {
 		UploaderConcurrency:   *uploaderConcurrency,
 	}
 
-	sc.Events = &core.EventChannels{
-		ImageProcessed:     make(chan *core.ImageConfiguration),
-		OriginalDownloaded: make(chan *core.ImageConfiguration),
-	}
-
-	mappings := make(map[string]string)
-	mappings["p"] = "product/image"
-	mapperConfiguration := &core.MapperConfiguration{mappings}
-
-	adapters := &core.Adapters{
-		Processor:    &cli.Processor{sc},
-		SourceMapper: &sm.SourceMapper{mapperConfiguration},
-		Uploader:     manta.InitializeUploader(sc),
-	}
-	sc.Adapters = adapters
-
-	go events.InitializeEventListeners(sc)
-
-	return sc, nil
+	return sc
 }
