@@ -58,7 +58,7 @@ func downloadAndSaveOriginal(ic *core.ImageConfiguration) error {
 			go func() {
 				ic.ServerConfiguration.Events.OriginalDownloadUnavailable <- ic
 			}()
-			return fmt.Errorf("unable to download image: %s, status code: %d", remoteURL, resp.StatusCode)
+			return fmt.Errorf("Unable to download image: %s, status code: %d", remoteURL, resp.StatusCode)
 		}
 		log.Printf("Downloaded from %s with code %d", remoteURL, resp.StatusCode)
 		defer resp.Body.Close()
@@ -71,7 +71,7 @@ func downloadAndSaveOriginal(ic *core.ImageConfiguration) error {
 		if err != nil {
 			log.Printf("Unable to create file: %s", path)
 			log.Println(err)
-			return fmt.Errorf("unable to create file: %s", path)
+			return fmt.Errorf("Unable to create file: %s", path)
 		}
 
 		io.Copy(out, resp.Body)
