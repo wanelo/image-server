@@ -16,8 +16,10 @@ func ServerConfiguration() (*core.ServerConfiguration, error) {
 	sc := configurationFromFlags()
 
 	sc.Events = &core.EventChannels{
-		ImageProcessed:     make(chan *core.ImageConfiguration),
-		OriginalDownloaded: make(chan *core.ImageConfiguration),
+		ImageProcessed:              make(chan *core.ImageConfiguration),
+		ImageProcessedWithErrors:    make(chan *core.ImageConfiguration),
+		OriginalDownloaded:          make(chan *core.ImageConfiguration),
+		OriginalDownloadUnavailable: make(chan *core.ImageConfiguration),
 	}
 
 	adapters := &core.Adapters{
