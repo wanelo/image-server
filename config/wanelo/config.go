@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/events"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/processor/cli"
 	s3 "github.com/wanelo/image-server/source_mapper/waneloS3"
@@ -29,8 +28,6 @@ func ServerConfiguration() (*core.ServerConfiguration, error) {
 		Uploader:  manta.InitializeUploader(sc),
 	}
 	sc.Adapters = adapters
-
-	go events.InitializeEventListeners(sc)
 
 	return sc, nil
 }

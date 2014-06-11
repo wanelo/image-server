@@ -8,18 +8,21 @@ import (
 	"github.com/go-martini/martini"
 	config "github.com/wanelo/image-server/config/wanelo"
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/events"
 )
 
 func main() {
 	port := *flag.String("p", "7000", "Specifies the server port.")
 	flag.Parse()
 
-	serverConfiguration, err := config.ServerConfiguration()
+	sc, err := config.ServerConfiguration()
 	if err != nil {
 		log.Panicln(err)
 	}
 
-	initializeRouter(serverConfiguration, port)
+	go events.InitializeEventListeners(sc)
+
+	initializeRouter(sc, port)
 }
 
 func initializeRouter(sc *core.ServerConfiguration, port string) {
