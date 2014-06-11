@@ -32,6 +32,7 @@ func digester(conf *CliConfiguration, done <-chan struct{}, ids <-chan int, c ch
 			// unable to download original image, skip processing for this image image
 			continue
 		}
+		sc.Adapters.Uploader.UploadOriginal(ic)
 
 		for _, filename := range conf.Outputs {
 			ic, err := parser.NameToConfiguration(sc, filename)
@@ -44,7 +45,13 @@ func digester(conf *CliConfiguration, done <-chan struct{}, ids <-chan int, c ch
 			ic.Namespace = conf.Namespace
 			ic.ID = encodedID
 
-			sc.Adapters.Processor.CreateImage(ic)
+			_, err = sc.Adapters.Processor.CreateImage(ic)
+			if err != nil {
+				log.Printf("Error creating image: %v\n", err)
+				continue
+			}
+
+			sc.Adapters.Uploader.Upload(ic)
 		}
 
 		select {
