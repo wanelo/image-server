@@ -1,3 +1,4 @@
 public/
 bin/image-server
 bin/image-cli
+tmp/

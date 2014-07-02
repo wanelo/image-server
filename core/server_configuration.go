@@ -7,20 +7,19 @@ type ServerConfiguration struct {
 	WhitelistedExtensions []string
 	MaximumWidth          int
 	LocalBasePath         string
-	MantaBasePath         string
+	RemoteBasePath        string
 	DefaultQuality        uint
 	UploaderConcurrency   uint
 	GraphiteHost          string
 	GraphitePort          int
-	Events                *EventChannels
 	Adapters              *Adapters
 }
 
 // EventChannels struct
 // Available image processing/downloading events
-type EventChannels struct {
-	ImageProcessed              chan *ImageConfiguration
-	ImageProcessedWithErrors    chan *ImageConfiguration
-	OriginalDownloaded          chan *ImageConfiguration
-	OriginalDownloadUnavailable chan *ImageConfiguration
-}
+// type EventChannels struct {
+// ImageProcessed              chan *ImageConfiguration
+// ImageProcessedWithErrors    chan *ImageConfiguration
+// OriginalDownloaded          chan *ImageConfiguration
+// OriginalDownloadFailed chan *ImageConfiguration
+// }

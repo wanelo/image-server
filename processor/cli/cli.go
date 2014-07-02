@@ -3,66 +3,18 @@ package cli
 import (
 	"container/list"
 	"fmt"
-	"log"
 	"math"
-	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/processor"
 )
 
-type Processor struct {
-	ServerConfiguration *core.ServerConfiguration
-}
+type Processor struct{}
 
-func (p *Processor) CreateImage(ic *core.ImageConfiguration) (string, error) {
-	c := make(chan processor.ImageProcessingResult)
-	go uniqueCreateImage(c, ic)
-	ipr := <-c
-	return ipr.ResizedPath, ipr.Error
-}
-
-func uniqueCreateImage(c chan processor.ImageProcessingResult, ic *core.ImageConfiguration) {
-	key := ic.LocalResizedImagePath()
-	_, present := processor.ImageProcessings[key]
-
-	if present {
-		processor.ImageProcessings[key] = append(processor.ImageProcessings[key], c)
-	} else {
-		processor.ImageProcessings[key] = []chan processor.ImageProcessingResult{c}
-
-		imagePath, err := downloadAndProcessImage(ic)
-		log.Println(imagePath)
-		for _, cc := range processor.ImageProcessings[key] {
-			cc <- processor.ImageProcessingResult{imagePath, err}
-		}
-		delete(processor.ImageProcessings, key)
-		go func() {
-			ic.ServerConfiguration.Events.ImageProcessed <- ic
-		}()
-	}
-}
-
-func downloadAndProcessImage(ic *core.ImageConfiguration) (string, error) {
-	resizedPath := ic.LocalResizedImagePath()
-	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-
-		err = createResizedImage(ic)
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
-	}
-
-	return resizedPath, nil
-}
-
-func createResizedImage(ic *core.ImageConfiguration) error {
-
-	cmd := exec.Command("convert", commandArgs(ic)...)
+func (p *Processor) CreateImage(source string, destination string, ic *core.ImageConfiguration) error {
+	cmd := exec.Command("convert", p.commandArgs(source, destination, ic)...)
 
 	err := cmd.Run()
 	if err != nil {
@@ -72,7 +24,7 @@ func createResizedImage(ic *core.ImageConfiguration) error {
 	return nil
 }
 
-func commandArgs(ic *core.ImageConfiguration) []string {
+func (p *Processor) commandArgs(source string, destination string, ic *core.ImageConfiguration) []string {
 	args := list.New()
 
 	args.PushBack("-format")
@@ -81,7 +33,7 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 	args.PushBack("-flatten")
 
 	if ic.Height > 0 && ic.Width > 0 {
-		cols, rows, err := originalDimensions(ic)
+		cols, rows, err := p.originalDimensions(source, ic)
 
 		if err == nil && (ic.Width != cols || ic.Height != rows) {
 			w := float64(ic.Width) / float64(cols)
@@ -115,14 +67,14 @@ func commandArgs(ic *core.ImageConfiguration) []string {
 	args.PushBack("-quality")
 	args.PushBack(fmt.Sprintf("%d", ic.Quality))
 
-	args.PushBack(ic.LocalOriginalImagePath())
-	args.PushBack(ic.LocalResizedImagePath())
+	args.PushBack(source)
+	args.PushBack(destination)
 
-	return convertArgumentsToSlice(args)
+	return p.convertArgumentsToSlice(args)
 }
 
-func originalDimensions(ic *core.ImageConfiguration) (int, int, error) {
-	args := []string{"-format", "%[fx:w]x%[fx:h]", ic.LocalOriginalImagePath()}
+func (p *Processor) originalDimensions(source string, ic *core.ImageConfiguration) (int, int, error) {
+	args := []string{"-format", "%[fx:w]x%[fx:h]", source}
 	out, err := exec.Command("identify", args...).Output()
 	dimensions := fmt.Sprintf("%s", out)
 
@@ -146,7 +98,7 @@ func originalDimensions(ic *core.ImageConfiguration) (int, int, error) {
 	return w, h, nil
 }
 
-func convertArgumentsToSlice(arguments *list.List) []string {
+func (p *Processor) convertArgumentsToSlice(arguments *list.List) []string {
 	argumentSlice := make([]string, 0, arguments.Len())
 	for e := arguments.Front(); e != nil; e = e.Next() {
 		argumentSlice = append(argumentSlice, e.Value.(string))

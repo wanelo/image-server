@@ -9,45 +9,23 @@ import (
 	"github.com/joyent/gocommon/client"
 	"github.com/joyent/gocommon/jpc"
 	m "github.com/richardiux/gomanta/manta"
-	"github.com/wanelo/image-server/core"
 )
 
 type Uploader struct {
-	Client *m.Client
+	Client  *m.Client
+	BaseDir string
 }
 
-var serverConfiguration *core.ServerConfiguration
-
-func InitializeUploader(sc *core.ServerConfiguration) *Uploader {
-	serverConfiguration = sc
-	u := &Uploader{Client: newMantaClient()}
+func InitializeUploader(baseDir string) *Uploader {
+	u := &Uploader{
+		Client:  newMantaClient(),
+		BaseDir: baseDir,
+	}
 	go u.ensureBasePath()
 	return u
 }
 
-func newMantaClient() *m.Client {
-	creds, err := jpc.CompleteCredentialsFromEnv("")
-	if err != nil {
-		log.Fatalf("Error reading credentials for manta: %s", err.Error())
-	}
-
-	client := client.NewClient(creds.MantaEndpoint.URL, "", creds, &m.Logger)
-	return m.New(client)
-}
-
-func (u *Uploader) Upload(ic *core.ImageConfiguration) {
-	source := ic.LocalResizedImagePath()
-	destination := serverConfiguration.MantaResizedImagePath(ic)
-	u.upload(source, destination)
-}
-
-func (u *Uploader) UploadOriginal(ic *core.ImageConfiguration) {
-	source := ic.LocalOriginalImagePath()
-	destination := serverConfiguration.MantaOriginalImagePath(ic)
-	u.upload(source, destination)
-}
-
-func (u *Uploader) upload(source string, destination string) error {
+func (u *Uploader) Upload(source string, destination string) error {
 	path, objectName := path.Split(destination)
 	err := u.ensureDirectory(path)
 	if err != nil {
@@ -100,9 +78,18 @@ func (u *Uploader) ensureDirectory(dir string) error {
 	return nil
 }
 
+func newMantaClient() *m.Client {
+	creds, err := jpc.CompleteCredentialsFromEnv("")
+	if err != nil {
+		log.Fatalf("Error reading credentials for manta: %s", err.Error())
+	}
+
+	client := client.NewClient(creds.MantaEndpoint.URL, "", creds, &m.Logger)
+	return m.New(client)
+}
+
 func (u *Uploader) ensureBasePath() {
-	baseDir := serverConfiguration.MantaBasePath
-	u.createDirectory(baseDir)
+	u.createDirectory(u.BaseDir)
 }
 
 func (u *Uploader) createDirectory(path string) error {

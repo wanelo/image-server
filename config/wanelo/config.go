@@ -6,8 +6,10 @@ import (
 
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
+	"github.com/wanelo/image-server/logger"
+	"github.com/wanelo/image-server/logger/graphite"
+	"github.com/wanelo/image-server/paths"
 	"github.com/wanelo/image-server/processor/cli"
-	s3 "github.com/wanelo/image-server/source_mapper/waneloS3"
 	"github.com/wanelo/image-server/uploader/manta"
 )
 
@@ -15,17 +17,16 @@ import (
 func ServerConfiguration() (*core.ServerConfiguration, error) {
 	sc := configurationFromFlags()
 
-	sc.Events = &core.EventChannels{
-		ImageProcessed:              make(chan *core.ImageConfiguration),
-		ImageProcessedWithErrors:    make(chan *core.ImageConfiguration),
-		OriginalDownloaded:          make(chan *core.ImageConfiguration),
-		OriginalDownloadUnavailable: make(chan *core.ImageConfiguration),
+	loggers := []core.Logger{
+		graphite.New(sc.GraphiteHost, sc.GraphitePort),
 	}
 
 	adapters := &core.Adapters{
-		Fetcher:   &fetcher.Fetcher{&s3.SourceMapper{}},
-		Processor: &cli.Processor{sc},
-		Uploader:  manta.InitializeUploader(sc),
+		Fetcher:   &fetcher.Fetcher{},
+		Processor: &cli.Processor{},
+		Uploader:  manta.InitializeUploader(sc.RemoteBasePath),
+		Paths:     &paths.Paths{sc.LocalBasePath, sc.RemoteBasePath},
+		Logger:    &logger.Logger{loggers},
 	}
 	sc.Adapters = adapters
 
@@ -37,7 +38,7 @@ func configurationFromFlags() *core.ServerConfiguration {
 		whitelistedExtensions = flag.String("extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
 		localBasePath         = flag.String("local_base_path", "public", "Directory where the images will be saved")
 		sourceDomain          = flag.String("source_domain", "http://wanelo.s3.amazonaws.com", "Source domain for images")
-		mantaBasePath         = flag.String("manta_base_path", "public/images/development", "base path for manta storage")
+		remoteBasePath        = flag.String("remote_base_path", "public/images/development", "base path for manta storage")
 		graphiteHost          = flag.String("graphite_host", "127.0.0.1", "Graphite Host")
 		graphitePort          = flag.Int("graphite_port", 8125, "Graphite port")
 		maximumWidth          = flag.Int("maximum_width", 1000, "Maximum image width")
@@ -52,7 +53,7 @@ func configurationFromFlags() *core.ServerConfiguration {
 		GraphitePort:          *graphitePort,
 		GraphiteHost:          *graphiteHost,
 		MaximumWidth:          *maximumWidth,
-		MantaBasePath:         *mantaBasePath,
+		RemoteBasePath:        *remoteBasePath,
 		DefaultQuality:        *defaultQuality,
 		SourceDomain:          *sourceDomain,
 		UploaderConcurrency:   *uploaderConcurrency,

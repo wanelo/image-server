@@ -4,21 +4,44 @@ type Adapters struct {
 	Fetcher   Fetcher
 	Processor Processor
 	Uploader  Uploader
+	Paths     Paths
+	Logger    Logger
 }
+
+type Fetcher interface {
+	Fetch(string, string) error
+}
+
+type Logger interface {
+	ImageProcessed(ic *ImageConfiguration)
+	ImageProcessedWithErrors(ic *ImageConfiguration)
+	OriginalDownloaded(source string, destination string)
+	OriginalDownloadFailed(source string)
+	OriginalDownloadSkipped(source string)
+}
+
+// Processor
+type Processor interface {
+	CreateImage(string, string, *ImageConfiguration) error
+}
+
+// Paths
+
+type Paths interface {
+	OriginalPath(string, string) string
+	ImageDirectory(string, string) string
+	TempImagePath(string) string
+	LocalOriginalPath(string, string) string
+	RemoteOriginalPath(string, string) string
+}
+
+// SourceMapper
 
 type SourceMapper interface {
 	RemoteImageURL(*ImageConfiguration) string
 }
 
-type Fetcher interface {
-	FetchOriginal(*ImageConfiguration) error
-}
-
-type Processor interface {
-	CreateImage(*ImageConfiguration) (string, error)
-}
-
+// Uploader
 type Uploader interface {
-	Upload(*ImageConfiguration)
-	UploadOriginal(*ImageConfiguration)
+	Upload(string, string) error
 }

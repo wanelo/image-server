@@ -1,10 +1,9 @@
 package uploader
 
-import "github.com/wanelo/image-server/core"
-
 type UploadWork struct {
-	ImageConfiguration *core.ImageConfiguration
-	Func               func(*core.ImageConfiguration)
+	Source      string
+	Destination string
+	Func        func(string, string) error
 }
 
 func UploadWorkers(concurrency uint) chan *UploadWork {
@@ -21,6 +20,6 @@ func UploadWorkers(concurrency uint) chan *UploadWork {
 func uploadWorker(in chan *UploadWork) {
 	for {
 		t := <-in
-		t.Func(t.ImageConfiguration)
+		t.Func(t.Source, t.Destination)
 	}
 }

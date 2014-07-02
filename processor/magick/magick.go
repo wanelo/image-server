@@ -4,73 +4,23 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 
-	m "github.com/rainycape/magick"
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/processor"
+	m "gopkgs.com/magick.v1"
 )
 
-type Processor struct {
-	ServerConfiguration *core.ServerConfiguration
-}
+type Processor struct{}
 
-func (p *Processor) CreateImage(ic *core.ImageConfiguration) (string, error) {
-	c := make(chan processor.ImageProcessingResult)
-	go uniqueCreateImage(c, p.ServerConfiguration, ic)
-	ipr := <-c
-	return ipr.ResizedPath, ipr.Error
-}
-
-func uniqueCreateImage(c chan processor.ImageProcessingResult, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
-	key := ic.LocalResizedImagePath()
-	_, present := processor.ImageProcessings[key]
-
-	if present {
-		processor.ImageProcessings[key] = append(processor.ImageProcessings[key], c)
-	} else {
-		processor.ImageProcessings[key] = []chan processor.ImageProcessingResult{c}
-
-		imagePath, err := downloadAndProcessImage(sc, ic)
-		for _, cc := range processor.ImageProcessings[key] {
-			cc <- processor.ImageProcessingResult{imagePath, err}
-		}
-		delete(processor.ImageProcessings, key)
-		go func() {
-			ic.ServerConfiguration.Events.ImageProcessed <- ic
-		}()
-	}
-}
-
-func downloadAndProcessImage(sc *core.ServerConfiguration, ic *core.ImageConfiguration) (string, error) {
+func (p *Processor) CreateImage(source string, destination string, ic *core.ImageConfiguration) error {
 	if ic.Width == 0 && ic.Height == 0 {
-		return createFullSizeImage(ic, sc)
+		return createFullSizeImage(source, destination, ic)
 	}
 
-	resizedPath := ic.LocalResizedImagePath()
-	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-
-		err = http.FetchOriginal(ic)
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
-
-		err = createResizedImage(ic)
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
-	}
-
-	return resizedPath, nil
+	return createResizedImage(source, destination, ic)
 }
 
-func createResizedImage(ic *core.ImageConfiguration) error {
-	start := time.Now()
-	fullSizePath := ic.LocalOriginalImagePath()
-	im, err := m.DecodeFile(fullSizePath)
+func createResizedImage(source string, destination string, ic *core.ImageConfiguration) error {
+	im, err := m.DecodeFile(source)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -83,11 +33,10 @@ func createResizedImage(ic *core.ImageConfiguration) error {
 		return err
 	}
 
-	resizedPath := ic.LocalResizedImagePath()
-	dir := filepath.Dir(resizedPath)
+	dir := filepath.Dir(destination)
 	os.MkdirAll(dir, 0700)
 
-	out, err := os.Create(resizedPath)
+	out, err := os.Create(destination)
 	defer out.Close()
 
 	info := magickInfo(ic)
@@ -97,43 +46,25 @@ func createResizedImage(ic *core.ImageConfiguration) error {
 		log.Println(err)
 		return err
 	}
-	elapsed := time.Since(start)
-	log.Printf("Took %s to generate image: %s", elapsed, resizedPath)
 
 	return nil
 }
 
-func createFullSizeImage(ic *core.ImageConfiguration, sc *core.ServerConfiguration) (string, error) {
-	fullSizePath := ic.LocalOriginalImagePath()
-	resizedPath := ic.LocalResizedImagePath()
-
-	if _, err := os.Stat(resizedPath); os.IsNotExist(err) {
-
-		err = http.FetchOriginal(ic)
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
-
-		im, err := m.DecodeFile(fullSizePath)
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
-		defer im.Dispose()
-
-		out, err := os.Create(resizedPath)
-		defer out.Close()
-
-		info := magickInfo(ic)
-		err = im.Encode(out, info)
-
-		if err != nil {
-			log.Println(err)
-			return "", err
-		}
+func createFullSizeImage(source string, destination string, ic *core.ImageConfiguration) error {
+	im, err := m.DecodeFile(source)
+	if err != nil {
+		log.Println(err)
+		return err
 	}
-	return resizedPath, nil
+	defer im.Dispose()
+
+	out, err := os.Create(destination)
+	defer out.Close()
+
+	info := magickInfo(ic)
+	err = im.Encode(out, info)
+
+	return err
 }
 
 func magickInfo(ic *core.ImageConfiguration) *m.Info {

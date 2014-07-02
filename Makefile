@@ -9,15 +9,15 @@ all: deps
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
 	@cd server; go build
 	@mv server/server bin/image-server
-	@cd cli; go build
-	@mv cli/cli bin/image-cli
+	# @cd cli; go build
+	# @mv cli/cli bin/image-cli
 	@go test -v ./...
 
 devserver:
 	@go run `ls server/*.go | grep -v _test.go`
 
-devcli:
-	@go run `ls cli/*.go | grep -v _test.go`
+# devcli:
+	# @go run `ls cli/*.go | grep -v _test.go`
 
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"

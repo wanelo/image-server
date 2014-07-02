@@ -1,12 +1,17 @@
 package main
 
+//
 import (
 	"log"
 	"sync"
+
 	"bitbucket.org/tebeka/base62"
 
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/fetcher"
+	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/parser"
+	"github.com/wanelo/image-server/source_mapper/waneloS3"
 )
 
 // A result is the product of reading and summing a file using MD5.
@@ -21,18 +26,33 @@ func digester(conf *CliConfiguration, done <-chan struct{}, ids <-chan int, c ch
 	for id := range ids { // HLpaths
 		encodedID := base62.Encode(uint64(id))
 		sc := conf.ServerConfiguration
-		adapters := sc.Adapters
 		ic := &core.ImageConfiguration{
-			ServerConfiguration: sc,
-			Namespace:           "p",
-			ID:                  encodedID,
+			Namespace: conf.Namespace,
+			ID:        encodedID,
 		}
-		err := adapters.Fetcher.FetchOriginal(ic)
+		sm := mapper.SourceMapper{sc}
+		source := sm.RemoteImageURL(ic)
+
+		f := fetcher.NewOriginalFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
+		fc := f.Channels
+		err, imageDetails := f.Fetch(source, conf.Namespace)
+
 		if err != nil {
 			// unable to download original image, skip processing for this image image
 			continue
 		}
-		sc.Adapters.Uploader.UploadOriginal(ic)
+
+		hash := imageDetails.Hash
+
+		select {
+		case source := <-fc.DownloadComplete:
+			destination := sc.Adapters.Paths.RemoteOriginalPath(conf.Namespace, hash)
+			sc.Adapters.Uploader.Upload(source, destination)
+		case <-fc.DownloadFailed:
+		//
+		case <-fc.SkippedDownload:
+			//
+		}
 
 		for _, filename := range conf.Outputs {
 			ic, err := parser.NameToConfiguration(sc, filename)
@@ -41,17 +61,24 @@ func digester(conf *CliConfiguration, done <-chan struct{}, ids <-chan int, c ch
 				continue
 			}
 
-			ic.ServerConfiguration = sc
 			ic.Namespace = conf.Namespace
-			ic.ID = encodedID
+			ic.ID = hash
 
-			_, err = sc.Adapters.Processor.CreateImage(ic)
+
+			p := processor.Processor{
+				Processor: sc.Adapters.Processor,
+				Source: "",
+				Destination: "",
+				ImageConfiguration: ic,
+				Channels: &processor.ProcessorChannels{make(chan *core.ImageConfiguration)},
+			}
+			_, err = p.CreateImage()
 			if err != nil {
 				log.Printf("Error creating image: %v\n", err)
 				continue
 			}
 
-			sc.Adapters.Uploader.Upload(ic)
+			// sc.Adapters.Uploader.Upload(ic)
 		}
 
 		select {

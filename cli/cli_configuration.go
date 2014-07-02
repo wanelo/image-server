@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"flag"
 	"fmt"
@@ -23,7 +24,7 @@ func extractCliConfiguration() *CliConfiguration {
 	var (
 		start       = flag.Int("start", 0, "")
 		end         = flag.Int("end", 0, "")
-		concurrency = flag.Int("concurrency", 20, "")
+		concurrency = flag.Int("concurrency", 100, "")
 		outputs     = flag.String("outputs", "x200.webp,x200.jpg", "Output files with dimension and compression: 'x300.jpg,x300.webp'")
 	)
 
@@ -63,5 +64,6 @@ func (c *CliConfiguration) ProductIds() ([]int, error) {
 	for i := c.Start; i <= c.End; i++ {
 		ids = append(ids, i)
 	}
+
 	return ids, nil
 }

@@ -22,6 +22,47 @@ All configuration is passed by flags
 
 ## Image Generation
 
+### Posting New Images
+
+An image needs to be uploaded to a namespace.
+
+    Namespaces allow to group image types. This allows different groups of images to have different dimensions and proccessings. For example avatars will require different image sizes than product images.
+
+Uploading an image requires a source
+```
+POST http://localhost:7000/p?source=http://example.com/image.jpg
+```
+
+It is possible to pre-generate images and save them to the configured file store by passing the outputs when posting the image.
+
+```
+POST http://localhost:7000/p?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
+```
+
+Example with curl
+```shell
+curl -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
+```
+
+The request returns the *"Image Information"* after the original image is saved to the file store.
+Image outputs are generated after the request is complete. The response includes properties of the image, and the image hash to be used to retrieve it in the future.
+
+### Image Information
+
+Image properties can be retrieved by visiting the info page. The response is the same as the one returned when creating the image.
+```
+GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a91/info.json
+```
+
+```json
+{
+	"hash": "f840ee339d264d4bab1b169a653b1a91",
+	"partitionedHash": "f84/0ee/339d264d4bab1b169a653b1a91"
+	"height": "520",
+	"width": "400"
+}
+```
+
 ### Sample images
 
 **Image Types**
@@ -50,19 +91,6 @@ The default compression of the image can modified by appending `-q` and the desi
 
     Square with quality 50
     GET http://localhost:7000/user/avatar/3589782/x600-q50.jpg
-
-### Multi Size Processing
-
-This is useful for pre-generating images and saving them to the configured file store.
-The request returs success after the original image is the file store.
-Image outputs are generated after the request is complete.
-
-    POST http://localhost:7000/p/00/of/rF?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
-
-Example with curl
-```shell
-curl -X POST http://localhost:7000/p/00/of/rF?outputs=x300.jpg,x300.webp
-```
 
 ## CLI
 
@@ -159,6 +187,9 @@ to increase them [permanently](https://coderwall.com/p/lfjoaq)
 ## Pending
 
 ### Required
+- Adapter for fetching original image from manta
+- Accept signals. QUIT needs to stop accepting requests, and finish processing what is on the queue.
+- Document flag usage. In readme and with --help
 - Strip metadata
 - Default background color needs to be white (for transparent gifs, etc)
 

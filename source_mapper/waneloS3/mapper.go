@@ -7,7 +7,9 @@ import (
 	"github.com/wanelo/image-server/encoders/base62"
 )
 
-type SourceMapper struct{}
+type SourceMapper struct{
+	ServerConfiguration *core.ServerConfiguration
+}
 
 // RemoteImageURL returns a URL string for original image
 func (m *SourceMapper) RemoteImageURL(ic *core.ImageConfiguration) string {
@@ -15,7 +17,7 @@ func (m *SourceMapper) RemoteImageURL(ic *core.ImageConfiguration) string {
 		return ic.Source
 	}
 
-	url := ic.ServerConfiguration.SourceDomain + "/" + m.imageDirectory(ic) + "/original.jpg"
+	url := m.ServerConfiguration.SourceDomain + "/" + m.imageDirectory(ic) + "/original.jpg"
 	return url
 }
 

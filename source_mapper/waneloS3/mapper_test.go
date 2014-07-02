@@ -14,12 +14,11 @@ func TestRemoteImageURL(t *testing.T) {
 	}
 
 	ic := &core.ImageConfiguration{
-		ServerConfiguration: sc,
 		Namespace:           "p",
 		ID:                  "00ofrA",
 	}
 
-	mapper := SourceMapper{}
+	mapper := SourceMapper{sc}
 
 	expected := "http://example.com/product/image/12077300/original.jpg"
 	remoteURL := mapper.RemoteImageURL(ic)
