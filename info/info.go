@@ -11,7 +11,9 @@ import (
 	"os"
 )
 
-type Info struct{}
+type Info struct {
+	Path string
+}
 
 type ImageDetails struct {
 	Hash   string
@@ -19,22 +21,24 @@ type ImageDetails struct {
 	Width  int
 }
 
-func (i Info) FileHash(path string) string {
-	if contents, err := ioutil.ReadFile(path); err == nil {
+func (i Info) FileHash() string {
+	if contents, err := ioutil.ReadFile(i.Path); err == nil {
 		return fmt.Sprintf("%x", md5.Sum(contents))
 	}
 	return ""
 }
 
-func (i Info) ImageDetails(path string) (*ImageDetails, error) {
-	if reader, err := os.Open(path); err == nil {
+// ImageDetails extracts file hash, height, and width when providing a image path
+// it returns an ImageDetails object
+func (i Info) ImageDetails() (*ImageDetails, error) {
+	if reader, err := os.Open(i.Path); err == nil {
 		defer reader.Close()
 		im, _, err := image.DecodeConfig(reader)
 		if err != nil {
 			return nil, err
 		}
 		details := &ImageDetails{
-			Hash:   i.FileHash(path),
+			Hash:   i.FileHash(),
 			Height: im.Height,
 			Width:  im.Width,
 		}

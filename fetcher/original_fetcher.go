@@ -32,7 +32,7 @@ func (f *OriginalFetcher) Fetch(url string, namespace string) (error, *info.Imag
 func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, namespace string) {
 	_, present := ImageDownloads[url]
 	md5, destination := "", ""
-	i := info.Info{}
+	var i info.Info
 
 	if present {
 		log.Println("Already downloading")
@@ -43,9 +43,10 @@ func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, na
 
 		tmp := f.Paths.TempImagePath(url)
 		err := f.Fetcher.Fetch(url, tmp)
+		i = info.Info{tmp}
 
 		if err == nil {
-			md5 = i.FileHash(tmp)
+			md5 = i.FileHash()
 			destination = f.Paths.LocalOriginalPath(namespace, md5)
 
 			// only copy image if does not exist
@@ -64,7 +65,8 @@ func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, na
 			go func() { f.Channels.DownloadFailed <- url }()
 		}
 
-		imageDetails, err := i.ImageDetails(destination)
+		i = info.Info{destination}
+		imageDetails, err := i.ImageDetails()
 
 		for i, cc := range ImageDownloads[url] {
 			fr := FetchResult{err, imageDetails}
