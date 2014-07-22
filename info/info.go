@@ -15,12 +15,6 @@ type Info struct {
 	Path string
 }
 
-type ImageDetails struct {
-	Hash   string
-	Height int
-	Width  int
-}
-
 func (i Info) FileHash() string {
 	if contents, err := ioutil.ReadFile(i.Path); err == nil {
 		return fmt.Sprintf("%x", md5.Sum(contents))

@@ -29,6 +29,8 @@ type Processor interface {
 
 type Paths interface {
 	OriginalPath(string, string) string
+	LocalInfoPath(string, string) string
+	RemoteInfoPath(string, string) string
 	ImageDirectory(string, string) string
 	TempImagePath(string) string
 	LocalOriginalPath(string, string) string
