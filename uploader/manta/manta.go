@@ -95,7 +95,7 @@ func (u *Uploader) ensureBasePath() {
 func (u *Uploader) createDirectory(path string) error {
 	err := u.Client.PutDirectory(path)
 	if err != nil {
-		log.Printf("Error creating directory on manta: %s", path)
+		log.Printf("Manta: %s", err)
 		return err
 	}
 	log.Printf("Created directory on manta: %s", path)
