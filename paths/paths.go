@@ -8,7 +8,7 @@ import (
 
 // Paths
 type Paths struct {
-	LocalBasePath string
+	LocalBasePath  string
 	RemoteBasePath string
 }
 
@@ -48,6 +48,17 @@ func (p *Paths) RemoteOriginalPath(namespace string, md5 string) string {
 	return fmt.Sprintf("%s/%s", p.RemoteBasePath, p.OriginalPath(namespace, md5))
 }
 
+func (p *Paths) InfoPath(namespace string, md5 string) string {
+	return fmt.Sprintf("%s/info.json", p.ImageDirectory(namespace, md5))
+}
+
+func (p *Paths) LocalInfoPath(namespace string, md5 string) string {
+	return fmt.Sprintf("%s/%s", p.LocalBasePath, p.InfoPath(namespace, md5))
+}
+
+func (p *Paths) RemoteInfoPath(namespace string, md5 string) string {
+	return fmt.Sprintf("%s/%s", p.RemoteBasePath, p.InfoPath(namespace, md5))
+}
 
 func (p *Paths) TempDirectory() string {
 	return fmt.Sprintf("%s/tmp", p.LocalBasePath)
