@@ -1,4 +1,4 @@
 public/
-bin/image-server
-bin/image-cli
+bin/solaris
+bin/images
 tmp/

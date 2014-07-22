@@ -8,8 +8,7 @@ MANTA_USER := $(shell echo $(MANTA_USER))
 all: deps
 	@mkdir -p bin/
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
-	@cd server; go build
-	@mv server/server bin/image-server
+	@go build -o bin/images
 	# @cd cli; go build
 	# @mv cli/cli bin/image-cli
 	@go test -v ./...
@@ -38,6 +37,7 @@ format:
 
 buildtomanta:
 	@echo "$(OK_COLOR)==> Building for solaris amd64$(NO_COLOR)"
-	@cd server; GOOS=solaris GOARCH=amd64 go build
+	@mkdir -p bin/solaris
+	@GOOS=solaris GOARCH=amd64 go build -o bin/solaris/images
 	@echo "$(OK_COLOR)==> Uploading to manta$(NO_COLOR)"
-	@mput -f server/server /$(MANTA_USER)/public/images/bin/image-server
+	@mput -f bin/solaris/images /$(MANTA_USER)/public/images/bin/image-server
