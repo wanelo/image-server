@@ -1,35 +1,19 @@
-package main
+package server
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/codegangsta/negroni"
-	"github.com/wanelo/image-server/fetcher"
 	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
-	config "github.com/wanelo/image-server/config/wanelo"
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/fetcher"
+	"github.com/wanelo/image-server/info"
 )
 
-func main() {
-
-	port := *flag.String("p", "7000", "Specifies the server port.")
-	flag.Parse()
-
-	sc, err := config.ServerConfiguration()
-	if err != nil {
-		log.Panicln(err)
-	}
-
-	// go events.InitializeEventListeners(sc)
-
-	initializeRouter(sc, port)
-}
-
-func initializeRouter(sc *core.ServerConfiguration, port string) {
+func InitializeRouter(sc *core.ServerConfiguration, port string) {
 	log.Println("starting server on http://0.0.0.0:" + port)
 
 	r := render.New(render.Options{
@@ -41,8 +25,10 @@ func initializeRouter(sc *core.ServerConfiguration, port string) {
 		NewImageHandler(wr, req, sc, r)
 	}).Methods("POST").Name("newImage")
 
-	n := negroni.New()
+	// n := negroni.New()
+	n := negroni.Classic()
 	n.UseHandler(router)
+
 	n.Run(":" + port)
 }
 
@@ -54,7 +40,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	source := qs.Get("source")
 	namespace := vars["namespace"]
 
-  f := fetcher.NewOriginalFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
+	f := fetcher.NewOriginalFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
 	fc := f.Channels
 	err, imageDetails := f.Fetch(source, namespace)
 
@@ -68,7 +54,15 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		select {
 		case source := <-fc.DownloadComplete:
 			destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, hash)
+
 			go sc.Adapters.Logger.OriginalDownloaded(source, destination)
+			go func() {
+				localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, hash)
+				remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
+
+				info.SaveImageDetail(imageDetails, localInfoPath)
+				sc.Adapters.Uploader.Upload(localInfoPath, remoteInfoPath)
+			}()
 			sc.Adapters.Uploader.Upload(source, destination)
 		case <-fc.DownloadFailed:
 			go sc.Adapters.Logger.OriginalDownloadFailed(source)

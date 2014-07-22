@@ -1,5 +1,4 @@
-package main
-
+package server
 // func genericImageHandler(params martini.Params, r *http.Request, w http.ResponseWriter, sc *core.ServerConfiguration) {
 // 	ic, err := parser.NameToConfiguration(sc, params["filename"])
 // 	if err != nil {
