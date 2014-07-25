@@ -25,21 +25,11 @@ func main() {
 		println("boom! I say!")
 	}
 
-	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "port", Value: "7000", Usage: "Specifies the server port."},
-		cli.StringFlag{Name: "extensions", Value: "jpg,gif,webp", Usage: "Whitelisted extensions (separated by commas)"},
-		cli.StringFlag{Name: "local_base_path", Value: "public", Usage: "Directory where the images will be saved"},
-		cli.StringFlag{Name: "source_domain", Value: "http://wanelo.s3.amazonaws.com", Usage: "Source domain for images"},
-		cli.StringFlag{Name: "remote_base_path", Value: "public/images/development", Usage: "base path for manta storage"},
-		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
-		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
-		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
-		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
-		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
-	}
+	app.Flags = globalFlags()
 
 	app.Commands = []cli.Command{
-		{Name: "server",
+		{
+      Name: "server",
 			ShortName: "s",
 			Usage:     "image server",
 			Action: func(c *cli.Context) {
@@ -55,6 +45,21 @@ func main() {
 	}
 
 	app.Run(os.Args)
+}
+
+func globalFlags() []cli.Flag {
+	return []cli.Flag{
+		cli.StringFlag{Name: "port", Value: "7000", Usage: "Specifies the server port."},
+		cli.StringFlag{Name: "extensions", Value: "jpg,gif,webp", Usage: "Whitelisted extensions (separated by commas)"},
+		cli.StringFlag{Name: "local_base_path", Value: "public", Usage: "Directory where the images will be saved"},
+		cli.StringFlag{Name: "source_domain", Value: "http://wanelo.s3.amazonaws.com", Usage: "Source domain for images"},
+		cli.StringFlag{Name: "remote_base_path", Value: "public/images/development", Usage: "base path for manta storage"},
+		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
+		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
+		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
+		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
+		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
+	}
 }
 
 func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
