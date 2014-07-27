@@ -3,7 +3,6 @@ package core
 type Adapters struct {
 	Fetcher   Fetcher
 	Processor Processor
-	Uploader  Uploader
 	Paths     Paths
 	Logger    Logger
 }
@@ -26,7 +25,6 @@ type Processor interface {
 }
 
 // Paths
-
 type Paths interface {
 	OriginalPath(string, string) string
 	LocalInfoPath(string, string) string
@@ -38,12 +36,13 @@ type Paths interface {
 }
 
 // SourceMapper
-
 type SourceMapper interface {
 	RemoteImageURL(*ImageConfiguration) string
 }
 
 // Uploader
 type Uploader interface {
+	CreateDirectory(string) error
 	Upload(string, string) error
+	Initialize() error
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher"
 	"github.com/wanelo/image-server/info"
+	"github.com/wanelo/image-server/uploader"
 )
 
 func InitializeRouter(sc *core.ServerConfiguration, port string) {
@@ -43,9 +44,16 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	f := fetcher.NewOriginalFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
 	fc := f.Channels
 	err, imageDetails := f.Fetch(source, namespace)
+	var json map[string]string
 
 	if err != nil {
 		errorStr = fmt.Sprintf("%s", err)
+		// r.JSON(w, http.StatusOK, json)
+		json = map[string]string{
+			"error": errorStr,
+		}
+		r.JSON(w, http.StatusOK, json)
+		return
 	}
 
 	hash := imageDetails.Hash
@@ -53,6 +61,13 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	go func() {
 		select {
 		case source := <-fc.DownloadComplete:
+			uploader := &uploader.Uploader{sc.RemoteBasePath}
+			err := uploader.CreateDirectory(sc.RemoteBasePath)
+			if err != nil {
+				log.Printf("Manta::sentToManta unable to create directory %s", sc.RemoteBasePath)
+				return
+			}
+
 			destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, hash)
 
 			go sc.Adapters.Logger.OriginalDownloaded(source, destination)
@@ -61,9 +76,12 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 				remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
 
 				info.SaveImageDetail(imageDetails, localInfoPath)
-				sc.Adapters.Uploader.Upload(localInfoPath, remoteInfoPath)
+				err := uploader.Upload(localInfoPath, remoteInfoPath)
+				if err != nil {
+					log.Println(err)
+				}
 			}()
-			sc.Adapters.Uploader.Upload(source, destination)
+			uploader.Upload(source, destination)
 		case <-fc.DownloadFailed:
 			go sc.Adapters.Logger.OriginalDownloadFailed(source)
 		case <-fc.SkippedDownload:
@@ -71,7 +89,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		}
 	}()
 
-	json := map[string]string{
+	json = map[string]string{
 		"error":  errorStr,
 		"hash":   hash,
 		"height": fmt.Sprintf("%v", imageDetails.Height),

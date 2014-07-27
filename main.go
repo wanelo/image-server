@@ -13,7 +13,7 @@ import (
 	"github.com/wanelo/image-server/paths"
 	processor "github.com/wanelo/image-server/processor/cli"
 	"github.com/wanelo/image-server/server"
-	"github.com/wanelo/image-server/uploader/manta"
+	"github.com/wanelo/image-server/uploader"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
-      Name: "server",
+			Name:      "server",
 			ShortName: "s",
 			Usage:     "image server",
 			Action: func(c *cli.Context) {
@@ -37,6 +37,8 @@ func main() {
 				if err != nil {
 					log.Panicln(err)
 				}
+
+				go initializeUploader(sc)
 
 				port := c.GlobalString("port")
 				server.InitializeRouter(sc, port)
@@ -62,6 +64,14 @@ func globalFlags() []cli.Flag {
 	}
 }
 
+func initializeUploader(sc *core.ServerConfiguration) {
+	uploader := uploader.Uploader{sc.RemoteBasePath}
+	err := uploader.Initialize()
+	if err != nil {
+		log.Panicln(err)
+	}
+}
+
 func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 	sc := serverConfigurationFromContext(c)
 
@@ -72,7 +82,6 @@ func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 	adapters := &core.Adapters{
 		Fetcher:   &fetcher.Fetcher{},
 		Processor: &processor.Processor{},
-		Uploader:  manta.InitializeUploader(sc.RemoteBasePath),
 		Paths:     &paths.Paths{sc.LocalBasePath, sc.RemoteBasePath},
 		Logger:    &logger.Logger{loggers},
 	}

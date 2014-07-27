@@ -12,26 +12,17 @@ import (
 )
 
 type Uploader struct {
-	Client  *m.Client
-	BaseDir string
+	Client *m.Client
 }
 
-func InitializeUploader(baseDir string) *Uploader {
-	u := &Uploader{
-		Client:  newMantaClient(),
-		BaseDir: baseDir,
+func DefaultUploader() *Uploader {
+	return &Uploader{
+		Client: newMantaClient(),
 	}
-	go u.ensureBasePath()
-	return u
 }
 
 func (u *Uploader) Upload(source string, destination string) error {
 	path, objectName := path.Split(destination)
-	err := u.ensureDirectory(path)
-	if err != nil {
-		log.Printf("Manta::sentToManta unable to create directory %s", path)
-		return err
-	}
 	object, err := ioutil.ReadFile(source)
 	if err != nil {
 		log.Printf("Manta::sentToManta unable to read file %s", source)
@@ -46,7 +37,7 @@ func (u *Uploader) Upload(source string, destination string) error {
 	return err
 }
 
-func (u *Uploader) ensureDirectory(dir string) error {
+func (u *Uploader) CreateDirectory(dir string) error {
 	err := u.createDirectory(dir)
 	if err != nil {
 		//  need to create sub directories
@@ -88,14 +79,9 @@ func newMantaClient() *m.Client {
 	return m.New(client)
 }
 
-func (u *Uploader) ensureBasePath() {
-	u.createDirectory(u.BaseDir)
-}
-
 func (u *Uploader) createDirectory(path string) error {
 	err := u.Client.PutDirectory(path)
 	if err != nil {
-		log.Printf("Manta: %s", err)
 		return err
 	}
 	log.Printf("Created directory on manta: %s", path)
