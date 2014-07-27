@@ -4,6 +4,7 @@ ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 MANTA_USER := $(shell echo $(MANTA_USER))
+VERSION=1.0.3
 
 all: deps
 	@mkdir -p bin/
@@ -39,5 +40,7 @@ buildtomanta:
 	@echo "$(OK_COLOR)==> Building for solaris amd64$(NO_COLOR)"
 	@mkdir -p bin/solaris
 	@GOOS=solaris GOARCH=amd64 go build -o bin/solaris/images
+	@echo "$(OK_COLOR)==> Compressing$(NO_COLOR)"
+	@tar -czvf bin/solaris/images.tar.gz bin/solaris/images
 	@echo "$(OK_COLOR)==> Uploading to manta$(NO_COLOR)"
-	@mput -f bin/solaris/images /$(MANTA_USER)/public/images/bin/image-server
+	@mput -f bin/solaris/images.tar.gz /$(MANTA_USER)/public/images/bin/images-$(VERSION).tar.gz
