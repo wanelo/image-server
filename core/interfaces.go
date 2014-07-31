@@ -36,6 +36,7 @@ type Paths interface {
 	RemoteImageDirectory(namespace string, md5 string) string
 	RemoteOriginalPath(string, string) string
 	RemoteOriginalURL(string, string) string
+	RemoteImagePath(namespace string, md5 string, imageName string) string
 }
 
 // SourceMapper

@@ -49,6 +49,10 @@ func (p *Paths) LocalImagePath(namespace string, md5 string, imageName string) s
 	return fmt.Sprintf("%s/%s", p.LocalBasePath, p.ImagePath(namespace, md5, imageName))
 }
 
+func (p *Paths) RemoteImagePath(namespace string, md5 string, imageName string) string {
+	return fmt.Sprintf("%s/%s", p.RemoteBasePath, p.ImagePath(namespace, md5, imageName))
+}
+
 // RemoteOriginalPath returns local path for original image
 func (p *Paths) RemoteOriginalPath(namespace string, md5 string) string {
 	return fmt.Sprintf("%s/%s", p.RemoteBasePath, p.OriginalPath(namespace, md5))

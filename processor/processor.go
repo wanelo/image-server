@@ -29,6 +29,7 @@ type Processor struct {
 
 type ProcessorChannels struct {
 	ImageProcessed chan *core.ImageConfiguration
+	Skipped        chan string
 }
 
 func (p *Processor) CreateImage() (string, error) {
@@ -44,6 +45,7 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 
 	if present {
 		ImageProcessings[key] = append(ImageProcessings[key], c)
+		p.notifySkipped(key)
 	} else {
 		ImageProcessings[key] = []chan ProcessorResult{c}
 		err := p.createIfNotAvailable()
@@ -52,9 +54,7 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 			cc <- ProcessorResult{p.Destination, err}
 		}
 		delete(ImageProcessings, key)
-		go func() {
-			p.Channels.ImageProcessed <- p.ImageConfiguration
-		}()
+		p.notifyProcessed()
 	}
 }
 
@@ -72,7 +72,22 @@ func (p *Processor) createIfNotAvailable() error {
 
 		elapsed := time.Since(start)
 		log.Printf("Took %s to generate image: %s", elapsed, p.Destination)
+		p.notifyProcessed()
+	} else {
+		p.notifySkipped(p.Destination)
 	}
 
 	return nil
+}
+
+func (p *Processor) notifyProcessed() {
+	go func() {
+		p.Channels.ImageProcessed <- p.ImageConfiguration
+	}()
+}
+
+func (p *Processor) notifySkipped(path string) {
+	go func() {
+		p.Channels.Skipped <- path
+	}()
 }

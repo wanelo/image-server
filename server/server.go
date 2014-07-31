@@ -118,8 +118,9 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration, r *render.Render) {
 	vars := mux.Vars(req)
+	filename := vars["filename"]
 
-	ic, err := parser.NameToConfiguration(sc, vars["filename"])
+	ic, err := parser.NameToConfiguration(sc, filename)
 	if err != nil {
 		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
 		return
@@ -135,7 +136,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	ic.ID = hash
 	ic.Namespace = namespace
 
-	localPath := sc.Adapters.Paths.LocalImagePath(namespace, hash, vars["filename"])
+	localPath := sc.Adapters.Paths.LocalImagePath(namespace, hash, filename)
 	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
 
 	// download original image
@@ -151,6 +152,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	// process image
 	pchan := &processor.ProcessorChannels{
 		make(chan *core.ImageConfiguration),
+		make(chan string),
 	}
 
 	p := processor.Processor{
@@ -161,10 +163,25 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	}
 
 	resizedPath, err := p.CreateImage()
+
 	if err != nil {
 		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
 		return
 	}
+
+	select {
+	case <-pchan.ImageProcessed:
+		log.Println("about to upload to manta")
+		uploader := &uploader.Uploader{sc.RemoteBasePath}
+		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
+		err = uploader.Upload(localPath, remoteResizedPath)
+		if err != nil {
+			log.Println(err)
+		}
+	case path := <-pchan.Skipped:
+		log.Printf("Skipped processing %s", path)
+	}
+
 	http.ServeFile(w, req, resizedPath)
 }
 
