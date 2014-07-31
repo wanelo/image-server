@@ -29,10 +29,11 @@ func (u *Uploader) Upload(source string, destination string) error {
 		return err
 	}
 	err = u.Client.PutObject(path, objectName, object)
-	log.Printf("Uploaded file to manta: %s", destination)
 
 	if err != nil {
 		log.Printf("Error uploading image to manta: %s", err)
+	} else {
+		log.Printf("Uploaded file to manta: %s", destination)
 	}
 	return err
 }
