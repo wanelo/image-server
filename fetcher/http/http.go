@@ -18,12 +18,16 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 
 		resp, err := gohttp.Get(url)
 
-		if err != nil || resp.StatusCode != 200 {
-			log.Printf("Unable to download image: %s, status code: %d", url, resp.StatusCode)
-			log.Println(err)
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != 200 {
 			return fmt.Errorf("Unable to download image: %s, status code: %d", url, resp.StatusCode)
 		}
+
 		log.Printf("Downloaded from %s with code %d", url, resp.StatusCode)
+
 		defer resp.Body.Close()
 
 		dir := filepath.Dir(destination)
