@@ -32,6 +32,7 @@ type Paths interface {
 	ImageDirectory(string, string) string
 	TempImagePath(string) string
 	LocalOriginalPath(string, string) string
+	RemoteImageDirectory(namespace string, md5 string) string
 	RemoteOriginalPath(string, string) string
 }
 

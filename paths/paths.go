@@ -38,6 +38,11 @@ func (p *Paths) LocalImageDirectory(namespace string, md5 string) string {
 	return fmt.Sprintf("%s/%s", p.LocalBasePath, p.ImageDirectory(namespace, md5))
 }
 
+// RemoteImageDirectory returns location for directory for images and info
+func (p *Paths) RemoteImageDirectory(namespace string, md5 string) string {
+	return fmt.Sprintf("%s/%s", p.RemoteBasePath, p.ImageDirectory(namespace, md5))
+}
+
 //  LocalImagePath returns local path for resized image
 func (p *Paths) LocalImagePath(namespace string, md5 string, imageName string) string {
 	return fmt.Sprintf("%s/%s", p.LocalBasePath, p.ImagePath(namespace, md5, imageName))

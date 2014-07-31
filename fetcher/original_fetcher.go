@@ -31,8 +31,9 @@ func (f *OriginalFetcher) Fetch(url string, namespace string) (error, *info.Imag
 // the image, and will then notify all requesters. The channel returns an error object
 func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, namespace string) {
 	_, present := ImageDownloads[url]
-	md5, destination := "", ""
 	var i info.Info
+	var imageDetails *info.ImageDetails
+	var destination string
 
 	if present {
 		log.Println("Already downloading")
@@ -46,7 +47,7 @@ func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, na
 		i = info.Info{tmp}
 
 		if err == nil {
-			md5 = i.FileHash()
+			md5 := i.FileHash()
 			destination = f.Paths.LocalOriginalPath(namespace, md5)
 
 			// only copy image if does not exist
@@ -57,24 +58,57 @@ func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, na
 				cpCmd := exec.Command("cp", "-rf", tmp, destination)
 				err = cpCmd.Run()
 
-				go func() { f.Channels.DownloadComplete <- destination }()
+				if err == nil {
+					go func() {
+						f.Channels.DownloadComplete <- destination
+					}()
+				}
+			} else {
+				go func() {
+					f.Channels.SkippedDownload <- destination
+				}()
 			}
+
+			i = info.Info{destination}
+			imageDetails, err = i.ImageDetails()
 		}
 
-		if err != nil {
-			go func() { f.Channels.DownloadFailed <- url }()
+		if err == nil {
+			log.Printf("Notifying download complete for path %s", destination)
+			f.notifyDownloadComplete(url, imageDetails)
+		} else {
+			go func() {
+				f.Channels.DownloadFailed <- destination
+			}()
+			f.notifyDownloadFailed(url, err)
 		}
 
-		i = info.Info{destination}
-		imageDetails, err := i.ImageDetails()
+	}
+}
 
-		for i, cc := range ImageDownloads[url] {
-			fr := FetchResult{err, imageDetails}
-			cc <- fr
+func (f *OriginalFetcher) notifyDownloadComplete(url string, d *info.ImageDetails) {
 
-			if i > 0 {
-				go func() { f.Channels.SkippedDownload <- url }()
-			}
-		}
+	for _, cc := range ImageDownloads[url] {
+		fr := FetchResult{nil, d}
+		cc <- fr
+
+		// if i > 0 {
+		// 	go func() { f.Channels.SkippedDownload <- url }()
+		// }
+	}
+}
+
+func (f *OriginalFetcher) notifyDownloadFailed(url string, err error) {
+	// if err != nil {
+	// 	go func() { f.Channels.DownloadFailed <- url }()
+	// }
+
+	for _, cc := range ImageDownloads[url] {
+		fr := FetchResult{err, nil}
+		cc <- fr
+
+		// if i > 0 {
+		// 	go func() { f.Channels.SkippedDownload <- url }()
+		// }
 	}
 }

@@ -41,6 +41,8 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	source := qs.Get("source")
 	namespace := vars["namespace"]
 
+	log.Printf("Processing request for: %s", source)
+
 	f := fetcher.NewOriginalFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
 	fc := f.Channels
 	err, imageDetails := f.Fetch(source, namespace)
@@ -58,36 +60,47 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	hash := imageDetails.Hash
 
-	go func() {
-		select {
-		case source := <-fc.DownloadComplete:
-			uploader := &uploader.Uploader{sc.RemoteBasePath}
-			err := uploader.CreateDirectory(sc.RemoteBasePath)
+	// go func() {
+	select {
+	case localOriginalPath := <-fc.DownloadComplete:
+		uploader := &uploader.Uploader{sc.RemoteBasePath}
+		err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, hash))
+		if err != nil {
+			log.Printf("Manta::sentToManta unable to create directory %s", sc.RemoteBasePath)
+			return
+		}
+
+		destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, hash)
+
+		go sc.Adapters.Logger.OriginalDownloaded(localOriginalPath, destination)
+		go func() {
+			localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, hash)
+			remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
+
+			err := info.SaveImageDetail(imageDetails, localInfoPath)
 			if err != nil {
-				log.Printf("Manta::sentToManta unable to create directory %s", sc.RemoteBasePath)
-				return
+				log.Println(err)
 			}
 
-			destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, hash)
+			// upload info
+			err = uploader.Upload(localInfoPath, remoteInfoPath)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
 
-			go sc.Adapters.Logger.OriginalDownloaded(source, destination)
-			go func() {
-				localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, hash)
-				remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
-
-				info.SaveImageDetail(imageDetails, localInfoPath)
-				err := uploader.Upload(localInfoPath, remoteInfoPath)
-				if err != nil {
-					log.Println(err)
-				}
-			}()
-			uploader.Upload(source, destination)
-		case <-fc.DownloadFailed:
-			go sc.Adapters.Logger.OriginalDownloadFailed(source)
-		case <-fc.SkippedDownload:
-			go sc.Adapters.Logger.OriginalDownloadSkipped(source)
+		// upload original image
+		err = uploader.Upload(localOriginalPath, destination)
+		if err != nil {
+			log.Println(err)
 		}
-	}()
+
+	case <-fc.DownloadFailed:
+		go sc.Adapters.Logger.OriginalDownloadFailed(source)
+	case <-fc.SkippedDownload:
+		go sc.Adapters.Logger.OriginalDownloadSkipped(source)
+	}
+	// }()
 
 	json = map[string]string{
 		"error":  errorStr,
