@@ -12,7 +12,7 @@ func init() {
 }
 
 // Fetcher is initialized with the fetcher adapter
-type OriginalFetcher struct {
+type SourceFetcher struct {
 	Fetcher  core.Fetcher
 	Paths    core.Paths
 	Channels *FetcherChannels

@@ -33,7 +33,7 @@
 // 		sm := mapper.SourceMapper{sc}
 // 		source := sm.RemoteImageURL(ic)
 //
-// 		f := fetcher.NewOriginalFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
+// 		f := fetcher.NewSourceFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
 // 		fc := f.Channels
 // 		err, imageDetails := f.Fetch(source, conf.Namespace)
 //

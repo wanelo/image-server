@@ -10,26 +10,26 @@ import (
 	"github.com/wanelo/image-server/info"
 )
 
-func NewOriginalFetcher(paths core.Paths, fetcher core.Fetcher) *OriginalFetcher {
+func NewSourceFetcher(paths core.Paths, fetcher core.Fetcher) *SourceFetcher {
 	channels := &FetcherChannels{
 		make(chan string),
 		make(chan string),
 		make(chan string),
 	}
 
-	return &OriginalFetcher{fetcher, paths, channels}
+	return &SourceFetcher{fetcher, paths, channels}
 }
 
-func (f *OriginalFetcher) Fetch(url string, namespace string) (error, *info.ImageDetails) {
+func (f *SourceFetcher) Fetch(url string, namespace string) (error, *info.ImageDetails) {
 	c := make(chan FetchResult)
-	go f.uniqueFetchOriginal(c, url, namespace)
+	go f.uniqueFetch(c, url, namespace)
 	r := <-c
 	return r.Error, r.ImageDetails
 }
 
 // Even if simultaneous calls request the same image, only the first one will download
 // the image, and will then notify all requesters. The channel returns an error object
-func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, namespace string) {
+func (f *SourceFetcher) uniqueFetch(c chan FetchResult, url string, namespace string) {
 	_, present := ImageDownloads[url]
 	var i info.Info
 	var imageDetails *info.ImageDetails
@@ -86,7 +86,7 @@ func (f *OriginalFetcher) uniqueFetchOriginal(c chan FetchResult, url string, na
 	}
 }
 
-func (f *OriginalFetcher) notifyDownloadComplete(url string, d *info.ImageDetails) {
+func (f *SourceFetcher) notifyDownloadComplete(url string, d *info.ImageDetails) {
 
 	for _, cc := range ImageDownloads[url] {
 		fr := FetchResult{nil, d}
@@ -98,7 +98,7 @@ func (f *OriginalFetcher) notifyDownloadComplete(url string, d *info.ImageDetail
 	}
 }
 
-func (f *OriginalFetcher) notifyDownloadFailed(url string, err error) {
+func (f *SourceFetcher) notifyDownloadFailed(url string, err error) {
 	// if err != nil {
 	// 	go func() { f.Channels.DownloadFailed <- url }()
 	// }

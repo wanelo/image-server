@@ -43,7 +43,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	log.Printf("Processing request for: %s", source)
 
-	f := fetcher.NewOriginalFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
+	f := fetcher.NewSourceFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
 	fc := f.Channels
 	err, imageDetails := f.Fetch(source, namespace)
 	var json map[string]string
