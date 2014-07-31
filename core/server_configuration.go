@@ -3,11 +3,11 @@ package core
 // ServerConfiguration struct
 // Most of this configuration comes from json config
 type ServerConfiguration struct {
-	SourceDomain          string
 	WhitelistedExtensions []string
 	MaximumWidth          int
 	LocalBasePath         string
 	RemoteBasePath        string
+	RemoteBaseURL         string
 	DefaultQuality        uint
 	UploaderConcurrency   uint
 	GraphiteHost          string

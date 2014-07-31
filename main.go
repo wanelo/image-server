@@ -54,7 +54,7 @@ func globalFlags() []cli.Flag {
 		cli.StringFlag{Name: "port", Value: "7000", Usage: "Specifies the server port."},
 		cli.StringFlag{Name: "extensions", Value: "jpg,gif,webp", Usage: "Whitelisted extensions (separated by commas)"},
 		cli.StringFlag{Name: "local_base_path", Value: "public", Usage: "Directory where the images will be saved"},
-		cli.StringFlag{Name: "source_domain", Value: "http://wanelo.s3.amazonaws.com", Usage: "Source domain for images"},
+		cli.StringFlag{Name: "remote_base_url", Value: "http://us-east.manta.joyent.com/wanelo", Usage: "Source domain for images"},
 		cli.StringFlag{Name: "remote_base_path", Value: "public/images/development", Usage: "base path for manta storage"},
 		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
 		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
@@ -82,7 +82,7 @@ func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 	adapters := &core.Adapters{
 		Fetcher:   &fetcher.Fetcher{},
 		Processor: &processor.Processor{},
-		Paths:     &paths.Paths{sc.LocalBasePath, sc.RemoteBasePath},
+		Paths:     &paths.Paths{sc.LocalBasePath, sc.RemoteBasePath, sc.RemoteBaseURL},
 		Logger:    &logger.Logger{loggers},
 	}
 	sc.Adapters = adapters
@@ -98,8 +98,8 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 		GraphiteHost:          c.GlobalString("graphite_host"),
 		MaximumWidth:          c.GlobalInt("maximum_width"),
 		RemoteBasePath:        c.GlobalString("remote_base_path"),
+		RemoteBaseURL:         c.GlobalString("remote_base_url"),
 		DefaultQuality:        uint(c.GlobalInt("default_quality")),
-		SourceDomain:          c.GlobalString("source_domain"),
 		UploaderConcurrency:   uint(c.GlobalInt("uploader_concurrency")),
 	}
 }

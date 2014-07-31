@@ -32,8 +32,10 @@ type Paths interface {
 	ImageDirectory(string, string) string
 	TempImagePath(string) string
 	LocalOriginalPath(string, string) string
+	LocalImagePath(namespace string, md5 string, imageName string) string
 	RemoteImageDirectory(namespace string, md5 string) string
 	RemoteOriginalPath(string, string) string
+	RemoteOriginalURL(string, string) string
 }
 
 // SourceMapper

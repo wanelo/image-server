@@ -10,6 +10,7 @@ import (
 type Paths struct {
 	LocalBasePath  string
 	RemoteBasePath string
+	RemoteBaseURL  string
 }
 
 // OriginalPath
@@ -51,6 +52,10 @@ func (p *Paths) LocalImagePath(namespace string, md5 string, imageName string) s
 // RemoteOriginalPath returns local path for original image
 func (p *Paths) RemoteOriginalPath(namespace string, md5 string) string {
 	return fmt.Sprintf("%s/%s", p.RemoteBasePath, p.OriginalPath(namespace, md5))
+}
+
+func (p *Paths) RemoteOriginalURL(namespace string, md5 string) string {
+	return fmt.Sprintf("%s/%s", p.RemoteBaseURL, p.RemoteOriginalPath(namespace, md5))
 }
 
 func (p *Paths) InfoPath(namespace string, md5 string) string {

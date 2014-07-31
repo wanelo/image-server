@@ -11,6 +11,8 @@ import (
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher"
 	"github.com/wanelo/image-server/info"
+	"github.com/wanelo/image-server/parser"
+	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/uploader"
 )
 
@@ -25,6 +27,10 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 	router.HandleFunc("/{namespace:[a-z0-9]+}", func(wr http.ResponseWriter, req *http.Request) {
 		NewImageHandler(wr, req, sc, r)
 	}).Methods("POST").Name("newImage")
+
+	router.HandleFunc("/{namespace:[a-z0-9]+}/{id1:[a-f0-9]{3}}/{id2:[a-f0-9]{3}}/{id3:[a-f0-9]{3}}/{id4:[a-f0-9]{3,}}/{filename}", func(wr http.ResponseWriter, req *http.Request) {
+		ResizeHandler(wr, req, sc, r)
+	}).Methods("GET").Name("resizeImage")
 
 	// n := negroni.New()
 	n := negroni.Classic()
@@ -60,7 +66,6 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	hash := imageDetails.Hash
 
-	// go func() {
 	select {
 	case localOriginalPath := <-fc.DownloadComplete:
 		uploader := &uploader.Uploader{sc.RemoteBasePath}
@@ -100,7 +105,6 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	case <-fc.SkippedDownload:
 		go sc.Adapters.Logger.OriginalDownloadSkipped(source)
 	}
-	// }()
 
 	json = map[string]string{
 		"error":  errorStr,
@@ -110,4 +114,63 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	}
 
 	r.JSON(w, http.StatusOK, json)
+}
+
+func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration, r *render.Render) {
+	vars := mux.Vars(req)
+
+	ic, err := parser.NameToConfiguration(sc, vars["filename"])
+	if err != nil {
+		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
+		return
+	}
+
+	namespace := vars["namespace"]
+	id1 := vars["id1"]
+	id2 := vars["id2"]
+	id3 := vars["id3"]
+	id4 := vars["id4"]
+	hash := fmt.Sprintf("%s%s%s%s", id1, id2, id3, id4)
+
+	ic.ID = hash
+	ic.Namespace = namespace
+
+	localPath := sc.Adapters.Paths.LocalImagePath(namespace, hash, vars["filename"])
+	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
+
+	// download original image
+	remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, hash)
+	log.Println(remoteOriginalPath)
+	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
+	err = f.Fetch()
+	if err != nil {
+		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
+		return
+	}
+
+	// process image
+	pchan := &processor.ProcessorChannels{
+		make(chan *core.ImageConfiguration),
+	}
+
+	p := processor.Processor{
+		Source:             localOriginalPath,
+		Destination:        localPath,
+		ImageConfiguration: ic,
+		Channels:           pchan,
+	}
+
+	resizedPath, err := p.CreateImage()
+	if err != nil {
+		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
+		return
+	}
+	http.ServeFile(w, req, resizedPath)
+}
+
+func errorHandler(err error, w http.ResponseWriter, r *http.Request, status int, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
+	w.WriteHeader(status)
+	if status == http.StatusNotFound {
+		fmt.Fprint(w, "404 image not available. ", err)
+	}
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/wanelo/image-server/core"
+	adapter "github.com/wanelo/image-server/processor/cli"
 )
 
 type ProcessorResult struct {
@@ -20,11 +21,10 @@ func init() {
 }
 
 type Processor struct {
-	Processor          core.Processor
 	Source             string
 	Destination        string
 	ImageConfiguration *core.ImageConfiguration
-	Channels     			 *ProcessorChannels
+	Channels           *ProcessorChannels
 }
 
 type ProcessorChannels struct {
@@ -61,7 +61,9 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 func (p *Processor) createIfNotAvailable() error {
 	if _, err := os.Stat(p.Destination); os.IsNotExist(err) {
 		start := time.Now()
-		err = p.Processor.CreateImage(p.Source, p.Destination, p.ImageConfiguration)
+
+		processor := &adapter.Processor{}
+		err = processor.CreateImage(p.Source, p.Destination, p.ImageConfiguration)
 
 		if err != nil {
 			log.Println(err)
