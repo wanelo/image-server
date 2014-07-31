@@ -19,7 +19,7 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "images"
-	app.Version = "0.1.0"
+	app.Version = "1.0.4"
 	app.Usage = "Image server and CLI"
 	app.Action = func(c *cli.Context) {
 		println("boom! I say!")
