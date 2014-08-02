@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
+	cliprocessor "github.com/wanelo/image-server/cli"
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/logger"
@@ -44,6 +45,33 @@ func main() {
 				server.InitializeRouter(sc, port)
 			},
 		},
+		{
+			Name:      "process",
+			ShortName: "p",
+			Usage:     "process image dimensions",
+			Action: func(c *cli.Context) {
+				sc, err := serverConfiguration(c)
+				if err != nil {
+					log.Panicln(err)
+				}
+
+				initializeUploader(sc)
+				outputsStr := c.GlobalString("outputs")
+				if outputsStr == "" {
+					log.Println("Need to specify outputs: 'x300jpg,x300.webp'")
+					return
+				}
+
+				// input := bufio.NewReader(os.Stdin)
+				namespace := c.GlobalString("namespace")
+				outputs := strings.Split(outputsStr, ",")
+				err = cliprocessor.Process(sc, namespace, outputs, os.Stdin)
+				if err != nil {
+					log.Panic(err)
+				}
+
+			},
+		},
 	}
 
 	app.Run(os.Args)
@@ -57,6 +85,8 @@ func globalFlags() []cli.Flag {
 		cli.StringFlag{Name: "remote_base_url", Value: "http://us-east.manta.joyent.com/wanelo", Usage: "Source domain for images"},
 		cli.StringFlag{Name: "remote_base_path", Value: "public/images/development", Usage: "base path for manta storage"},
 		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
+		cli.StringFlag{Name: "namespace", Value: "p", Usage: "Namespace"},
+		cli.StringFlag{Name: "outputs", Value: "", Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
 		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
 		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},

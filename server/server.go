@@ -28,7 +28,7 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 		NewImageHandler(wr, req, sc, r)
 	}).Methods("POST").Name("newImage")
 
-	router.HandleFunc("/{namespace:[a-z0-9]+}/{id1:[a-f0-9]{3}}/{id2:[a-f0-9]{3}}/{id3:[a-f0-9]{3}}/{id4:[a-f0-9]{3,}}/{filename}", func(wr http.ResponseWriter, req *http.Request) {
+	router.HandleFunc("/{namespace:[a-z0-9]+}/{id1:[a-f0-9]{3}}/{id2:[a-f0-9]{3}}/{id3:[a-f0-9]{3}}/{id4:[a-f0-9]{23}}/{filename}", func(wr http.ResponseWriter, req *http.Request) {
 		ResizeHandler(wr, req, sc, r)
 	}).Methods("GET").Name("resizeImage")
 
@@ -151,8 +151,8 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 
 	// process image
 	pchan := &processor.ProcessorChannels{
-		make(chan *core.ImageConfiguration),
-		make(chan string),
+		ImageProcessed: make(chan *core.ImageConfiguration),
+		Skipped:        make(chan string),
 	}
 
 	p := processor.Processor{
