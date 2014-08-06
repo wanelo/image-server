@@ -19,17 +19,13 @@ import (
 func InitializeRouter(sc *core.ServerConfiguration, port string) {
 	log.Println("starting server on http://0.0.0.0:" + port)
 
-	r := render.New(render.Options{
-		IndentJSON: true,
-	})
-
 	router := mux.NewRouter()
 	router.HandleFunc("/{namespace:[a-z0-9]+}", func(wr http.ResponseWriter, req *http.Request) {
-		NewImageHandler(wr, req, sc, r)
+		NewImageHandler(wr, req, sc)
 	}).Methods("POST").Name("newImage")
 
 	router.HandleFunc("/{namespace:[a-z0-9]+}/{id1:[a-f0-9]{3}}/{id2:[a-f0-9]{3}}/{id3:[a-f0-9]{3}}/{id4:[a-f0-9]{23}}/{filename}", func(wr http.ResponseWriter, req *http.Request) {
-		ResizeHandler(wr, req, sc, r)
+		ResizeHandler(wr, req, sc)
 	}).Methods("GET").Name("resizeImage")
 
 	// n := negroni.New()
@@ -39,7 +35,11 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 	n.Run(":" + port)
 }
 
-func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration, r *render.Render) {
+func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
+	r := render.New(render.Options{
+		IndentJSON: true,
+	})
+
 	qs := req.URL.Query()
 	vars := mux.Vars(req)
 	errorStr := ""
@@ -49,9 +49,9 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	log.Printf("Processing request for: %s", source)
 
-	f := fetcher.NewSourceFetcher(sc.Adapters.Paths, sc.Adapters.Fetcher)
-	fc := f.Channels
-	err, imageDetails := f.Fetch(source, namespace)
+	f := fetcher.NewSourceFetcher(sc.Adapters.Paths)
+
+	imageDetails, downloaded, err := f.Fetch(source, namespace)
 	var json map[string]string
 
 	if err != nil {
@@ -66,8 +66,8 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	hash := imageDetails.Hash
 
-	select {
-	case localOriginalPath := <-fc.DownloadComplete:
+	if downloaded {
+		localOriginalPath := f.Paths.LocalOriginalPath(namespace, hash)
 		uploader := &uploader.Uploader{sc.RemoteBasePath}
 		err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, hash))
 		if err != nil {
@@ -99,11 +99,6 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		if err != nil {
 			log.Println(err)
 		}
-
-	case <-fc.DownloadFailed:
-		go sc.Adapters.Logger.OriginalDownloadFailed(source)
-	case <-fc.SkippedDownload:
-		go sc.Adapters.Logger.OriginalDownloadSkipped(source)
 	}
 
 	json = map[string]string{
@@ -116,7 +111,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	r.JSON(w, http.StatusOK, json)
 }
 
-func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration, r *render.Render) {
+func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
 	vars := mux.Vars(req)
 	filename := vars["filename"]
 
@@ -143,7 +138,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, hash)
 	log.Println(remoteOriginalPath)
 	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
-	err = f.Fetch()
+	_, err = f.Fetch()
 	if err != nil {
 		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
 		return
@@ -154,6 +149,8 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 		ImageProcessed: make(chan *core.ImageConfiguration),
 		Skipped:        make(chan string),
 	}
+	defer close(pchan.ImageProcessed)
+	defer close(pchan.Skipped)
 
 	p := processor.Processor{
 		Source:             localOriginalPath,

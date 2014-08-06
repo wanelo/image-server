@@ -1,7 +1,6 @@
 package fetcher
 
 import (
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,97 +10,69 @@ import (
 )
 
 type SourceFetcher struct {
-	Fetcher  core.Fetcher
-	Paths    core.Paths
-	Channels *FetcherChannels
+	Paths core.Paths
 }
 
-func NewSourceFetcher(paths core.Paths, fetcher core.Fetcher) *SourceFetcher {
-	channels := &FetcherChannels{
-		make(chan string),
-		make(chan string),
-		make(chan string),
-	}
-
-	return &SourceFetcher{fetcher, paths, channels}
+func NewSourceFetcher(paths core.Paths) *SourceFetcher {
+	return &SourceFetcher{paths}
 }
 
-func (f *SourceFetcher) Fetch(url string, namespace string) (error, *info.ImageDetails) {
+func (f *SourceFetcher) Fetch(url string, namespace string) (*info.ImageDetails, bool, error) {
 	c := make(chan FetchResult)
+	defer close(c)
 	go f.uniqueFetchSource(c, url, namespace)
 	r := <-c
-	return r.Error, r.ImageDetails
+	return r.ImageDetails, r.Downloaded, r.Error
 }
 
 // Even if simultaneous calls request the same image, only the first one will download
 // the image, and will then notify all requesters. The channel returns an error object
 func (f *SourceFetcher) uniqueFetchSource(c chan FetchResult, url string, namespace string) {
-	_, present := ImageDownloads[url]
-	var i info.Info
-	var imageDetails *info.ImageDetails
-	var destination string
+	tmpOriginalPath, downloaded, err := f.downloadTempSource(url)
 
-	if present {
-		log.Println("Already downloading")
-		ImageDownloads[url] = append(ImageDownloads[url], c)
-	} else {
-		ImageDownloads[url] = []chan FetchResult{c}
-		defer delete(ImageDownloads, url)
+	if err != nil {
+		f.notifyDownloadSourceFailed(c, err)
+		return
+	}
 
-		tmp := f.Paths.TempImagePath(url)
-		err := f.Fetcher.Fetch(url, tmp)
-		i = info.Info{tmp}
+	tmpInfo := info.Info{tmpOriginalPath}
+	md5 := tmpInfo.FileHash()
+	destination := f.Paths.LocalOriginalPath(namespace, md5)
 
-		if err == nil {
-			md5 := i.FileHash()
-			destination = f.Paths.LocalOriginalPath(namespace, md5)
+	if downloaded {
+		// only copy image if does not exist
+		if _, err = os.Stat(destination); os.IsNotExist(err) {
+			dir := filepath.Dir(destination)
+			os.MkdirAll(dir, 0700)
 
-			// only copy image if does not exist
-			if _, err = os.Stat(destination); os.IsNotExist(err) {
-				dir := filepath.Dir(destination)
-				os.MkdirAll(dir, 0700)
+			cpCmd := exec.Command("cp", "-rf", tmpOriginalPath, destination)
+			err = cpCmd.Run()
 
-				cpCmd := exec.Command("cp", "-rf", tmp, destination)
-				err = cpCmd.Run()
-
-				if err == nil {
-					go func() {
-						f.Channels.DownloadComplete <- destination
-					}()
-				}
-			} else {
-				go func() {
-					f.Channels.SkippedDownload <- destination
-				}()
+			if err != nil {
+				f.notifyDownloadSourceFailed(c, err)
+				return
 			}
-
-			i = info.Info{destination}
-			imageDetails, err = i.ImageDetails()
 		}
-
-		if err == nil {
-			log.Printf("Notifying download complete for path %s", destination)
-			f.notifyDownloadSourceComplete(url, imageDetails)
-		} else {
-			go func() {
-				f.Channels.DownloadFailed <- destination
-			}()
-			f.notifyDownloadSourceFailed(url, err)
-		}
-
 	}
+
+	i := info.Info{destination}
+	imageDetails, err := i.ImageDetails()
+
+	if err != nil {
+		f.notifyDownloadSourceFailed(c, err)
+		return
+	}
+
+	c <- FetchResult{nil, imageDetails, downloaded}
 }
 
-func (f *SourceFetcher) notifyDownloadSourceComplete(url string, d *info.ImageDetails) {
-	for _, cc := range ImageDownloads[url] {
-		fr := FetchResult{nil, d}
-		cc <- fr
-	}
+func (f *SourceFetcher) downloadTempSource(url string) (string, bool, error) {
+	tmpOriginalPath := f.Paths.TempImagePath(url)
+	fetcher := NewUniqueFetcher(url, tmpOriginalPath)
+	downloaded, err := fetcher.Fetch()
+	return tmpOriginalPath, downloaded, err
 }
 
-func (f *SourceFetcher) notifyDownloadSourceFailed(url string, err error) {
-	for _, cc := range ImageDownloads[url] {
-		fr := FetchResult{err, nil}
-		cc <- fr
-	}
+func (f *SourceFetcher) notifyDownloadSourceFailed(c chan FetchResult, err error) {
+	c <- FetchResult{err, nil, false}
 }

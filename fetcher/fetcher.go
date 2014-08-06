@@ -17,4 +17,5 @@ type FetcherChannels struct {
 type FetchResult struct {
 	Error        error
 	ImageDetails *info.ImageDetails
+	Downloaded   bool
 }

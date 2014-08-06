@@ -11,24 +11,18 @@ import (
 type UniqueFetcher struct {
 	Source      string
 	Destination string
-	Channels    *FetcherChannels
 }
 
 func NewUniqueFetcher(source string, destination string) *UniqueFetcher {
-	channels := &FetcherChannels{
-		make(chan string),
-		make(chan string),
-		make(chan string),
-	}
-
-	return &UniqueFetcher{source, destination, channels}
+	return &UniqueFetcher{source, destination}
 }
 
-func (f *UniqueFetcher) Fetch() error {
+func (f *UniqueFetcher) Fetch() (bool, error) {
 	c := make(chan FetchResult)
+	defer close(c)
 	go f.uniqueFetch(c)
 	r := <-c
-	return r.Error
+	return r.Downloaded, r.Error
 }
 
 // Even if simultaneous calls request the same image, only the first one will download
@@ -36,11 +30,11 @@ func (f *UniqueFetcher) Fetch() error {
 func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 	url := f.Source
 	destination := f.Destination
+	downloaded := false
 	_, present := ImageDownloads[url]
 	var err error
 
 	if present {
-		log.Println("Already downloading")
 		ImageDownloads[url] = append(ImageDownloads[url], c)
 	} else {
 		ImageDownloads[url] = []chan FetchResult{c}
@@ -52,42 +46,33 @@ func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 			os.MkdirAll(dir, 0700)
 
 			fetcher := &httpFetcher.Fetcher{}
-			fetcher.Fetch(url, destination)
-
-			if err == nil {
-				go func() {
-					f.Channels.DownloadComplete <- destination
-				}()
-			}
-		} else {
-			go func() {
-				f.Channels.SkippedDownload <- destination
-			}()
+			err = fetcher.Fetch(url, destination)
+			downloaded = true
 		}
 
 		if err == nil {
 			log.Printf("Notifying download complete for path %s", destination)
-			f.notifyDownloadComplete(url)
+			f.notifyDownloadComplete(url, downloaded)
 		} else {
-			go func() {
-				f.Channels.DownloadFailed <- destination
-			}()
 			f.notifyDownloadFailed(url, err)
 		}
 
 	}
 }
 
-func (f *UniqueFetcher) notifyDownloadComplete(url string) {
-	for _, cc := range ImageDownloads[url] {
-		fr := FetchResult{nil, nil}
+func (f *UniqueFetcher) notifyDownloadComplete(url string, downloaded bool) {
+	for i, cc := range ImageDownloads[url] {
+		fr := FetchResult{nil, nil, downloaded}
+		if i == 0 && downloaded {
+			downloaded = false
+		}
 		cc <- fr
 	}
 }
 
 func (f *UniqueFetcher) notifyDownloadFailed(url string, err error) {
 	for _, cc := range ImageDownloads[url] {
-		fr := FetchResult{err, nil}
+		fr := FetchResult{err, nil, false}
 		cc <- fr
 	}
 }

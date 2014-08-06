@@ -80,7 +80,7 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 		remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, hash)
 		log.Println(remoteOriginalPath)
 		f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
-		err := f.Fetch()
+		_, err := f.Fetch()
 		if err != nil {
 			log.Printf("Unable to download image for %s: %s", hash, err)
 			continue
