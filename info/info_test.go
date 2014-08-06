@@ -14,8 +14,9 @@ func assert(t *testing.T, value int, expected int) {
 func TestImageHash(t *testing.T) {
 	i := Info{"../test/images/a.jpg"}
 	expectedHash := "31e8b3187a9f63f26d58c88bf09a7bbd"
-	if i.FileHash() != expectedHash {
-		t.Errorf("expected %v to be %v", i.FileHash(), expectedHash)
+	hash, _ := i.FileHash()
+	if hash != expectedHash {
+		t.Errorf("expected %v to be %v", hash, expectedHash)
 	}
 }
 

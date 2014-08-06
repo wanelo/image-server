@@ -43,6 +43,8 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 
 		io.Copy(out, resp.Body)
 		log.Printf("Took %s to download image: %s", time.Since(start), destination)
+	} else {
+		log.Printf("Fetcher: image is already present on destination: %s", destination)
 	}
 	return nil
 }

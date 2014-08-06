@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -36,7 +37,13 @@ func (f *SourceFetcher) uniqueFetchSource(c chan FetchResult, url string, namesp
 	}
 
 	tmpInfo := info.Info{tmpOriginalPath}
-	md5 := tmpInfo.FileHash()
+
+	md5, err := tmpInfo.FileHash()
+	if err != nil {
+		f.notifyDownloadSourceFailed(c, err)
+		return
+	}
+
 	destination := f.Paths.LocalOriginalPath(namespace, md5)
 
 	if downloaded {
@@ -67,7 +74,9 @@ func (f *SourceFetcher) uniqueFetchSource(c chan FetchResult, url string, namesp
 }
 
 func (f *SourceFetcher) downloadTempSource(url string) (string, bool, error) {
+	log.Println("downloadTempSource", url)
 	tmpOriginalPath := f.Paths.TempImagePath(url)
+	log.Println("tmpOriginalPath", tmpOriginalPath)
 	fetcher := NewUniqueFetcher(url, tmpOriginalPath)
 	downloaded, err := fetcher.Fetch()
 	return tmpOriginalPath, downloaded, err

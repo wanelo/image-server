@@ -30,7 +30,6 @@ func (f *UniqueFetcher) Fetch() (bool, error) {
 func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 	url := f.Source
 	destination := f.Destination
-	downloaded := false
 	_, present := ImageDownloads[url]
 	var err error
 
@@ -41,18 +40,17 @@ func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 		defer delete(ImageDownloads, url)
 
 		// only copy image if does not exist
-		if _, err := os.Stat(destination); os.IsNotExist(err) {
+		if _, err = os.Stat(destination); os.IsNotExist(err) {
 			dir := filepath.Dir(destination)
 			os.MkdirAll(dir, 0700)
 
 			fetcher := &httpFetcher.Fetcher{}
 			err = fetcher.Fetch(url, destination)
-			downloaded = true
 		}
 
 		if err == nil {
 			log.Printf("Notifying download complete for path %s", destination)
-			f.notifyDownloadComplete(url, downloaded)
+			f.notifyDownloadComplete(url)
 		} else {
 			f.notifyDownloadFailed(url, err)
 		}
@@ -60,12 +58,10 @@ func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 	}
 }
 
-func (f *UniqueFetcher) notifyDownloadComplete(url string, downloaded bool) {
+func (f *UniqueFetcher) notifyDownloadComplete(url string) {
 	for i, cc := range ImageDownloads[url] {
+		downloaded := i == 0
 		fr := FetchResult{nil, nil, downloaded}
-		if i == 0 && downloaded {
-			downloaded = false
-		}
 		cc <- fr
 	}
 }
