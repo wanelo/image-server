@@ -93,6 +93,7 @@ func (c *Client) Do(method, path string, headers http.Header, r io.Reader) (*htt
 	if err != nil {
 		return nil, err
 	}
+	req.Close = true
 
 	for header, values := range headers {
 		for _, value := range values {
