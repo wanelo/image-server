@@ -78,21 +78,20 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, hash)
 
 		go sc.Adapters.Logger.OriginalDownloaded(localOriginalPath, destination)
-		go func() {
-			localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, hash)
-			remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
 
-			err := info.SaveImageDetail(imageDetails, localInfoPath)
-			if err != nil {
-				log.Println(err)
-			}
+		localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, hash)
+		remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
 
-			// upload info
-			err = uploader.Upload(localInfoPath, remoteInfoPath)
-			if err != nil {
-				log.Println(err)
-			}
-		}()
+		err = info.SaveImageDetail(imageDetails, localInfoPath)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// upload info
+		err = uploader.Upload(localInfoPath, remoteInfoPath)
+		if err != nil {
+			log.Println(err)
+		}
 
 		// upload original image
 		err = uploader.Upload(localOriginalPath, destination)
