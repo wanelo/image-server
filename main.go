@@ -98,7 +98,8 @@ func initializeUploader(sc *core.ServerConfiguration) {
 	uploader := uploader.Uploader{sc.RemoteBasePath}
 	err := uploader.Initialize()
 	if err != nil {
-		log.Panicln(err)
+		log.Println("EXITING: Unable to initialize manta: ", err)
+		os.Exit(2)
 	}
 }
 
