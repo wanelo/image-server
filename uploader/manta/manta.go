@@ -1,34 +1,40 @@
 package manta
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
+	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/joyent/gocommon/client"
-	"github.com/joyent/gocommon/jpc"
-	m "github.com/richardiux/gomanta/manta"
+	client "github.com/wanelo/image-server/uploader/manta/client"
 )
 
+type MantaClient interface {
+	PutObject(path string, objectName string, object io.Reader) error
+	PutDirectory(path string) error
+}
+
 type Uploader struct {
-	Client *m.Client
+	Client MantaClient
 }
 
 func DefaultUploader() *Uploader {
+	c := client.DefaultClient()
+
 	return &Uploader{
-		Client: newMantaClient(),
+		Client: c,
 	}
 }
 
 func (u *Uploader) Upload(source string, destination string) error {
 	path, objectName := path.Split(destination)
-	object, err := ioutil.ReadFile(source)
+	fi, err := os.Open(source)
 	if err != nil {
-		log.Printf("Manta::sentToManta unable to read file %s", source)
+		log.Printf("Manta::sentToManta unable to read file %s, %s", source, err)
 		return err
 	}
-	err = u.Client.PutObject(path, objectName, object)
+	err = u.Client.PutObject(path, objectName, fi)
 
 	if err != nil {
 		log.Printf("Error uploading image to manta: %s", err)
@@ -70,17 +76,10 @@ func (u *Uploader) CreateDirectory(dir string) error {
 	return nil
 }
 
-func newMantaClient() *m.Client {
-	creds, err := jpc.CompleteCredentialsFromEnv("")
-	if err != nil {
-		log.Fatalf("Error reading credentials for manta: %s", err.Error())
-	}
-
-	client := client.NewClient(creds.MantaEndpoint.URL, "", creds, &m.Logger)
-	return m.New(client)
-}
-
 func (u *Uploader) createDirectory(path string) error {
+	if path == "." {
+		return nil
+	}
 	err := u.Client.PutDirectory(path)
 	if err != nil {
 		return err
