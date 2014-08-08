@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os/user"
 	"time"
@@ -26,12 +25,12 @@ type Client struct {
 	signer Signer
 }
 
-func ensureHomedir() string {
+func homeDir() (string, error) {
 	user, err := user.Current()
 	if err != nil {
-		log.Fatal("manta: could not determine home directory: %v", err)
+		return "", err
 	}
-	return user.HomeDir
+	return user.HomeDir, nil
 }
 
 // SignRequest signs the 'date' field of req.

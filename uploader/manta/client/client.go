@@ -19,7 +19,10 @@ func init() {
 	MANTA_KEY_ID = os.Getenv("MANTA_KEY_ID")
 	SDC_IDENTITY = os.Getenv("SDC_IDENTITY")
 	if SDC_IDENTITY == "" {
-		SDC_IDENTITY = filepath.Join(ensureHomedir(), ".ssh", "id_rsa")
+		homeDir, err := homeDir()
+		if err == nil {
+			SDC_IDENTITY = filepath.Join(homeDir, ".ssh", "id_rsa")
+		}
 	}
 }
 
