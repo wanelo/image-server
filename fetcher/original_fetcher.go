@@ -52,6 +52,7 @@ func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 			log.Printf("Notifying download complete for path %s", destination)
 			f.notifyDownloadComplete(url)
 		} else {
+			log.Printf("Unable to download image %s", err)
 			f.notifyDownloadFailed(url, err)
 		}
 
