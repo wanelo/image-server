@@ -4,14 +4,13 @@ import (
 	"io"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 
 	client "github.com/wanelo/image-server/uploader/manta/client"
 )
 
 type MantaClient interface {
-	PutObject(path string, objectName string, object io.Reader) error
+	PutObject(destination string, contentType string, object io.Reader) error
 	PutDirectory(path string) error
 }
 
@@ -28,13 +27,17 @@ func DefaultUploader() *Uploader {
 }
 
 func (u *Uploader) Upload(source string, destination string) error {
-	path, objectName := path.Split(destination)
+	log.Println("About to Upload:", source)
 	fi, err := os.Open(source)
+
 	if err != nil {
 		log.Printf("Manta::sentToManta unable to read file %s, %s", source, err)
 		return err
 	}
-	err = u.Client.PutObject(path, objectName, fi)
+
+	// content type should be set depending of the type of file uploaded
+	contentType := "application/octet-stream"
+	err = u.Client.PutObject(destination, contentType, fi)
 
 	if err != nil {
 		log.Printf("Error uploading image to manta: %s", err)

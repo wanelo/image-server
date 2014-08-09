@@ -37,12 +37,13 @@ func DefaultClient() *Client {
 	}
 }
 
-func (c *Client) PutObject(path, objectName string, r io.Reader) error {
+func (c *Client) PutObject(destination string, contentType string, r io.Reader) error {
 	headers := make(http.Header)
-	headers.Add("content-type", "application/json; type=directory")
+	headers.Add("content-type", "application/json")
+	// headers.Add("max-content-length", "8000000")
 
-	log.Println("PutObject", path, objectName)
-	resp, err := c.Put(path, headers, r)
+	log.Println("filepath:", destination)
+	resp, err := c.Put(destination, headers, r)
 
 	if err != nil {
 		return err
