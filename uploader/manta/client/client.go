@@ -40,7 +40,6 @@ func DefaultClient() *Client {
 func (c *Client) PutObject(destination string, contentType string, r io.Reader) error {
 	headers := make(http.Header)
 	headers.Add("content-type", "application/json")
-	// headers.Add("max-content-length", "8000000")
 
 	log.Println("filepath:", destination)
 	resp, err := c.Put(destination, headers, r)
