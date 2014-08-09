@@ -2,17 +2,31 @@ package cli
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
-	"strings"
+	"os"
+	"regexp"
 	"sync"
 
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher"
+	"github.com/wanelo/image-server/info"
 	"github.com/wanelo/image-server/parser"
 	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/uploader"
 )
+
+type Item struct {
+	Hash   string
+	URL    string
+	Width  int
+	Height int
+}
+
+func (i Item) ToTabDelimited() string {
+	return fmt.Sprintf("%s\t%s\t%d\t%d\n", i.Hash, i.URL, i.Width, i.Height)
+}
 
 func Process(sc *core.ServerConfiguration, namespace string, outputs []string, input io.Reader) error {
 	done := make(chan struct{})
@@ -46,8 +60,8 @@ func Process(sc *core.ServerConfiguration, namespace string, outputs []string, i
 	return nil
 }
 
-func enqueueAll(done <-chan struct{}, input io.Reader) <-chan string {
-	idsc := make(chan string)
+func enqueueAll(done <-chan struct{}, input io.Reader) <-chan *Item {
+	idsc := make(chan *Item)
 	go func() { // HL
 		// Close the ids channel after Walk returns.
 		defer close(idsc) // HL
@@ -58,7 +72,12 @@ func enqueueAll(done <-chan struct{}, input io.Reader) <-chan string {
 			if err != nil {
 				break
 			}
-			idsc <- strings.TrimSpace(line)
+
+			item, err := lineToItem(line)
+			if err == nil {
+				idsc <- item
+			}
+
 		}
 	}()
 	return idsc
@@ -72,10 +91,23 @@ type result struct {
 
 // digester reads path names from paths and sends digests of the corresponding
 // files on c until either paths or done is closed.
-func digester(sc *core.ServerConfiguration, namespace string, outputs []string, done <-chan struct{}, ids <-chan string, c chan<- result) {
-	for hash := range ids { // HLpaths
+func digester(sc *core.ServerConfiguration, namespace string, outputs []string, done <-chan struct{}, items <-chan *Item, c chan<- result) {
+	for item := range items { // HLpaths
+		hash := item.Hash
+
+		if hash == "" {
+			err := downloadOriginal(sc, namespace, item)
+			if err != nil {
+				continue
+			}
+			if item.Hash == "" {
+				log.Panic("It should have created an image hash")
+			}
+			hash = item.Hash
+		}
+
 		log.Printf("About to process image: %s", hash)
-		// download original image
+
 		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
 		remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, hash)
 		log.Println(remoteOriginalPath)
@@ -87,49 +119,11 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 		}
 
 		for _, filename := range outputs {
-			ic, err := parser.NameToConfiguration(sc, filename)
+			err := processImage(sc, namespace, hash, localOriginalPath, filename)
 			if err != nil {
-				log.Printf("Error parsing name: %v\n", err)
+				log.Println(err)
 				continue
 			}
-
-			ic.Namespace = namespace
-			ic.ID = hash
-
-			// process image
-			pchan := &processor.ProcessorChannels{
-				ImageProcessed: make(chan *core.ImageConfiguration),
-				Skipped:        make(chan string),
-			}
-
-			localPath := sc.Adapters.Paths.LocalImagePath(namespace, hash, filename)
-
-			p := processor.Processor{
-				Source:             localOriginalPath,
-				Destination:        localPath,
-				ImageConfiguration: ic,
-				Channels:           pchan,
-			}
-
-			_, err = p.CreateImage()
-
-			if err != nil {
-				continue
-			}
-
-			select {
-			case <-pchan.ImageProcessed:
-				log.Println("about to upload to manta")
-				uploader := &uploader.Uploader{sc.RemoteBasePath}
-				remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
-				err = uploader.Upload(localPath, remoteResizedPath)
-				if err != nil {
-					log.Println(err)
-				}
-			case path := <-pchan.Skipped:
-				log.Printf("Skipped processing %s", path)
-			}
-
 		}
 
 		select {
@@ -138,5 +132,112 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 			return
 		}
 
+		fmt.Fprint(os.Stdout, item.ToTabDelimited())
 	}
+}
+
+func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) error {
+	if item.URL == "" {
+		return fmt.Errorf("Missing Hash & URL")
+	}
+
+	// Image does not have a hash, need to upload source and get image hash
+	f := fetcher.NewSourceFetcher(sc.Adapters.Paths)
+	imageDetails, downloaded, err := f.Fetch(item.URL, namespace)
+
+	if err != nil {
+		return err
+	}
+
+	hash := imageDetails.Hash
+	if downloaded {
+		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
+		uploader := &uploader.Uploader{sc.RemoteBasePath}
+
+		err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, hash))
+		if err != nil {
+			return err
+		}
+
+		destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, hash)
+		localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, hash)
+		remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
+
+		err = info.SaveImageDetail(imageDetails, localInfoPath)
+		if err != nil {
+			return err
+		}
+
+		// upload info
+		err = uploader.Upload(localInfoPath, remoteInfoPath)
+		if err != nil {
+			return err
+		}
+
+		// upload original image
+		err = uploader.Upload(localOriginalPath, destination)
+		if err != nil {
+			return err
+		}
+	}
+
+  item.Width = imageDetails.Width
+	item.Height = imageDetails.Height
+	item.Hash = hash
+	return nil
+}
+
+func processImage(sc *core.ServerConfiguration, namespace string, hash string, localOriginalPath string, filename string) error {
+	ic, err := parser.NameToConfiguration(sc, filename)
+	if err != nil {
+		return fmt.Errorf("Error parsing name: %v\n", err)
+	}
+
+	ic.Namespace = namespace
+	ic.ID = hash
+
+	// process image
+	pchan := &processor.ProcessorChannels{
+		ImageProcessed: make(chan *core.ImageConfiguration),
+		Skipped:        make(chan string),
+	}
+
+	localPath := sc.Adapters.Paths.LocalImagePath(namespace, hash, filename)
+
+	p := processor.Processor{
+		Source:             localOriginalPath,
+		Destination:        localPath,
+		ImageConfiguration: ic,
+		Channels:           pchan,
+	}
+
+	_, err = p.CreateImage()
+
+	if err != nil {
+		return err
+	}
+
+	select {
+	case <-pchan.ImageProcessed:
+		log.Println("about to upload to manta")
+		uploader := &uploader.Uploader{sc.RemoteBasePath}
+		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
+		err = uploader.Upload(localPath, remoteResizedPath)
+		if err != nil {
+			log.Println(err)
+		}
+	case path := <-pchan.Skipped:
+		log.Printf("Skipped processing %s", path)
+	}
+
+	return nil
+}
+
+func lineToItem(line string) (*Item, error) {
+	hr, _ := regexp.Compile("([a-z0-9]{32})")
+	ur, _ := regexp.Compile("(htt[^\t\n\f\r ]+)")
+
+	hash := hr.FindString(line)
+	url := ur.FindString(line)
+	return &Item{hash, url, 0, 0}, nil
 }
