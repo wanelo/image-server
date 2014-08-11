@@ -5,6 +5,9 @@ import (
 	"os"
 	"strings"
 
+	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/codegangsta/cli"
 	cliprocessor "github.com/wanelo/image-server/cli"
 	"github.com/wanelo/image-server/core"
@@ -18,6 +21,11 @@ import (
 )
 
 func main() {
+	go func() {
+		// used for pprof
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	app := cli.NewApp()
 	app.Name = "images"
 	app.Version = "1.0.4"
