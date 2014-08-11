@@ -93,33 +93,33 @@ type result struct {
 // files on c until either paths or done is closed.
 func digester(sc *core.ServerConfiguration, namespace string, outputs []string, done <-chan struct{}, items <-chan *Item, c chan<- result) {
 	for item := range items { // HLpaths
-		hash := item.Hash
-
-		if hash == "" {
-			err := downloadOriginal(sc, namespace, item)
+		if item.Hash == "" {
+			err := downloadOriginalFromSource(sc, namespace, item)
 			if err != nil {
 				continue
 			}
-			if item.Hash == "" {
-				log.Panic("It should have created an image hash")
-			}
-			hash = item.Hash
 		}
 
-		log.Printf("About to process image: %s", hash)
+		log.Printf("About to process image: %s", item.Hash)
 
-		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
-		remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, hash)
-		log.Println(remoteOriginalPath)
+		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, item.Hash)
+		remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, item.Hash)
+
 		f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
 		_, err := f.Fetch()
 		if err != nil {
-			log.Printf("Unable to download image for %s: %s", hash, err)
-			continue
+			// if not able to download original from store
+			if item.URL != "" {
+				// source URL is present, try downloading it again.
+				err = downloadOriginalFromSource(sc, namespace, item)
+				if err != nil {
+					continue
+				}
+			}
 		}
 
 		for _, filename := range outputs {
-			err := processImage(sc, namespace, hash, localOriginalPath, filename)
+			err := processImage(sc, namespace, item.Hash, localOriginalPath, filename)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -127,7 +127,7 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 		}
 
 		select {
-		case c <- result{hash, err}:
+		case c <- result{item.Hash, err}:
 		case <-done:
 			return
 		}
@@ -136,7 +136,7 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 	}
 }
 
-func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) error {
+func downloadOriginalFromSource(sc *core.ServerConfiguration, namespace string, item *Item) error {
 	if item.URL == "" {
 		return fmt.Errorf("Missing Hash & URL")
 	}
@@ -181,7 +181,7 @@ func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item
 		}
 	}
 
-  item.Width = imageDetails.Width
+	item.Width = imageDetails.Width
 	item.Height = imageDetails.Height
 	item.Hash = hash
 	return nil
