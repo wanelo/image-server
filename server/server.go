@@ -42,7 +42,6 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	qs := req.URL.Query()
 	vars := mux.Vars(req)
-	errorStr := ""
 
 	source := qs.Get("source")
 	namespace := vars["namespace"]
@@ -55,12 +54,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	var json map[string]string
 
 	if err != nil {
-		errorStr = fmt.Sprintf("%s", err)
-		// r.JSON(w, http.StatusOK, json)
-		json = map[string]string{
-			"error": errorStr,
-		}
-		r.JSON(w, http.StatusOK, json)
+		errorHandlerJSON(err, w, r, http.StatusNotFound)
 		return
 	}
 
@@ -72,6 +66,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, hash))
 		if err != nil {
 			log.Printf("Manta::sentToManta unable to create directory %s", sc.RemoteBasePath)
+			errorHandlerJSON(err, w, r, http.StatusInternalServerError)
 			return
 		}
 
@@ -97,14 +92,19 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		err = uploader.Upload(localOriginalPath, destination)
 		if err != nil {
 			log.Println(err)
+			errorHandlerJSON(err, w, r, http.StatusInternalServerError)
+			return
 		}
 	}
 
 	json = map[string]string{
-		"error":  errorStr,
 		"hash":   hash,
 		"height": fmt.Sprintf("%v", imageDetails.Height),
 		"width":  fmt.Sprintf("%v", imageDetails.Width),
+	}
+
+	if err != nil {
+		json["error"] = fmt.Sprintf("%s", err)
 	}
 
 	r.JSON(w, http.StatusOK, json)
@@ -179,6 +179,13 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	}
 
 	http.ServeFile(w, req, resizedPath)
+}
+
+func errorHandlerJSON(err error, w http.ResponseWriter, r *render.Render, status int) {
+	json := map[string]string{
+		"error": fmt.Sprintf("%s", err),
+	}
+	r.JSON(w, status, json)
 }
 
 func errorHandler(err error, w http.ResponseWriter, r *http.Request, status int, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
