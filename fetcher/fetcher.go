@@ -1,7 +1,12 @@
 package fetcher
 
-import "github.com/wanelo/image-server/info"
+import (
+	"sync"
 
+	"github.com/wanelo/image-server/info"
+)
+
+var mu sync.RWMutex // To protect ImageDownloads
 var ImageDownloads map[string][]chan FetchResult
 
 func init() {

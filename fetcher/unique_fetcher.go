@@ -30,13 +30,17 @@ func (f *UniqueFetcher) Fetch() (bool, error) {
 func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 	url := f.Source
 	destination := f.Destination
+
+	mu.Lock()
 	_, present := ImageDownloads[url]
 	var err error
 
 	if present {
 		ImageDownloads[url] = append(ImageDownloads[url], c)
+		mu.Unlock()
 	} else {
 		ImageDownloads[url] = []chan FetchResult{c}
+		mu.Unlock()
 		defer delete(ImageDownloads, url)
 
 		// only copy image if does not exist
