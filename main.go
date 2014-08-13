@@ -124,8 +124,8 @@ func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 	adapters := &core.Adapters{
 		Fetcher:   &fetcher.Fetcher{},
 		Processor: &processor.Processor{},
-		Paths:     &paths.Paths{sc.LocalBasePath, sc.RemoteBasePath, sc.RemoteBaseURL},
-		Logger:    &logger.Logger{loggers},
+		Paths:     &paths.Paths{LocalBasePath: sc.LocalBasePath, RemoteBasePath: sc.RemoteBasePath, RemoteBaseURL: sc.RemoteBaseURL},
+		Logger:    &logger.Logger{Loggers: loggers},
 	}
 	sc.Adapters = adapters
 
