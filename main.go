@@ -44,7 +44,8 @@ func main() {
 			Action: func(c *cli.Context) {
 				sc, err := serverConfiguration(c)
 				if err != nil {
-					log.Panicln(err)
+					log.Println(err)
+					os.Exit(1)
 				}
 
 				go initializeUploader(sc)
@@ -60,7 +61,8 @@ func main() {
 			Action: func(c *cli.Context) {
 				sc, err := serverConfiguration(c)
 				if err != nil {
-					log.Panicln(err)
+					log.Println(err)
+					os.Exit(1)
 				}
 
 				initializeUploader(sc)
@@ -75,7 +77,8 @@ func main() {
 				outputs := strings.Split(outputsStr, ",")
 				err = cliprocessor.Process(sc, namespace, outputs, os.Stdin)
 				if err != nil {
-					log.Panic(err)
+					log.Println(err)
+					os.Exit(1)
 				}
 
 			},
