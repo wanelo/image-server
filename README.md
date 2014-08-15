@@ -121,7 +121,7 @@ Set up the environment:
 
 ```bash
 mkdir -p $GOPATH/src/github.com/wanelo/
-git clone git@github.com:wanelo/image-server.git $GOPATH/src/github.com/wanelo/
+git clone git@github.com:wanelo/image-server.git $GOPATH/src/github.com/wanelo/image-server
 ln -s $GOPATH/src/github.com/wanelo/image-server ~/workspace/image-server
 cd ~/workspace/image-server
 ```
