@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"net/http"
 	_ "net/http/pprof"
@@ -21,10 +23,8 @@ import (
 )
 
 func main() {
-	go func() {
-		// used for pprof
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
+	go initializePprofServer()
+	go handleShutdownSignals()
 
 	app := cli.NewApp()
 	app.Name = "images"
@@ -144,4 +144,16 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 		DefaultQuality:        uint(c.GlobalInt("default_quality")),
 		UploaderConcurrency:   uint(c.GlobalInt("uploader_concurrency")),
 	}
+}
+
+func handleShutdownSignals() {
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
+	<-shutdown
+	os.Exit(0)
+}
+
+func initializePprofServer() {
+	log.Println(http.ListenAndServe("localhost:6060", nil))
 }
