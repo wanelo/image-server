@@ -31,7 +31,7 @@ func main() {
 	app.Version = "1.0.4"
 	app.Usage = "Image server and CLI"
 	app.Action = func(c *cli.Context) {
-		println("boom! I say!")
+		println("Need to provide subcommand: server or process")
 	}
 
 	app.Flags = globalFlags()
@@ -106,7 +106,7 @@ func globalFlags() []cli.Flag {
 }
 
 func initializeUploader(sc *core.ServerConfiguration) {
-	uploader := uploader.Uploader{sc.RemoteBasePath}
+	uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 	err := uploader.Initialize()
 	if err != nil {
 		log.Println("EXITING: Unable to initialize manta: ", err)

@@ -62,7 +62,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	if downloaded {
 		localOriginalPath := f.Paths.LocalOriginalPath(namespace, hash)
-		uploader := &uploader.Uploader{sc.RemoteBasePath}
+		uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 		err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, hash))
 		if err != nil {
 			log.Printf("Manta::sentToManta unable to create directory %s", sc.RemoteBasePath)
@@ -168,7 +168,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	select {
 	case <-pchan.ImageProcessed:
 		log.Println("about to upload to manta")
-		uploader := &uploader.Uploader{sc.RemoteBasePath}
+		uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
 		err = uploader.Upload(localPath, remoteResizedPath)
 		if err != nil {

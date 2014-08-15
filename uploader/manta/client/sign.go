@@ -1,28 +1,30 @@
 package client
 
 import (
-	"crypto"
 	"crypto/rand"
-	"crypto/rsa"
-	"crypto/sha256"
-	"crypto/x509"
 	"encoding/base64"
-	"encoding/pem"
-	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
+	"net"
 	"net/http"
+	"os"
 	"os/user"
 	"time"
+
+	"code.google.com/p/go.crypto/ssh"
+	"code.google.com/p/go.crypto/ssh/agent"
 )
 
 // Client is a Manta client. Client is not safe for concurrent use.
 type Client struct {
-	User   string
-	KeyId  string
-	Key    string
-	Url    string
-	signer Signer
+	User      string
+	KeyId     string
+	Key       string
+	Url       string
+	signer    ssh.Signer
+	agentConn io.ReadWriter
 }
 
 func homeDir() (string, error) {
@@ -35,79 +37,73 @@ func homeDir() (string, error) {
 
 // SignRequest signs the 'date' field of req.
 func (c *Client) SignRequest(req *http.Request) error {
+	start := time.Now()
 	if c.signer == nil {
 		var err error
-		c.signer, err = loadPrivateKey(c.Key)
+		c.signer, err = c.getSigner(SDC_IDENTITY)
 		if err != nil {
-			return fmt.Errorf("could not load private key %q: %v", c.Key, err)
+			return err
 		}
 	}
-	return signRequest(req, fmt.Sprintf("/%s/keys/%s", MANTA_USER, MANTA_KEY_ID), c.signer)
+	err := signRequest(req, fmt.Sprintf("/%s/keys/%s", MANTA_USER, MANTA_KEY_ID), c.signer)
+	elapsed := time.Since(start)
+	log.Printf("Took %s to sign request", elapsed)
+	return err
 }
 
-func signRequest(req *http.Request, keyid string, priv Signer) error {
+func signRequest(req *http.Request, keyid string, signer ssh.Signer) error {
 	now := time.Now().UTC().Format(time.RFC1123)
 	req.Header.Set("date", now)
-	signed, err := priv.Sign([]byte(fmt.Sprintf("date: %s", now)))
+	signed, err := signer.Sign(rand.Reader, []byte(fmt.Sprintf("date: %s", now)))
 	if err != nil {
 		return fmt.Errorf("could not sign request: %v", err)
 	}
-	sig := base64.StdEncoding.EncodeToString(signed)
-	authz := fmt.Sprintf("Signature keyId=%q,algorithm=%q,signature=%q", keyid, "rsa-sha256", sig)
+	sig := base64.StdEncoding.EncodeToString(signed.Blob)
+	authz := fmt.Sprintf("Signature keyId=%q,algorithm=%q,signature=%q", keyid, "rsa-sha1", sig)
 	req.Header.Set("Authorization", authz)
 	return nil
 }
 
-// loadPrivateKey loads an parses a PEM encoded private key file.
-func loadPrivateKey(path string) (Signer, error) {
-	data, err := ioutil.ReadFile(path)
+func (c *Client) getSigner(keyPath string) (signer ssh.Signer, err error) {
+	if keySigner != nil {
+		return keySigner, nil
+	}
+
+	// The keySigner will be nil if it was impossible to load the key, for reasons
+	// like the key needing a passphrase. In that case, we ask the SSH Agent for
+	// the key, just in case it has it.
+	return c.getSignerFromSSHAgent(keyPath)
+}
+
+func getSignerFromPrivateKey(keyPath string) (signer ssh.Signer, err error) {
+	var encodedKey []byte
+	encodedKey, err = ioutil.ReadFile(keyPath)
 	if err != nil {
 		return nil, err
 	}
-	return parsePrivateKey(data)
+	signer, err = ssh.ParsePrivateKey(encodedKey)
+	return signer, err
 }
 
-// parsePublicKey parses a PEM encoded private key.
-func parsePrivateKey(pemBytes []byte) (Signer, error) {
-	block, _ := pem.Decode(pemBytes)
-	if block == nil {
-		return nil, errors.New("ssh: no key found")
+func (c *Client) getSignerFromSSHAgent(keyPath string) (ssh.Signer, error) {
+	if c.agentConn == nil {
+		var err error
+		c.agentConn, err = net.Dial("unix", os.Getenv("SSH_AUTH_SOCK"))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	rsa, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	ag := agent.NewClient(c.agentConn)
+
+	signers, err := ag.Signers()
 	if err != nil {
-		return nil, fmt.Errorf("An error occurred while parsing the key: %s", err)
+		log.Panic(err)
 	}
-	return newSignerFromKey(rsa)
-}
 
-// A Signer is can create signatures that verify against a public key.
-type Signer interface {
-	// Sign returns raw signature for the given data. This method
-	// will apply the hash specified for the keytype to the data.
-	Sign(data []byte) ([]byte, error)
-}
-
-func newSignerFromKey(k interface{}) (Signer, error) {
-	var sshKey Signer
-	switch t := k.(type) {
-	case *rsa.PrivateKey:
-		sshKey = &rsaPrivateKey{t}
-	default:
-		return nil, fmt.Errorf("ssh: unsupported key type %T", k)
+	for _, signer := range signers {
+		if signer.PublicKey().(*agent.Key).Comment == keyPath {
+			return signer, nil
+		}
 	}
-	return sshKey, nil
-}
-
-type rsaPublicKey rsa.PublicKey
-
-type rsaPrivateKey struct {
-	*rsa.PrivateKey
-}
-
-// Sign signs data with rsa-sha256
-func (r *rsaPrivateKey) Sign(data []byte) ([]byte, error) {
-	h := sha256.New()
-	h.Write(data)
-	d := h.Sum(nil)
-	return rsa.SignPKCS1v15(rand.Reader, r.PrivateKey, crypto.SHA256, d)
+	return nil, fmt.Errorf("Signer was not found")
 }

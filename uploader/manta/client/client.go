@@ -8,9 +8,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"code.google.com/p/go.crypto/ssh"
 )
 
 var MANTA_URL, MANTA_USER, MANTA_KEY_ID, SDC_IDENTITY string
+var keySigner ssh.Signer
 
 // manta_url := os.Getenv("MANTA_URL")
 func init() {
@@ -23,6 +26,9 @@ func init() {
 		if err == nil {
 			SDC_IDENTITY = filepath.Join(homeDir, ".ssh", "id_rsa")
 		}
+	}
+	if requiresSSL() {
+		keySigner, _ = getSignerFromPrivateKey(SDC_IDENTITY)
 	}
 }
 
@@ -101,7 +107,7 @@ func (c *Client) Do(method, path string, headers http.Header, r io.Reader) (*htt
 		}
 	}
 
-	if MANTA_URL != "http://localhost:80/" {
+	if requiresSSL() {
 		if err := c.SignRequest(req); err != nil {
 			return nil, err
 		}
@@ -116,4 +122,9 @@ func (c *Client) NewRequest(method, path string, r io.Reader) (*http.Request, er
 	url := fmt.Sprintf("%s/%s/%s", c.Url, c.User, path)
 	return http.NewRequest(method, url, r)
 
+}
+
+func requiresSSL() bool {
+	// No need to use https if inside manta
+	return MANTA_URL != "http://localhost:80/"
 }

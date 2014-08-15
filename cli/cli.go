@@ -152,7 +152,7 @@ func downloadOriginalFromSource(sc *core.ServerConfiguration, namespace string, 
 	hash := imageDetails.Hash
 	if downloaded {
 		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
-		uploader := &uploader.Uploader{sc.RemoteBasePath}
+		uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 
 		err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, hash))
 		if err != nil {
@@ -220,7 +220,7 @@ func processImage(sc *core.ServerConfiguration, namespace string, hash string, l
 	select {
 	case <-pchan.ImageProcessed:
 		log.Println("about to upload to manta")
-		uploader := &uploader.Uploader{sc.RemoteBasePath}
+		uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
 		err = uploader.Upload(localPath, remoteResizedPath)
 		if err != nil {
