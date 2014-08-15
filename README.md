@@ -117,18 +117,27 @@ Few errors will cause the server to return error pages
 
 ## Development
 
-Prerequisites
+Set up the environment:
 
 ```bash
-brew install imagemagick --with-webp
+mkdir -p $GOPATH/src/github.com/wanelo/
+git clone git@github.com:wanelo/image-server.git $GOPATH/src/github.com/wanelo/
+ln -s $GOPATH/src/github.com/wanelo/image-server ~/workspace/image-server
+cd ~/workspace/image-server
 ```
 
-To download dependencies
+Install dependencies:
+
 ```bash
+brew bundle
 make deps
 ```
 
-## Compilation
+Set up editor:
+
+  - Atom.io package `go plus`
+
+Compile the app:
 
 `make` will build the executable under `./bin`
 ```bash

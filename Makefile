@@ -24,6 +24,8 @@ deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
 	@go get -d -v ./...
 	@echo $(DEPS) | xargs -n1 go get -d
+	@go get code.google.com/p/go.tools/cmd/godoc
+	@go get code.google.com/p/go.tools/cmd/vet
 
 updatedeps:
 	@echo "$(OK_COLOR)==> Updating all dependencies$(NO_COLOR)"

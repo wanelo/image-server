@@ -1,4 +1,4 @@
-install go --cross-compile-all
-install hg
-install giflib
-install imagemagick --with-webp
+install --force go --cross-compile-all
+install --force hg
+install --force giflib
+install --force imagemagick --with-webp
