@@ -144,6 +144,15 @@ Compile the app:
 make
 ```
 
+## Deploy
+
+Make sure you increase the version number in the Makefile.
+Update chef configuration to use this new version.
+
+```bash
+make buildtomanta
+```
+
 ## Graphite Events
 
 A local cache was not found and the image was processed. This also tracks count of images sent to remote store.
