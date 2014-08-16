@@ -1,10 +1,14 @@
 package server
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 
+	"code.google.com/p/go-uuid/uuid"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
@@ -28,11 +32,67 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 		ResizeHandler(wr, req, sc)
 	}).Methods("GET").Name("resizeImage")
 
+	router.HandleFunc("/{namespace}/batch", func(wr http.ResponseWriter, req *http.Request) {
+		BatchHandler(wr, req, sc)
+	}).Methods("POST").Name("batch")
+
 	// n := negroni.New()
 	n := negroni.Classic()
 	n.UseHandler(router)
 
 	n.Run(":" + port)
+}
+
+func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
+	name := uuid.NewRandom()
+	// func Post(url string, bodyType string, body io.Reader) (resp *Response, err error)
+	// uploader := uploader.DefaultUploader(sc.RemoteBasePath)
+
+	body := &bytes.Buffer{}
+	_, err := body.ReadFrom(req.Body)
+	defer req.Body.Close()
+
+	if err == nil {
+		os.MkdirAll("tmp", 0700)
+		localPath := fmt.Sprintf("tmp/%s", name)
+		log.Println("About to create", localPath)
+		out, err := os.Create(localPath)
+		if err != nil {
+			panic(err)
+		}
+		defer out.Close()
+
+		_, err = io.Copy(out, body)
+		if err != nil {
+			fmt.Fprintln(w, err)
+		}
+
+		// http.Post(fmt.Sprintf("http://localhost:3333/%s", name), "text/plain", body)
+
+		fmt.Println(name)
+	} else {
+		log.Println(err)
+	}
+
+	// log.Println(fmt.Sprintf("http://localhost:3333/%s", name))
+
+	// reader := bufio.NewReader(req.Body)
+	//
+	// var err error
+	// eof := false
+	// for !eof {
+	// 	var line string
+	// 	line, err = reader.ReadString('\n')
+	// 	if err == io.EOF {
+	// 		err = nil
+	// 		eof = true
+	// 	} else if err != nil {
+	// 		return
+	// 	}
+	//
+	// 	fmt.Println(line)
+	// }
+
 }
 
 func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
