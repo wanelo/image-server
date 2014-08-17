@@ -28,6 +28,10 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 		ResizeHandler(wr, req, sc)
 	}).Methods("GET").Name("resizeImage")
 
+	router.HandleFunc("/{namespace}/batch", func(wr http.ResponseWriter, req *http.Request) {
+		BatchHandler(wr, req, sc)
+	}).Methods("POST").Name("batch")
+
 	// n := negroni.New()
 	n := negroni.Classic()
 	n.UseHandler(router)
