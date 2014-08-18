@@ -16,6 +16,7 @@ import (
 )
 
 func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
+	batchSize := 1000
 	name := uuid.NewRandom()
 	dirName := fmt.Sprintf("tmp/%s", name)
 	os.MkdirAll(dirName, 0700)
@@ -41,7 +42,7 @@ func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfi
 		items[count] = line
 
 		count++
-		if count >= 1000 {
+		if count >= batchSize {
 			count = 0
 			path := fmt.Sprintf("%s/%d.txt", dirName, partition)
 			writeBatchPartition(path, items)
