@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"code.google.com/p/go-uuid/uuid"
@@ -23,14 +24,17 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 		IndentJSON: true,
 	})
 
-	batchSize := 100
+	batchSize, err := strconv.Atoi(req.FormValue("batch_size"))
+	if err != nil {
+		batchSize = 1000
+	}
+
 	name := uuid.NewRandom().String()
 	dirName := fmt.Sprintf("tmp/%s", name)
 	os.MkdirAll(dirName, 0700)
 	reader := bufio.NewReader(req.Body)
 	uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 
-	var err error
 	count := 0
 	partition := 0
 	eof := false
