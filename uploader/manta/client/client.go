@@ -55,7 +55,7 @@ func (c *Client) PutObject(destination string, contentType string, r io.Reader) 
 	}
 	defer resp.Body.Close()
 
-	return c.ensureSuccess(resp)
+	return c.ensureStatus(resp, 204)
 }
 
 func (c *Client) PutDirectory(path string) error {
@@ -68,16 +68,16 @@ func (c *Client) PutDirectory(path string) error {
 		return err
 	}
 	defer resp.Body.Close()
-	return c.ensureSuccess(resp)
+	return c.ensureStatus(resp, 204)
 }
 
-func (c *Client) ensureSuccess(resp *http.Response) error {
-	if resp.StatusCode != 204 {
+func (c *Client) ensureStatus(resp *http.Response, expected int) error {
+	if resp.StatusCode != expected {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return (err)
 		}
-		return fmt.Errorf("%s", body)
+		return fmt.Errorf("HTTP Response for %v was not %v got %v: %s", resp.Request, expected, resp.StatusCode, body)
 	}
 
 	return nil
@@ -91,6 +91,11 @@ func (c *Client) Get(path string, headers http.Header) (*http.Response, error) {
 // Put executes a PUT request and returns the response.
 func (c *Client) Put(path string, headers http.Header, r io.Reader) (*http.Response, error) {
 	return c.Do("PUT", path, headers, r)
+}
+
+// Post executes a POST request and returns the response.
+func (c *Client) Post(path string, headers http.Header, body io.Reader) (*http.Response, error) {
+	return c.Do("POST", path, headers, body)
 }
 
 // Do executes a method request and returns the response.
