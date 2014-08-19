@@ -11,13 +11,14 @@ import (
 
 	"code.google.com/p/go-uuid/uuid"
 
+	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/uploader"
 	"github.com/wanelo/image-server/uploader/manta/client"
 )
 
-func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
+func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
 	r := render.New(render.Options{
 		IndentJSON: true,
 	})
@@ -91,6 +92,26 @@ func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfi
 	}
 
 	r.JSON(w, http.StatusOK, json)
+}
+
+func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
+	vars := mux.Vars(req)
+	uuid := vars["uuid"]
+
+	mantaClient := client.DefaultClient()
+
+	// if not complete return 202
+	job, err := mantaClient.GetJob(uuid)
+	if err != nil {
+		errorHandler(err, w, req, 500)
+	}
+
+	if job.State == "done" {
+		fmt.Fprint(w, "YAY done")
+		w.WriteHeader(200)
+	} else {
+		w.WriteHeader(202)
+	}
 }
 
 func uploadBatchPartition(jobID string, partition int, uploader *uploader.Uploader) error {

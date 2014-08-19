@@ -28,6 +28,31 @@ type CreateJobOpts struct {
 	Phases []Phase `json:"phases"`         // Tasks to execute as part of this job
 }
 
+// Job represents the status of a job.
+type Job struct {
+	Id                 string      // Job unique identifier
+	Name               string      `json:"name,omitempty"` // Job Name
+	State              string      // Job state
+	Cancelled          bool        // Whether the job has been cancelled or not
+	InputDone          bool        // Whether the inputs for the job is still open or not
+	Stats              JobStats    `json:"stats,omitempty"` // Job statistics
+	TimeCreated        string      // Time the job was created at
+	TimeDone           string      `json:"timeDone,omitempty"`           // Time the job was completed
+	TimeArchiveStarted string      `json:"timeArchiveStarted,omitempty"` // Time the job archiving started
+	TimeArchiveDone    string      `json:"timeArchiveDone,omitempty"`    // Time the job archiving completed
+	Phases             []Phase     `json:"phases"`                       // Job tasks
+	Options            interface{} // Job options
+}
+
+// JobStats represents statistics about a job
+type JobStats struct {
+	Errors    int // Number or errors
+	Outputs   int // Number of output produced
+	Retries   int // Number of retries
+	Tasks     int // Total number of task in the job
+	TasksDone int // number of tasks done
+}
+
 // CreateJob submits a job to Manta and returns the URI for the job.
 func (c *Client) CreateJob(opts CreateJobOpts) (string, error) {
 	headers := make(http.Header)
@@ -81,4 +106,25 @@ func (c *Client) EndJobInput(jobID string) error {
 	}
 
 	return c.ensureStatus(resp, 202)
+}
+
+func (c *Client) GetJob(jobID string) (Job, error) {
+	path := fmt.Sprintf("jobs/%s/live/status", jobID)
+	resp, err := c.Get(path, nil)
+	if err != nil {
+		return Job{}, err
+	}
+
+	err = c.ensureStatus(resp, 200)
+	if err != nil {
+		return Job{}, err
+	}
+
+	job := new(Job)
+	err = json.NewDecoder(resp.Body).Decode(job)
+	if err != nil {
+		return Job{}, err
+	}
+
+	return *job, nil
 }

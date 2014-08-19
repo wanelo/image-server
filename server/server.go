@@ -29,9 +29,14 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 	}).Methods("GET").Name("resizeImage")
 
 	router.HandleFunc("/{namespace}/batch", func(wr http.ResponseWriter, req *http.Request) {
-		BatchHandler(wr, req, sc)
-	}).Methods("POST").Name("batch")
+		CreateBatchHandler(wr, req, sc)
+	}).Methods("POST").Name("createBatch")
 
+	router.HandleFunc("/{namespace}/batch/{uuid:[a-f0-9-]{36}}", func(wr http.ResponseWriter, req *http.Request) {
+		BatchHandler(wr, req, sc)
+	}).Methods("GET").Name("batch")
+
+	// n := negroni.New()
 	// n := negroni.New()
 	n := negroni.Classic()
 	n.UseHandler(router)
@@ -120,7 +125,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 
 	ic, err := parser.NameToConfiguration(sc, filename)
 	if err != nil {
-		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
+		errorHandler(err, w, req, http.StatusNotFound)
 		return
 	}
 
@@ -143,7 +148,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
 	_, err = f.Fetch()
 	if err != nil {
-		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
+		errorHandler(err, w, req, http.StatusNotFound)
 		return
 	}
 
@@ -165,7 +170,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	resizedPath, err := p.CreateImage()
 
 	if err != nil {
-		errorHandler(err, w, req, http.StatusNotFound, sc, ic)
+		errorHandler(err, w, req, http.StatusNotFound)
 		return
 	}
 
@@ -192,7 +197,7 @@ func errorHandlerJSON(err error, w http.ResponseWriter, r *render.Render, status
 	r.JSON(w, status, json)
 }
 
-func errorHandler(err error, w http.ResponseWriter, r *http.Request, status int, sc *core.ServerConfiguration, ic *core.ImageConfiguration) {
+func errorHandler(err error, w http.ResponseWriter, r *http.Request, status int) {
 	w.WriteHeader(status)
 	if status == http.StatusNotFound {
 		fmt.Fprint(w, "404 image not available. ", err)
