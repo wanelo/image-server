@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -109,8 +110,11 @@ func (c *Client) EndJobInput(jobID string) error {
 }
 
 func (c *Client) GetJob(jobID string) (Job, error) {
+	headers := make(http.Header)
+	headers.Add("content-type", "application/json")
+
 	path := fmt.Sprintf("jobs/%s/live/status", jobID)
-	resp, err := c.Get(path, nil)
+	resp, err := c.Get(path, headers)
 	if err != nil {
 		return Job{}, err
 	}
@@ -127,4 +131,27 @@ func (c *Client) GetJob(jobID string) (Job, error) {
 	}
 
 	return *job, nil
+}
+
+func (c *Client) GetJobOutput(jobID string) (string, error) {
+	headers := make(http.Header)
+	headers.Add("content-type", "application/json")
+	path := fmt.Sprintf("jobs/%s/live/out", jobID)
+	resp, err := c.Get(path, headers)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	err = c.ensureStatus(resp, 200)
+	if err != nil {
+		return "", err
+	}
+
+	reader := bufio.NewReader(resp.Body)
+	out, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(out), nil
 }

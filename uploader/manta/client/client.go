@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"code.google.com/p/go.crypto/ssh"
 )
@@ -56,6 +57,20 @@ func (c *Client) PutObject(destination string, contentType string, r io.Reader) 
 	defer resp.Body.Close()
 
 	return c.ensureStatus(resp, 204)
+}
+
+func (c *Client) GetObject(path string) (io.Reader, error) {
+	resp, err := c.Get(path, nil)
+	if err != nil {
+		return nil, err
+	}
+	// defer resp.Body.Close()
+
+	err = c.ensureStatus(resp, 200)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Body, nil
 }
 
 func (c *Client) PutDirectory(path string) error {
@@ -124,9 +139,14 @@ func (c *Client) Do(method, path string, headers http.Header, r io.Reader) (*htt
 // NewRequest is similar to http.NewRequest except it appends path to
 // the API endpoint this client is configured for.
 func (c *Client) NewRequest(method, path string, r io.Reader) (*http.Request, error) {
-	url := fmt.Sprintf("%s/%s/%s", c.Url, c.User, path)
+	var url string
+	if strings.HasPrefix(path, "/"+c.User) {
+		url = fmt.Sprintf("%s%s", c.Url, path)
+	} else {
+		url = fmt.Sprintf("%s/%s/%s", c.Url, c.User, path)
+	}
+	log.Println("Making request to manta:", url)
 	return http.NewRequest(method, url, r)
-
 }
 
 func requiresSSL() bool {

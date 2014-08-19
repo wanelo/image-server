@@ -36,8 +36,6 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 		BatchHandler(wr, req, sc)
 	}).Methods("GET").Name("batch")
 
-	// n := negroni.New()
-	// n := negroni.New()
 	n := negroni.Classic()
 	n.UseHandler(router)
 

@@ -99,17 +99,36 @@ func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfi
 	uuid := vars["uuid"]
 
 	mantaClient := client.DefaultClient()
-
-	// if not complete return 202
 	job, err := mantaClient.GetJob(uuid)
+
 	if err != nil {
+		log.Println(err)
 		errorHandler(err, w, req, 500)
+		return
 	}
 
 	if job.State == "done" {
-		fmt.Fprint(w, "YAY done")
+
+		var output string
+		output, err = mantaClient.GetJobOutput(uuid)
+
+		if err != nil {
+			log.Println(err)
+			errorHandler(err, w, req, 500)
+			return
+		}
+
+		result, err := mantaClient.GetObject(output)
+		if err != nil {
+			log.Println(err)
+			errorHandler(err, w, req, 500)
+			return
+		}
+
 		w.WriteHeader(200)
+		io.Copy(w, result)
 	} else {
+		// if not complete return 202
 		w.WriteHeader(202)
 	}
 }
