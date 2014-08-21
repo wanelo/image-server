@@ -9,6 +9,7 @@ type ServerConfiguration struct {
 	RemoteBaseURL         string
 	DefaultQuality        uint
 	UploaderConcurrency   uint
+	ProcessorConcurrency  uint
 	GraphiteHost          string
 	GraphitePort          int
 	Adapters              *Adapters

@@ -102,6 +102,7 @@ func globalFlags() []cli.Flag {
 		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
 		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
+		cli.IntFlag{Name: "processor_concurrency", Value: 10, Usage: "Processor concurrency"},
 	}
 }
 
@@ -143,6 +144,7 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 		RemoteBaseURL:         c.GlobalString("remote_base_url"),
 		DefaultQuality:        uint(c.GlobalInt("default_quality")),
 		UploaderConcurrency:   uint(c.GlobalInt("uploader_concurrency")),
+		ProcessorConcurrency:  uint(c.GlobalInt("processor_concurrency")),
 	}
 }
 

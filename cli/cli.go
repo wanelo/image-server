@@ -39,11 +39,11 @@ func Process(sc *core.ServerConfiguration, namespace string, outputs []string, i
 
 	idsc := enqueueAll(done, input)
 
-	// Start a fixed number of goroutines to read and digest files.
+	// Start a fixed number of goroutines to read and digest images.
 	c := make(chan result) // HLc
 	var wg sync.WaitGroup
 
-	numDigesters := 10
+	numDigesters := int(sc.ProcessorConcurrency)
 	wg.Add(numDigesters)
 
 	for i := 0; i < numDigesters; i++ {
