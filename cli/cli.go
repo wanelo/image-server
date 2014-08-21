@@ -17,6 +17,7 @@ import (
 	"github.com/wanelo/image-server/uploader"
 )
 
+// Item represents all image properties needed for the result of the processing
 type Item struct {
 	Hash   string
 	URL    string
@@ -24,10 +25,14 @@ type Item struct {
 	Height int
 }
 
+// ToTabDelimited creates a tab delimited text representation of an Item
 func (i Item) ToTabDelimited() string {
 	return fmt.Sprintf("%s\t%s\t%d\t%d\n", i.Hash, i.URL, i.Width, i.Height)
 }
 
+// Process instanciates image processing based on the tab delimited input that
+// contains source image urls and hashes. Each image is processed by a pool of
+// of digesters
 func Process(sc *core.ServerConfiguration, namespace string, outputs []string, input io.Reader) error {
 	done := make(chan struct{})
 	defer close(done)
@@ -89,8 +94,7 @@ type result struct {
 	Err error
 }
 
-// digester reads path names from paths and sends digests of the corresponding
-// files on c until either paths or done is closed.
+// digester processes image items till done is received.
 func digester(sc *core.ServerConfiguration, namespace string, outputs []string, done <-chan struct{}, items <-chan *Item, c chan<- result) {
 	for item := range items { // HLpaths
 		if item.Hash == "" {
