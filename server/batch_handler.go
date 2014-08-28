@@ -84,7 +84,7 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 		uploadBatchPartition(name, i, uploader)
 	}
 
-	jobID, err := createBatchJob(name, partition)
+	jobID, err := createBatchJob(name, sc.Outputs)
 	if err != nil {
 		log.Println("Can't initialize manta job:", err)
 		errorHandlerJSON(err, w, r, http.StatusInternalServerError)
@@ -96,6 +96,7 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 	}
 
 	r.JSON(w, http.StatusOK, json)
+	go addJobs(name, jobID, partition)
 }
 
 func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
@@ -165,12 +166,14 @@ func writeBatchPartition(jobID string, partition int, lines []string) error {
 	return err
 }
 
-func createBatchJob(uuid string, partitionCount int) (string, error) {
+func createBatchJob(uuid string, outputs string) (string, error) {
 	mantaClient := client.DefaultClient()
+	remoteBasePath := "public/images"
+	exec := fmt.Sprintf("/assets/wanelo/public/images/bin/images-solaris-1.0.6 --remote_base_path %s --outputs %s process", remoteBasePath, outputs)
 
 	phases := []client.Phase{
 		{Type: "map",
-			Exec: "/assets/wanelo/public/images/bin/images-solaris-1.0.6 --remote_base_path public/images --outputs full_size.jpg,full_size.webp,x110-q90.jpg,x200-q90.jpg,x354-q80.jpg,w620-q80.jpg,w736-q75.jpg,w1472-q65.jpg,x110-q90.webp,x200-q90.webp,x354-q80.webp,w620-q80.webp,w736-q75.webp,w1472-q65.webp process",
+			Exec: exec,
 			Init: "/assets/wanelo/stor/images/init.sh",
 			Assets: []string{
 				"/wanelo/public/images/bin/images-solaris-1.0.6",
@@ -184,22 +187,25 @@ func createBatchJob(uuid string, partitionCount int) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	return jobID, nil
+}
 
+func addJobs(uuid string, jobID string, partitionCount int) error {
+	mantaClient := client.DefaultClient()
 	partitionPaths := ""
 	for i := 0; i <= partitionCount; i++ {
 		partitionPaths += fmt.Sprintf("/wanelo/stor/images/batches/%s/%d.txt\n", uuid, i)
 	}
 	log.Println(partitionPaths)
 
-	err = mantaClient.AddJobInput(jobID, strings.NewReader(partitionPaths))
+	err := mantaClient.AddJobInput(jobID, strings.NewReader(partitionPaths))
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	err = mantaClient.EndJobInput(jobID)
 	if err != nil {
-		return "", err
+		return err
 	}
-
-	return jobID, nil
+	return nil
 }

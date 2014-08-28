@@ -13,4 +13,5 @@ type ServerConfiguration struct {
 	GraphiteHost          string
 	GraphitePort          int
 	Adapters              *Adapters
+	Outputs               string
 }
