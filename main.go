@@ -102,7 +102,7 @@ func globalFlags() []cli.Flag {
 		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
 		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
-		cli.IntFlag{Name: "processor_concurrency", Value: 10, Usage: "Processor concurrency"},
+		cli.IntFlag{Name: "processor_concurrency", Value: 4, Usage: "Processor concurrency"},
 	}
 }
 
