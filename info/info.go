@@ -15,13 +15,13 @@ type Info struct {
 	Path string
 }
 
-func (i Info) FileHash() (string, error) {
-	var err error
-	if contents, err := ioutil.ReadFile(i.Path); err == nil {
+func (i Info) FileHash() (hash string, err error) {
+	var contents []byte
+	if contents, err = ioutil.ReadFile(i.Path); err == nil {
 		hash := fmt.Sprintf("%x", md5.Sum(contents))
 		return hash, nil
 	}
-	return "", err
+	return hash, err
 }
 
 // ImageDetails extracts file hash, height, and width when providing a image path
