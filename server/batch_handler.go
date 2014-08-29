@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/job/manta"
+	mantajob "github.com/wanelo/image-server/job/manta"
 	"github.com/wanelo/image-server/uploader/manta/client"
 )
 
@@ -23,7 +23,7 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 		batchSize = 1000
 	}
 
-	job, err := mantajob.CreateJob(sc.Outputs, batchSize, req.Body)
+	job, err := mantajob.CreateJob(sc.Outputs, sc.RemoteBasePath, batchSize, req.Body)
 	if err != nil {
 		errorHandlerJSON(err, w, r, http.StatusInternalServerError)
 		return
@@ -35,7 +35,7 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 
 	r.JSON(w, http.StatusOK, json)
 
-	go job.AddJobs(job.InputsCount, sc.RemoteBasePath)
+	go job.AddJobs(job.InputsCount)
 }
 
 func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {

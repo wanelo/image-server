@@ -13,18 +13,19 @@ import (
 )
 
 type Job struct {
-	Outputs     string
-	BatchSize   int
-	JobID       string
-	InputsCount int
+	Outputs        string
+	BatchSize      int
+	JobID          string
+	InputsCount    int
+	RemoteBasePath string
 }
 
-func CreateJob(outputs string, batchSize int, input io.Reader) (job *Job, err error) {
+func CreateJob(outputs string, remoteBasePath string, batchSize int, input io.Reader) (job *Job, err error) {
 	job = &Job{
 		Outputs:   outputs,
 		BatchSize: batchSize,
 	}
-	job.JobID, err = createBatchJob(outputs)
+	job.JobID, err = createBatchJob(outputs, remoteBasePath)
 	if err != nil {
 		return nil, err
 	}
@@ -34,8 +35,8 @@ func CreateJob(outputs string, batchSize int, input io.Reader) (job *Job, err er
 	return job, err
 }
 
-func (job Job) AddJobs(partitionCount int, remoteBasePath string) error {
-	uploader := uploader.DefaultUploader(remoteBasePath)
+func (job Job) AddJobs(partitionCount int) error {
+	uploader := uploader.DefaultUploader(job.RemoteBasePath)
 	remoteDirectory := fmt.Sprintf("stor/images/batches/%s", job.JobID)
 	err := uploader.CreateDirectory(remoteDirectory)
 	if err != nil {
@@ -109,9 +110,8 @@ func (job Job) createInputs(input io.Reader) (partition int, err error) {
 	return partition, nil
 }
 
-func createBatchJob(outputs string) (string, error) {
+func createBatchJob(outputs string, remoteBasePath string) (string, error) {
 	mantaClient := client.DefaultClient()
-	remoteBasePath := "public/images"
 	exec := fmt.Sprintf("/assets/wanelo/public/images/bin/images-solaris-1.0.6 --remote_base_path %s --outputs %s process", remoteBasePath, outputs)
 
 	phases := []client.Phase{
