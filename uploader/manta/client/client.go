@@ -1,6 +1,8 @@
 package client
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,6 +17,16 @@ import (
 
 var MANTA_URL, MANTA_USER, MANTA_KEY_ID, SDC_IDENTITY string
 var keySigner ssh.Signer
+
+// Entry represents an object stored in Manta, either a file or a directory
+type Entry struct {
+	Name       string `json:"name"`           // Entry name
+	Etag       string `json:"etag,omitempty"` // If type is 'object', object UUID
+	Size       int    `json:"size,omitempty"` // If type is 'object', object size (content-length)
+	Type       string `json:"type"`           // Entry type, one of 'directory' or 'object'
+	Mtime      string `json:"mtime"`          // ISO8601 timestamp of the last update
+	Durability int    `json:"durability"`
+}
 
 // manta_url := os.Getenv("MANTA_URL")
 func init() {
@@ -90,6 +102,38 @@ func (c *Client) PutDirectory(path string) error {
 	}
 	defer resp.Body.Close()
 	return c.ensureStatus(resp, 204)
+}
+
+// ListDirectory lists the contents of a directory
+// https://apidocs.joyent.com/manta/api.html#ListDirectory
+func (c *Client) ListDirectory(path string) ([]Entry, error) {
+	headers := make(http.Header)
+	headers.Add("content-type", "application/json; type=directory")
+
+	resp, err := c.Get(path, headers)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var entries []Entry
+
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		entry := new(Entry)
+		line := scanner.Text()
+		err := json.Unmarshal([]byte(line), entry)
+
+		if err != nil {
+			return nil, err
+		}
+
+		entries = append(entries, *entry)
+	}
+
+	return entries, c.ensureStatus(resp, 200)
 }
 
 func (c *Client) ensureStatus(resp *http.Response, expected int) error {
