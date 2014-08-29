@@ -44,6 +44,8 @@ func DefaultClient() *Client {
 	}
 }
 
+// PutObject creates or overwrites an object
+// https://apidocs.joyent.com/manta/api.html#PutObject
 func (c *Client) PutObject(destination string, contentType string, r io.Reader) error {
 	headers := make(http.Header)
 	headers.Add("content-type", "application/json")
@@ -59,6 +61,8 @@ func (c *Client) PutObject(destination string, contentType string, r io.Reader) 
 	return c.ensureStatus(resp, 204)
 }
 
+// GetObject retrieves an object
+// https://apidocs.joyent.com/manta/api.html#GetObject
 func (c *Client) GetObject(path string) (io.Reader, error) {
 	resp, err := c.Get(path, nil)
 	if err != nil {
@@ -73,6 +77,8 @@ func (c *Client) GetObject(path string) (io.Reader, error) {
 	return resp.Body, nil
 }
 
+// PutDirectory in the Joyent Manta Storage Service is an idempotent create-or-update operation
+// https://apidocs.joyent.com/manta/api.html#PutDirectory
 func (c *Client) PutDirectory(path string) error {
 	headers := make(http.Header)
 	headers.Add("content-type", "application/json; type=directory")
