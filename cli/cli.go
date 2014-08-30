@@ -100,24 +100,32 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 	for item := range items {
 		var itemOutputs []string
 		fetchedExistingOutputs := false
+		var existingFiles map[string]mantaclient.Entry
 
 		if item.Hash != "" {
-			itemOutputs, _ = calculateMissingOutputs(sc, namespace, item.Hash, outputs)
+			itemOutputs, existingFiles, _ = calculateMissingOutputs(sc, namespace, item.Hash, outputs)
 			fetchedExistingOutputs = true
 		}
 
-		err := downloadOriginal(sc, namespace, item)
+		imageDetails, err := downloadOriginal(sc, namespace, item)
 		if err != nil {
 			continue
 		}
 
 		// have not tried to retrieve existing outputs
 		if !fetchedExistingOutputs {
-			itemOutputs, err = calculateMissingOutputs(sc, namespace, item.Hash, outputs)
+			itemOutputs, existingFiles, err = calculateMissingOutputs(sc, namespace, item.Hash, outputs)
 			log.Println(itemOutputs, err)
 			if err != nil {
 				// process all outputs
 				copy(itemOutputs, outputs)
+			}
+		}
+
+		if _, ok := existingFiles["original"]; !ok {
+			err = uploadOriginal(sc, namespace, item, imageDetails)
+			if err != nil {
+				continue
 			}
 		}
 
@@ -142,14 +150,15 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 	}
 }
 
-func calculateMissingOutputs(sc *core.ServerConfiguration, namespace string, imageHash string, outputs []string) ([]string, error) {
+func calculateMissingOutputs(sc *core.ServerConfiguration, namespace string, imageHash string, outputs []string) ([]string, map[string]mantaclient.Entry, error) {
 	// Determine what versions need to be generated
 	var itemOutputs []string
 	c := mantaclient.DefaultClient()
+	m := make(map[string]mantaclient.Entry)
 	remoteDirectory := sc.Adapters.Paths.RemoteImageDirectory(namespace, imageHash)
 	entries, err := c.ListDirectory(remoteDirectory)
 	if err == nil {
-		m := make(map[string]mantaclient.Entry)
+
 		for _, entry := range entries {
 			if entry.Type == "object" {
 				m[entry.Name] = entry
@@ -167,56 +176,60 @@ func calculateMissingOutputs(sc *core.ServerConfiguration, namespace string, ima
 		}
 
 	} else {
+		return nil, nil, err
+	}
+
+	return itemOutputs, m, nil
+}
+
+func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) (*info.ImageDetails, error) {
+	// Image does not have a hash, need to upload source and get image hash
+	f := fetcher.OriginalFetcher{Paths: sc.Adapters.Paths}
+	imageDetails, _, err := f.Fetch(namespace, item.URL, item.Hash)
+
+	if err != nil {
 		return nil, err
 	}
 
-	return itemOutputs, nil
+	hash := imageDetails.Hash
+	item.Width = imageDetails.Width
+	item.Height = imageDetails.Height
+	item.Hash = hash
+
+	return imageDetails, nil
 }
 
-func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) error {
-	// Image does not have a hash, need to upload source and get image hash
-	f := fetcher.OriginalFetcher{Paths: sc.Adapters.Paths}
-	imageDetails, downloaded, err := f.Fetch(namespace, item.URL, item.Hash)
+func uploadOriginal(sc *core.ServerConfiguration, namespace string, item *Item, imageDetails *info.ImageDetails) error {
 
+	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, item.Hash)
+	uploader := uploader.DefaultUploader(sc.RemoteBasePath)
+
+	err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, item.Hash))
 	if err != nil {
 		return err
 	}
 
-	hash := imageDetails.Hash
-	if downloaded {
-		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
-		uploader := uploader.DefaultUploader(sc.RemoteBasePath)
+	destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, item.Hash)
+	localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, item.Hash)
+	remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, item.Hash)
 
-		err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, hash))
-		if err != nil {
-			return err
-		}
-
-		destination := sc.Adapters.Paths.RemoteOriginalPath(namespace, hash)
-		localInfoPath := sc.Adapters.Paths.LocalInfoPath(namespace, hash)
-		remoteInfoPath := sc.Adapters.Paths.RemoteInfoPath(namespace, hash)
-
-		err = info.SaveImageDetail(imageDetails, localInfoPath)
-		if err != nil {
-			return err
-		}
-
-		// upload info
-		err = uploader.Upload(localInfoPath, remoteInfoPath)
-		if err != nil {
-			return err
-		}
-
-		// upload original image
-		err = uploader.Upload(localOriginalPath, destination)
-		if err != nil {
-			return err
-		}
+	err = info.SaveImageDetail(imageDetails, localInfoPath)
+	if err != nil {
+		return err
 	}
 
-	item.Width = imageDetails.Width
-	item.Height = imageDetails.Height
-	item.Hash = hash
+	// upload info
+	err = uploader.Upload(localInfoPath, remoteInfoPath)
+	if err != nil {
+		return err
+	}
+
+	// upload original image
+	err = uploader.Upload(localOriginalPath, destination)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
