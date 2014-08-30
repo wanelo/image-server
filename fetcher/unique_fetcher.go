@@ -17,6 +17,8 @@ func NewUniqueFetcher(source string, destination string) *UniqueFetcher {
 	return &UniqueFetcher{source, destination}
 }
 
+// Fetch returns a boolean to denote if the image was downloaded.
+// This value is false when the image is already present in the filesystem
 func (f *UniqueFetcher) Fetch() (bool, error) {
 	c := make(chan FetchResult)
 	defer close(c)

@@ -97,30 +97,13 @@ type result struct {
 // digester processes image items till done is received.
 func digester(sc *core.ServerConfiguration, namespace string, outputs []string, done <-chan struct{}, items <-chan *Item, c chan<- result) {
 	for item := range items { // HLpaths
-		if item.Hash == "" {
-			err := downloadOriginalFromSource(sc, namespace, item)
-			if err != nil {
-				continue
-			}
+		err := downloadOriginal(sc, namespace, item)
+		if err != nil {
+			continue
 		}
 
 		log.Printf("About to process image: %s", item.Hash)
-
 		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, item.Hash)
-		remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, item.Hash)
-
-		f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
-		_, err := f.Fetch()
-		if err != nil {
-			// if not able to download original from store
-			if item.URL != "" {
-				// source URL is present, try downloading it again.
-				err = downloadOriginalFromSource(sc, namespace, item)
-				if err != nil {
-					continue
-				}
-			}
-		}
 
 		for _, filename := range outputs {
 			err := processImage(sc, namespace, item.Hash, localOriginalPath, filename)
@@ -140,14 +123,10 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 	}
 }
 
-func downloadOriginalFromSource(sc *core.ServerConfiguration, namespace string, item *Item) error {
-	if item.URL == "" {
-		return fmt.Errorf("Missing Hash & URL")
-	}
-
+func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) error {
 	// Image does not have a hash, need to upload source and get image hash
-	f := fetcher.NewSourceFetcher(sc.Adapters.Paths)
-	imageDetails, downloaded, err := f.Fetch(item.URL, namespace)
+	f := fetcher.OriginalFetcher{Paths: sc.Adapters.Paths}
+	imageDetails, downloaded, err := f.Fetch(namespace, item.URL, item.Hash)
 
 	if err != nil {
 		return err
