@@ -3,6 +3,7 @@ package cli
 import (
 	"container/list"
 	"fmt"
+	"log"
 	"math"
 	"os/exec"
 	"strconv"
@@ -85,13 +86,13 @@ func (p *Processor) originalDimensions(source string, ic *core.ImageConfiguratio
 	d := strings.Split(dimensions, "x")
 	w, err := strconv.Atoi(d[0])
 	if err != nil {
-		fmt.Printf("Can't convert width to integer: %s\n", d[0])
+		log.Printf("Can't convert width to integer: %s\n", d[0])
 		return 0, 0, err
 	}
 
 	h, err := strconv.Atoi(d[1])
 	if err != nil {
-		fmt.Printf("Can't convert height to integer: %s\n", d[1])
+		log.Printf("Can't convert height to integer: %s\n", d[1])
 		return 0, 0, err
 	}
 
