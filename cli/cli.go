@@ -15,6 +15,7 @@ import (
 	"github.com/wanelo/image-server/parser"
 	"github.com/wanelo/image-server/processor"
 	"github.com/wanelo/image-server/uploader"
+	mantaclient "github.com/wanelo/image-server/uploader/manta/client"
 )
 
 // Item represents all image properties needed for the result of the processing
@@ -96,16 +97,34 @@ type result struct {
 
 // digester processes image items till done is received.
 func digester(sc *core.ServerConfiguration, namespace string, outputs []string, done <-chan struct{}, items <-chan *Item, c chan<- result) {
-	for item := range items { // HLpaths
+	for item := range items {
+		var itemOutputs []string
+		fetchedExistingOutputs := false
+
+		if item.Hash != "" {
+			itemOutputs, _ = calculateMissingOutputs(sc, namespace, item.Hash, outputs)
+			fetchedExistingOutputs = true
+		}
+
 		err := downloadOriginal(sc, namespace, item)
 		if err != nil {
 			continue
 		}
 
+		// have not tried to retrieve existing outputs
+		if !fetchedExistingOutputs {
+			itemOutputs, err = calculateMissingOutputs(sc, namespace, item.Hash, outputs)
+			log.Println(itemOutputs, err)
+			if err != nil {
+				// process all outputs
+				copy(itemOutputs, outputs)
+			}
+		}
+
 		log.Printf("About to process image: %s", item.Hash)
 		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, item.Hash)
 
-		for _, filename := range outputs {
+		for _, filename := range itemOutputs {
 			err := processImage(sc, namespace, item.Hash, localOriginalPath, filename)
 			if err != nil {
 				log.Println(err)
@@ -121,6 +140,37 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 
 		fmt.Fprint(os.Stdout, item.ToTabDelimited())
 	}
+}
+
+func calculateMissingOutputs(sc *core.ServerConfiguration, namespace string, imageHash string, outputs []string) ([]string, error) {
+	// Determine what versions need to be generated
+	var itemOutputs []string
+	c := mantaclient.DefaultClient()
+	remoteDirectory := sc.Adapters.Paths.RemoteImageDirectory(namespace, imageHash)
+	entries, err := c.ListDirectory(remoteDirectory)
+	if err == nil {
+		m := make(map[string]mantaclient.Entry)
+		for _, entry := range entries {
+			if entry.Type == "object" {
+				m[entry.Name] = entry
+			} else {
+				// got a directory
+			}
+		}
+
+		for _, output := range outputs {
+			if _, ok := m[output]; ok {
+				log.Printf("Skipping %s/%s", remoteDirectory, output)
+			} else {
+				itemOutputs = append(itemOutputs, output)
+			}
+		}
+
+	} else {
+		return nil, err
+	}
+
+	return itemOutputs, nil
 }
 
 func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) error {
