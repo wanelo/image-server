@@ -65,11 +65,11 @@ func main() {
 					os.Exit(1)
 				}
 
-				initializeUploader(sc)
+				// initializeUploader(sc)
 				outputsStr := c.GlobalString("outputs")
 				if outputsStr == "" {
-					log.Println("Need to specify outputs: 'x300jpg,x300.webp'")
-					return
+					log.Println("Need to specify outputs: 'x300.jpg,x300.webp'")
+					os.Exit(1)
 				}
 
 				// input := bufio.NewReader(os.Stdin)
@@ -106,6 +106,7 @@ func globalFlags() []cli.Flag {
 	}
 }
 
+// initializeUploader creates base path on destination server
 func initializeUploader(sc *core.ServerConfiguration) {
 	uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 	err := uploader.Initialize()
@@ -133,6 +134,10 @@ func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 	return sc, nil
 }
 
+// serverConfigurationFromContext returns a core.ServerConfiguration initialized
+// from command line flags or defaults.
+// Command line flags preceding the Command (server, process, etc) are registered
+// as globals. Flags succeeding the Command are not globals.
 func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 	return &core.ServerConfiguration{
 		WhitelistedExtensions: strings.Split(c.GlobalString("extensions"), ","),

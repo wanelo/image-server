@@ -6,7 +6,7 @@ import (
 	"github.com/wanelo/image-server/uploader/manta/client"
 )
 
-var ImageExecutable = "/assets/wanelo/public/images/bin/images-solaris-1.0.6"
+var ImageExecutable = "/wanelo/public/images/bin/images-solaris-1.0.6"
 var ImageInitScript = "/wanelo/stor/images/init.sh"
 
 type JobCreator interface {
@@ -19,7 +19,7 @@ type MantaJob struct {
 }
 
 func (j *MantaJob) ToImageCommand() string {
-	return fmt.Sprintf("%s --remote_base_path %s --outputs %s process", ImageExecutable, j.BasePath, j.Outputs)
+	return fmt.Sprintf("/assets%s --remote_base_path %s --outputs %s process $MANTA_INPUT_FILE", ImageExecutable, j.BasePath, j.Outputs)
 }
 
 func (j *MantaJob) ToJobOpts() client.CreateJobOpts {

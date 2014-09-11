@@ -4,7 +4,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
@@ -14,16 +13,14 @@ import (
 )
 
 func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
+	vars := mux.Vars(req)
+	namespace := vars["namespace"]
+
 	r := render.New(render.Options{
 		IndentJSON: true,
 	})
 
-	batchSize, err := strconv.Atoi(req.FormValue("batch_size"))
-	if err != nil {
-		batchSize = 1000
-	}
-
-	job, err := mantajob.CreateJob(sc.Outputs, sc.RemoteBasePath, batchSize, req.Body)
+	job, err := mantajob.CreateJob(sc.Outputs, sc.RemoteBasePath, namespace, req.Body)
 	if err != nil {
 		errorHandlerJSON(err, w, r, http.StatusInternalServerError)
 		return
@@ -34,8 +31,6 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 	}
 
 	r.JSON(w, http.StatusOK, json)
-
-	go job.AddJobs(job.InputsCount)
 }
 
 func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
