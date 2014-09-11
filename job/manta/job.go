@@ -8,11 +8,13 @@ import (
 	"os"
 	"strings"
 
+	"github.com/wanelo/image-server/job"
 	"github.com/wanelo/image-server/uploader"
 	"github.com/wanelo/image-server/uploader/manta/client"
 )
 
 type Job struct {
+	Input          io.Reader
 	Outputs        string
 	BatchSize      int
 	JobID          string
@@ -20,19 +22,39 @@ type Job struct {
 	RemoteBasePath string
 }
 
-func CreateJob(outputs string, remoteBasePath string, batchSize int, input io.Reader) (job *Job, err error) {
-	job = &Job{
-		Outputs:   outputs,
-		BatchSize: batchSize,
-	}
-	job.JobID, err = createBatchJob(outputs, remoteBasePath)
+// CreateJob
+func CreateJob(outputs string, remoteBasePath string, input io.Reader) (j *Job, err error) {
+	j = &Job{Input: input, Outputs: outputs}
+
+	mantaClient := client.DefaultClient()
+	mantaJob := job.MantaJob{BasePath: remoteBasePath, Outputs: outputs}
+	j.JobID, err = mantaJob.CreateMantaJob(mantaClient)
 	if err != nil {
 		return nil, err
 	}
 
-	job.InputsCount, err = job.createInputs(input)
+	j.InputsCount, err = j.createInputs(input)
 
-	return job, err
+	return j, err
+}
+
+fun (job Job) ToJobInput() io.Reader {
+
+}
+
+func (job Job) AddInputs() error {
+	input := job.ToJobInput()
+
+	err = mantaClient.AddJobInput(job.JobID, input)
+	if err != nil {
+		return err
+	}
+
+	err = mantaClient.EndJobInput(job.JobID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (job Job) AddJobs(partitionCount int) error {
@@ -67,6 +89,9 @@ func (job Job) AddJobs(partitionCount int) error {
 	return nil
 }
 
+// createInputs splits input into multiple partitioned files with batch size
+// and returns the number of partitions created.
+// files are stored on tmp directory under job uuid
 func (job Job) createInputs(input io.Reader) (partition int, err error) {
 	dirName := fmt.Sprintf("tmp/%s", job.JobID)
 	os.MkdirAll(dirName, 0700)
@@ -90,48 +115,19 @@ func (job Job) createInputs(input io.Reader) (partition int, err error) {
 		items = append(items, line)
 
 		count++
-		if count >= job.BatchSize {
+		if count >= job.BatchSize || eof {
 			count = 0
-			writeBatchPartition(job.JobID, partition, items)
+			err = writeBatchPartition(job.JobID, partition, items)
+			if err != nil {
+				log.Println("Can't write batch partition", job.JobID, partition, err)
+				return 0, err
+			}
 			items = nil
 			partition++
 		}
 	}
 
-	// write the remaining items
-	if items != nil {
-		err = writeBatchPartition(job.JobID, partition, items)
-		if err != nil {
-			log.Println("Can't write batch partition", job.JobID, partition, err)
-			return partition, err
-		}
-	}
-
 	return partition, nil
-}
-
-func createBatchJob(outputs string, remoteBasePath string) (string, error) {
-	mantaClient := client.DefaultClient()
-	exec := fmt.Sprintf("/assets/wanelo/public/images/bin/images-solaris-1.0.6 --remote_base_path %s --outputs %s process", remoteBasePath, outputs)
-
-	phases := []client.Phase{
-		{Type: "map",
-			Exec: exec,
-			Init: "/assets/wanelo/stor/images/init.sh",
-			Assets: []string{
-				"/wanelo/public/images/bin/images-solaris-1.0.6",
-				"/wanelo/stor/images/init.sh",
-			},
-		},
-		{Type: "reduce", Exec: "cat"},
-	}
-
-	opts := client.CreateJobOpts{Phases: phases}
-	jobID, err := mantaClient.CreateJob(opts)
-	if err != nil {
-		return "", err
-	}
-	return jobID, nil
 }
 
 func uploadBatchPartition(jobID string, partition int, uploader *uploader.Uploader) error {

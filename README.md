@@ -106,7 +106,12 @@ Allows to download a range of images in parallel
 images-manta -start 10000000 -end 10001000 -concurrency 100
 ```
 
+## Manta
 
+Command for manta task:
+```shell
+image --remote_base_path public/images --outputs x300.webp,x300.jpg process $MANTA_INPUT_FILE
+```
 
 ## Error Handling
 
