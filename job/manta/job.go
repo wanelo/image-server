@@ -18,7 +18,8 @@ type Job struct {
 	Namespace      string
 }
 
-// CreateJob
+// CreateJob takes the supplied Job metadata and image hash stream and initializes
+// a Manta job. It then adds the inputs to the Manta job.
 func CreateJob(outputs string, remoteBasePath string, namespace string, input io.Reader) (j *Job, err error) {
 	mantaClient := client.DefaultClient()
 	basePath := fmt.Sprintf("/%s/%s", mantaClient.User, remoteBasePath)
