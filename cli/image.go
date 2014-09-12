@@ -10,6 +10,7 @@ import (
 	"github.com/wanelo/image-server/parser"
 	"github.com/wanelo/image-server/processor"
 
+	"github.com/wanelo/image-server/uploader"
 	mantaclient "github.com/wanelo/image-server/uploader/manta/client"
 )
 
@@ -18,17 +19,21 @@ import (
 //
 //
 type ImageUpload struct {
-	LocalPath string
+	ServerConfiguration *core.ServerConfiguration
+	Namespace           string
+	Hash                string
+	Filename            string
+	LocalPath           string
 }
 
 func (iu *ImageUpload) Upload() error {
-	log.Printf("uploading to manta: %s", iu.LocalPath)
-	// uploader := uploader.DefaultUploader(sc.RemoteBasePath)
-	// remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(ip.Namespace, ip.Image.Hash, filename)
-	// err = uploader.Upload(imageUpload.LocalPath, remoteResizedPath)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
+	uploader := uploader.DefaultUploader("")
+	remoteResizedPath := iu.ServerConfiguration.Adapters.Paths.RemoteImagePath(iu.Namespace, iu.Hash, iu.Filename)
+	log.Printf("uploading %s to manta: %s", iu.LocalPath, remoteResizedPath)
+	err := uploader.Upload(iu.LocalPath, remoteResizedPath)
+	if err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
@@ -114,8 +119,14 @@ func (ip *ImageProcessor) ProcessOutput(sc *core.ServerConfiguration, filename s
 	// and run it through ImageUpload to get it into manta
 	select {
 	case localImagePath := <-ip.channel:
+		// Hash                string
+
 		upload := ImageUpload{
-			LocalPath: localImagePath,
+			ServerConfiguration: sc,
+			LocalPath:           localImagePath,
+			Filename:            filename,
+			Namespace:           ip.Namespace,
+			Hash:                ip.Image.Hash,
 		}
 		upload.Upload()
 	}
