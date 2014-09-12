@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/info"
 )
 
 // Item represents all image properties needed for the result of the processing
@@ -20,11 +22,21 @@ func (i Item) ToTabDelimited() string {
 }
 
 func Process(sc *core.ServerConfiguration, namespace string, outputs []string, path string) error {
+
 	processor := NewImageProcessor(namespace, path, outputs)
 	err := processor.ProcessMissing(sc)
 	if err != nil {
 		return err
 	}
+
+	i := info.Info{Path: path}
+	id, err := i.ImageDetails()
+	if err != nil {
+		return err
+	}
+
+	item := Item{Hash: id.Hash, Width: id.Width, Height: id.Width}
+	fmt.Fprint(os.Stdout, item.ToTabDelimited())
 
 	return nil
 }
