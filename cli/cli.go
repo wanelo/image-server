@@ -164,6 +164,13 @@ func calculateMissingOutputs(sc *core.ServerConfiguration, namespace string, ima
 				m[entry.Name] = entry
 			} else {
 				// got a directory
+				invalidDirectoryPath := fmt.Sprintf("%s/%s", remoteDirectory, entry.Name)
+				err2 := c.DeleteDirectory(invalidDirectoryPath)
+				if err2 != nil {
+					log.Println("Unable to delete directory", invalidDirectoryPath)
+				} else {
+					log.Println("Deleted invalid directory", invalidDirectoryPath)
+				}
 			}
 		}
 

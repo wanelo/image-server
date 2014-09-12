@@ -104,6 +104,18 @@ func (c *Client) PutDirectory(path string) error {
 	return c.ensureStatus(resp, 204)
 }
 
+// DeleteDirectory deletes a directory. The directory must be empty. There is no response data from this request. On success an HTTP 204 is returned
+func (c *Client) DeleteDirectory(path string) error {
+	resp, err := c.Delete(path)
+
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return c.ensureStatus(resp, 204)
+}
+
 // ListDirectory lists the contents of a directory
 // https://apidocs.joyent.com/manta/api.html#ListDirectory
 func (c *Client) ListDirectory(path string) ([]Entry, error) {
@@ -161,6 +173,11 @@ func (c *Client) Put(path string, headers http.Header, r io.Reader) (*http.Respo
 // Post executes a POST request and returns the response.
 func (c *Client) Post(path string, headers http.Header, body io.Reader) (*http.Response, error) {
 	return c.Do("POST", path, headers, body)
+}
+
+// Delete executes a DELETE request and returns the response.
+func (c *Client) Delete(path string) (*http.Response, error) {
+	return c.Do("DELETE", path, nil, nil)
 }
 
 // Do executes a method request and returns the response.
