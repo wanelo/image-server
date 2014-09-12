@@ -4,7 +4,7 @@ ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 MANTA_USER := $(shell echo $(MANTA_USER))
-VERSION=1.0.6
+VERSION=1.1.0
 
 all: deps
 	@mkdir -p bin/

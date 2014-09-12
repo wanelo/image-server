@@ -28,7 +28,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "images"
-	app.Version = "1.0.4"
+	app.Version = "1.1.0"
 	app.Usage = "Image server and CLI"
 	app.Action = func(c *cli.Context) {
 		println("Need to provide subcommand: server or process")

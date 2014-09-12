@@ -6,7 +6,7 @@ import (
 	"github.com/wanelo/image-server/uploader/manta/client"
 )
 
-var ImageExecutable = "/wanelo/public/images/bin/images-solaris-1.0.6"
+var ImageExecutable = "/wanelo/public/images/bin/images-solaris-1.1.0"
 var ImageInitScript = "/wanelo/stor/images/init.sh"
 
 type JobCreator interface {
