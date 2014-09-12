@@ -65,17 +65,52 @@ func main() {
 					os.Exit(1)
 				}
 
-				initializeUploader(sc)
+				// initializeUploader(sc)
 				outputsStr := c.GlobalString("outputs")
 				if outputsStr == "" {
-					log.Println("Need to specify outputs: 'x300jpg,x300.webp'")
-					return
+					log.Println("Need to specify outputs: 'x300.jpg,x300.webp'")
+					os.Exit(1)
 				}
 
 				// input := bufio.NewReader(os.Stdin)
 				namespace := c.GlobalString("namespace")
 				outputs := strings.Split(outputsStr, ",")
-				err = cliprocessor.Process(sc, namespace, outputs, os.Stdin)
+				path := c.Args().First()
+				if path == "" {
+					log.Println("Need to pass an image path ARG")
+					os.Exit(1)
+				}
+
+				err = cliprocessor.Process(sc, namespace, outputs, path)
+				if err != nil {
+					log.Println(err)
+					os.Exit(1)
+				}
+
+			},
+		},
+		{
+			Name:      "process_stream",
+			ShortName: "ps",
+			Usage:     "process image dimensions",
+			Action: func(c *cli.Context) {
+				sc, err := serverConfiguration(c)
+				if err != nil {
+					log.Println(err)
+					os.Exit(1)
+				}
+
+				// initializeUploader(sc)
+				outputsStr := c.GlobalString("outputs")
+				if outputsStr == "" {
+					log.Println("Need to specify outputs: 'x300.jpg,x300.webp'")
+					os.Exit(1)
+				}
+
+				// input := bufio.NewReader(os.Stdin)
+				namespace := c.GlobalString("namespace")
+				outputs := strings.Split(outputsStr, ",")
+				err = cliprocessor.ProcessStream(sc, namespace, outputs, os.Stdin)
 				if err != nil {
 					log.Println(err)
 					os.Exit(1)
@@ -106,6 +141,7 @@ func globalFlags() []cli.Flag {
 	}
 }
 
+// initializeUploader creates base path on destination server
 func initializeUploader(sc *core.ServerConfiguration) {
 	uploader := uploader.DefaultUploader(sc.RemoteBasePath)
 	err := uploader.Initialize()
@@ -133,6 +169,10 @@ func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 	return sc, nil
 }
 
+// serverConfigurationFromContext returns a core.ServerConfiguration initialized
+// from command line flags or defaults.
+// Command line flags preceding the Command (server, process, etc) are registered
+// as globals. Flags succeeding the Command are not globals.
 func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 	return &core.ServerConfiguration{
 		WhitelistedExtensions: strings.Split(c.GlobalString("extensions"), ","),

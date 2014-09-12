@@ -63,7 +63,7 @@ func (p *Processor) commandArgs(source string, destination string, ic *core.Imag
 	}
 
 	args.PushBack("-background")
-	args.PushBack("rgba\\(255,255,255,1\\)")
+	args.PushBack("rgba(255,255,255,1)")
 
 	args.PushBack("-quality")
 	args.PushBack(fmt.Sprintf("%d", ic.Quality))
