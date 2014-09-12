@@ -75,7 +75,42 @@ func main() {
 				// input := bufio.NewReader(os.Stdin)
 				namespace := c.GlobalString("namespace")
 				outputs := strings.Split(outputsStr, ",")
-				err = cliprocessor.Process(sc, namespace, outputs, os.Stdin)
+				path := c.Args().First()
+				if path == "" {
+					log.Println("Need to pass an image path ARG")
+					os.Exit(1)
+				}
+
+				err = cliprocessor.Process(sc, namespace, outputs, path)
+				if err != nil {
+					log.Println(err)
+					os.Exit(1)
+				}
+
+			},
+		},
+		{
+			Name:      "process_stream",
+			ShortName: "ps",
+			Usage:     "process image dimensions",
+			Action: func(c *cli.Context) {
+				sc, err := serverConfiguration(c)
+				if err != nil {
+					log.Println(err)
+					os.Exit(1)
+				}
+
+				// initializeUploader(sc)
+				outputsStr := c.GlobalString("outputs")
+				if outputsStr == "" {
+					log.Println("Need to specify outputs: 'x300.jpg,x300.webp'")
+					os.Exit(1)
+				}
+
+				// input := bufio.NewReader(os.Stdin)
+				namespace := c.GlobalString("namespace")
+				outputs := strings.Split(outputsStr, ",")
+				err = cliprocessor.ProcessStream(sc, namespace, outputs, os.Stdin)
 				if err != nil {
 					log.Println(err)
 					os.Exit(1)
