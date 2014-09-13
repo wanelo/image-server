@@ -14,12 +14,13 @@ type JobCreator interface {
 }
 
 type MantaJob struct {
-	BasePath string
-	Outputs  string
+	BasePath  string
+	Outputs   string
+	Namespace string
 }
 
 func (j *MantaJob) ToImageCommand() string {
-	return fmt.Sprintf("/assets%s --remote_base_path %s --outputs %s process $MANTA_INPUT_FILE", ImageExecutable, j.BasePath, j.Outputs)
+	return fmt.Sprintf("/assets%s --remote_base_path %s --namespace %s --outputs %s process $MANTA_INPUT_FILE", ImageExecutable, j.BasePath, j.Namespace, j.Outputs)
 }
 
 func (j *MantaJob) ToJobOpts() client.CreateJobOpts {

@@ -25,7 +25,7 @@ func CreateJob(outputs string, remoteBasePath string, namespace string, input io
 	basePath := fmt.Sprintf("/%s/%s", mantaClient.User, remoteBasePath)
 	j = &Job{Input: input, Outputs: outputs, RemoteBasePath: basePath, Namespace: namespace}
 
-	mantaJob := job.MantaJob{BasePath: j.RemoteBasePath, Outputs: outputs}
+	mantaJob := job.MantaJob{BasePath: j.RemoteBasePath, Outputs: outputs, Namespace: namespace}
 	j.JobID, err = mantaJob.CreateMantaJob(mantaClient)
 	if err != nil {
 		return nil, err

@@ -18,9 +18,9 @@ func (f *FakeMantaClient) CreateJob(opts client.CreateJobOpts) (string, error) {
 }
 
 func TestMantaJobImageCommand(t *testing.T) {
-	job := job.MantaJob{BasePath: "tacos", Outputs: "whatever"}
+	job := job.MantaJob{BasePath: "tacos", Outputs: "whatever", Namespace: "p"}
 	var output = job.ToImageCommand()
-	Equals(t, "/assets/wanelo/public/images/bin/images-solaris-1.1.0 --remote_base_path tacos --outputs whatever process $MANTA_INPUT_FILE", output)
+	Equals(t, "/assets/wanelo/public/images/bin/images-solaris-1.1.0 --remote_base_path tacos --namespace p --outputs whatever process $MANTA_INPUT_FILE", output)
 }
 
 func TestMantaJobOpts(t *testing.T) {
