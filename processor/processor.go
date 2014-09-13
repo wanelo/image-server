@@ -3,6 +3,7 @@ package processor
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/wanelo/image-server/core"
@@ -61,6 +62,9 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 func (p *Processor) createIfNotAvailable() error {
 	if _, err := os.Stat(p.Destination); os.IsNotExist(err) {
 		start := time.Now()
+
+		dir := filepath.Dir(p.Destination)
+		os.MkdirAll(dir, 0700)
 
 		processor := &adapter.Processor{}
 		err = processor.CreateImage(p.Source, p.Destination, p.ImageConfiguration)
