@@ -27,11 +27,14 @@ func HashPaths(input io.Reader, basePath string, namespace string) []HashPath {
 
 	line, err := reader.ReadString('\n')
 	for err != io.EOF {
-		hashPaths = append(hashPaths, HashPath{
-			BasePath:  basePath,
-			Namespace: namespace,
-			Hash:      strings.TrimSpace(line),
-		})
+		hash := strings.TrimSpace(line)
+		if len(hash) == 32 {
+			hashPaths = append(hashPaths, HashPath{
+				BasePath:  basePath,
+				Namespace: namespace,
+				Hash:      hash,
+			})
+		}
 		line, err = reader.ReadString('\n')
 	}
 
