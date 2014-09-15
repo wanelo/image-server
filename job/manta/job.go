@@ -16,6 +16,7 @@ type Job struct {
 	InputsCount    int
 	RemoteBasePath string
 	Namespace      string
+	JobInput       io.Reader
 }
 
 // CreateJob takes the supplied Job metadata and image hash stream and initializes
@@ -30,20 +31,14 @@ func CreateJob(outputs string, remoteBasePath string, namespace string, input io
 	if err != nil {
 		return nil, err
 	}
+	j.JobInput = j.ToMantaJobInput()
 
-	err = j.AddInputs()
-	if err != nil {
-		return nil, err
-	}
-
-	return j, err
+	return j, nil
 }
 
 func (j Job) AddInputs() error {
-	mantaPaths := j.ToMantaJobInput()
-
 	mantaClient := client.DefaultClient()
-	err := mantaClient.AddJobInput(j.JobID, mantaPaths)
+	err := mantaClient.AddJobInput(j.JobID, j.JobInput)
 	if err != nil {
 		return err
 	}

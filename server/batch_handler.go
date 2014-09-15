@@ -31,6 +31,8 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 	}
 
 	r.JSON(w, http.StatusOK, json)
+
+	go job.AddInputs()
 }
 
 func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
