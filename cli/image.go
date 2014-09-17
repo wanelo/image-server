@@ -62,7 +62,7 @@ func (ip *ImageProcessor) calculateMissingOutputs(sc *core.ServerConfiguration) 
 	// Determine what versions need to be generated
 	var itemOutputs []string
 	c := mantaclient.DefaultClient()
-	c.Timeout = sc.HTTPTimeout
+	c.HTTPTimeout = sc.HTTPTimeout
 	m := make(map[string]mantaclient.Entry)
 	remoteDirectory := sc.Adapters.Paths.RemoteImageDirectory(ip.Namespace, ip.Image.Hash)
 	entries, err := c.ListDirectory(remoteDirectory)
