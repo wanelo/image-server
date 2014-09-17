@@ -59,8 +59,12 @@ func BatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfi
 		w.WriteHeader(200)
 		io.Copy(w, result)
 	} else {
-		// if not complete return 202
-		w.WriteHeader(202)
+		// If not complete, return job details and 202
+		r := render.New(render.Options{
+			IndentJSON: true,
+		})
+
+		r.JSON(w, 202, job)
 	}
 }
 
