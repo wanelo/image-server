@@ -1,5 +1,7 @@
 package core
 
+import "time"
+
 // ServerConfiguration struct
 type ServerConfiguration struct {
 	WhitelistedExtensions []string
@@ -10,6 +12,7 @@ type ServerConfiguration struct {
 	DefaultQuality        uint
 	UploaderConcurrency   uint
 	ProcessorConcurrency  uint
+	HTTPTimeout           time.Duration
 	GraphiteHost          string
 	GraphitePort          int
 	Adapters              *Adapters

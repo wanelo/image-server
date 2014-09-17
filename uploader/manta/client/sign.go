@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -16,16 +15,6 @@ import (
 	"code.google.com/p/go.crypto/ssh"
 	"code.google.com/p/go.crypto/ssh/agent"
 )
-
-// Client is a Manta client. Client is not safe for concurrent use.
-type Client struct {
-	User      string
-	KeyId     string
-	Key       string
-	Url       string
-	signer    ssh.Signer
-	agentConn io.ReadWriter
-}
 
 func homeDir() (string, error) {
 	user, err := user.Current()

@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"net/http"
 	_ "net/http/pprof"
@@ -138,6 +139,7 @@ func globalFlags() []cli.Flag {
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
 		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
 		cli.IntFlag{Name: "processor_concurrency", Value: 4, Usage: "Processor concurrency"},
+		cli.IntFlag{Name: "http_timeout", Value: 5, Usage: "HTTP request timeout in seconds"},
 	}
 }
 
@@ -174,6 +176,8 @@ func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 // Command line flags preceding the Command (server, process, etc) are registered
 // as globals. Flags succeeding the Command are not globals.
 func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
+	httpTimeout := time.Duration(c.GlobalInt("http_timeout")) * time.Second
+
 	return &core.ServerConfiguration{
 		WhitelistedExtensions: strings.Split(c.GlobalString("extensions"), ","),
 		LocalBasePath:         c.GlobalString("local_base_path"),
@@ -185,7 +189,7 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 		Outputs:               c.GlobalString("outputs"),
 		DefaultQuality:        uint(c.GlobalInt("default_quality")),
 		UploaderConcurrency:   uint(c.GlobalInt("uploader_concurrency")),
-		ProcessorConcurrency:  uint(c.GlobalInt("processor_concurrency")),
+		HTTPTimeout:           httpTimeout,
 	}
 }
 

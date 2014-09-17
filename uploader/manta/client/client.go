@@ -11,12 +11,24 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"code.google.com/p/go.crypto/ssh"
 )
 
 var MANTA_URL, MANTA_USER, MANTA_KEY_ID, SDC_IDENTITY string
 var keySigner ssh.Signer
+
+// Client is a Manta client. Client is not safe for concurrent use.
+type Client struct {
+	User        string
+	KeyId       string
+	Key         string
+	Url         string
+	HTTPTimeout time.Duration
+	signer      ssh.Signer
+	agentConn   io.ReadWriter
+}
 
 // Entry represents an object stored in Manta, either a file or a directory
 type Entry struct {
@@ -49,10 +61,11 @@ func init() {
 // default Manta environment variables.
 func DefaultClient() *Client {
 	return &Client{
-		User:  MANTA_USER,
-		KeyId: MANTA_KEY_ID,
-		Key:   SDC_IDENTITY,
-		Url:   MANTA_URL,
+		User:        MANTA_USER,
+		KeyId:       MANTA_KEY_ID,
+		Key:         SDC_IDENTITY,
+		Url:         MANTA_URL,
+		HTTPTimeout: 5 * time.Second,
 	}
 }
 
@@ -200,7 +213,9 @@ func (c *Client) Do(method, path string, headers http.Header, r io.Reader) (*htt
 		}
 	}
 
-	return http.DefaultClient.Do(req)
+	tr := &http.Transport{ResponseHeaderTimeout: c.HTTPTimeout}
+	client := &http.Client{Transport: tr}
+	return client.Do(req)
 }
 
 // NewRequest is similar to http.NewRequest except it appends path to
