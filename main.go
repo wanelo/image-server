@@ -52,7 +52,7 @@ func main() {
 				go initializeUploader(sc)
 
 				port := c.GlobalString("port")
-				server.InitializeRouter(sc, port)
+				server.InitializeRouter(sc, c.GlobalString("listen"), port)
 			},
 		},
 		{
@@ -141,6 +141,7 @@ func globalFlags() []cli.Flag {
 		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
 		cli.StringFlag{Name: "namespace", Value: "p", Usage: "Namespace"},
 		cli.StringFlag{Name: "outputs", Value: default_outputs, Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
+		cli.StringFlag{Name: "listen", Value: "127.0.0.1", Usage: "IP address the server listens to"},
 		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
 		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
@@ -155,7 +156,7 @@ func initializeUploader(sc *core.ServerConfiguration) {
 	uploader := uploader.DefaultUploader(sc)
 	err := uploader.Initialize()
 	if err != nil {
-		log.Println("EXITING: Unable to initialize manta: ", err)
+		log.Println("EXITING: Unable to initialize uploader: ", err)
 		os.Exit(2)
 	}
 }

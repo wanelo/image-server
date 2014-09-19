@@ -16,8 +16,8 @@ import (
 	"github.com/wanelo/image-server/uploader"
 )
 
-func InitializeRouter(sc *core.ServerConfiguration, port string) {
-	log.Println("starting server on http://0.0.0.0:" + port)
+func InitializeRouter(sc *core.ServerConfiguration, listen string, port string) {
+	log.Printf("starting server on http://%s:%s", listen, port)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/{namespace:[a-z0-9]+}", func(wr http.ResponseWriter, req *http.Request) {
@@ -41,7 +41,7 @@ func InitializeRouter(sc *core.ServerConfiguration, port string) {
 	n := negroni.Classic()
 	n.UseHandler(router)
 
-	n.Run(":" + port)
+	n.Run(listen + ":" + port)
 }
 
 func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
