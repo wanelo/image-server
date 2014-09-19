@@ -19,11 +19,12 @@ type Uploader struct {
 	BaseDir string
 }
 
-func DefaultUploader() *Uploader {
+func DefaultUploader(baseDir string) *Uploader {
 	c := client.DefaultClient()
 
 	return &Uploader{
-		Client: c,
+		Client:  c,
+		BaseDir: baseDir,
 	}
 }
 
