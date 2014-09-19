@@ -124,7 +124,14 @@ func main() {
 	app.Run(os.Args)
 }
 
+// globalFlags returns flags. If the flags are not present, it will try
+// extracting values from the environment, otherwise it will use default values
 func globalFlags() []cli.Flag {
+	default_outputs := os.Getenv("IMG_OUTPUTS")
+	if default_outputs == "" {
+		default_outputs = "full_size.jpg,full_size.webp,x110-q90.jpg,x200-q90.jpg,x354-q80.jpg,w620-q80.jpg,w736-q75.jpg,w1472-q65.jpg,x110-q90.webp,x200-q90.webp,x354-q80.webp,w620-q80.webp,w736-q75.webp,w1472-q65.webp"
+	}
+
 	return []cli.Flag{
 		cli.StringFlag{Name: "port", Value: "7000", Usage: "Specifies the server port."},
 		cli.StringFlag{Name: "extensions", Value: "jpg,gif,webp", Usage: "Whitelisted extensions (separated by commas)"},
@@ -133,7 +140,7 @@ func globalFlags() []cli.Flag {
 		cli.StringFlag{Name: "remote_base_path", Value: "public/images/development", Usage: "base path for manta storage"},
 		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
 		cli.StringFlag{Name: "namespace", Value: "p", Usage: "Namespace"},
-		cli.StringFlag{Name: "outputs", Value: "full_size.jpg,full_size.webp,x110-q90.jpg,x200-q90.jpg,x354-q80.jpg,w620-q80.jpg,w736-q75.jpg,w1472-q65.jpg,x110-q90.webp,x200-q90.webp,x354-q80.webp,w620-q80.webp,w736-q75.webp,w1472-q65.webp", Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
+		cli.StringFlag{Name: "outputs", Value: default_outputs, Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
 		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
 		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
@@ -186,10 +193,14 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 		MaximumWidth:          c.GlobalInt("maximum_width"),
 		RemoteBasePath:        c.GlobalString("remote_base_path"),
 		RemoteBaseURL:         c.GlobalString("remote_base_url"),
-		Outputs:               c.GlobalString("outputs"),
-		DefaultQuality:        uint(c.GlobalInt("default_quality")),
-		UploaderConcurrency:   uint(c.GlobalInt("uploader_concurrency")),
-		HTTPTimeout:           httpTimeout,
+
+		AWSAccessKeyID: c.GlobalString("aws_access_key_id"),
+		AWSSecretKey:   c.GlobalString("aws_secret_key"),
+
+		Outputs:             c.GlobalString("outputs"),
+		DefaultQuality:      uint(c.GlobalInt("default_quality")),
+		UploaderConcurrency: uint(c.GlobalInt("uploader_concurrency")),
+		HTTPTimeout:         httpTimeout,
 	}
 }
 

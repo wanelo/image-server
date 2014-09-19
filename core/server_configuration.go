@@ -17,4 +17,6 @@ type ServerConfiguration struct {
 	GraphitePort          int
 	Adapters              *Adapters
 	Outputs               string
+	AWSAccessKeyID        string
+	AWSSecretKey          string
 }
