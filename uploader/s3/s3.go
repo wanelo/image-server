@@ -1,28 +1,35 @@
 package s3
 
 import (
+	"io/ioutil"
+	"net/http"
+
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
 )
 
+// Uploader for S3
 type Uploader struct {
+	AccessKey  string
+	SecretKey  string
+	Token      string
 	BucketName string
-	Bucket     s3.Bucket
 }
 
 // Upload copies a file int a bucket in S3
-func (u *Uploader) Upload(source string, destination string) error {
-	bucket, err := u.bucket()
-	var data []byte
+func (u *Uploader) Upload(source string, destination string, contType string) error {
+	bucket := u.retrieveBucket()
+	data, err := ioutil.ReadFile(source)
 
-	// need real content type here
-	contType := "image/jpeg"
+	if err != nil {
+		return err
+	}
 
-	perm := s3.PublicRead
-	data, err = pathToBytes(source)
+	if contType != "" {
+		contType = http.DetectContentType(data)
+	}
 
-	err = bucket.Put(destination, data, contType, perm)
-	// log.Print(fmt.Sprintf("%T %+v", resp.Buckets[0], resp.Buckets[0]))
+	err = bucket.Put(destination, data, contType, s3.PublicRead)
 	return err
 }
 
@@ -37,18 +44,8 @@ func (u *Uploader) Initialize() error {
 	return nil
 }
 
-func (u *Uploader) bucket() (*s3.Bucket, error) {
-	auth, err := aws.EnvAuth()
-
-	if err != nil {
-		return &s3.Bucket{}, err
-	}
-
+func (u *Uploader) retrieveBucket() *s3.Bucket {
+	auth := aws.Auth{AccessKey: u.AccessKey, SecretKey: u.SecretKey, Token: u.Token}
 	client := s3.New(auth, aws.USEast)
-	return client.Bucket(u.BucketName), nil
-}
-
-func pathToBytes(path string) ([]byte, error) {
-	var data []byte
-	return data, nil
+	return client.Bucket(u.BucketName)
 }

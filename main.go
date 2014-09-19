@@ -152,7 +152,7 @@ func globalFlags() []cli.Flag {
 
 // initializeUploader creates base path on destination server
 func initializeUploader(sc *core.ServerConfiguration) {
-	uploader := uploader.DefaultUploader(sc.RemoteBasePath)
+	uploader := uploader.DefaultUploader(sc)
 	err := uploader.Initialize()
 	if err != nil {
 		log.Println("EXITING: Unable to initialize manta: ", err)

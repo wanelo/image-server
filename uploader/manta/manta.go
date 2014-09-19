@@ -15,7 +15,8 @@ type MantaClient interface {
 }
 
 type Uploader struct {
-	Client MantaClient
+	Client  MantaClient
+	BaseDir string
 }
 
 func DefaultUploader() *Uploader {
@@ -26,7 +27,7 @@ func DefaultUploader() *Uploader {
 	}
 }
 
-func (u *Uploader) Upload(source string, destination string) error {
+func (u *Uploader) Upload(source string, destination string, contType string) error {
 	log.Println("About to Upload:", source)
 	fi, err := os.Open(source)
 
@@ -77,6 +78,10 @@ func (u *Uploader) CreateDirectory(dir string) error {
 		}
 	}
 	return nil
+}
+
+func (u *Uploader) Initialize() error {
+	return u.CreateDirectory(u.BaseDir)
 }
 
 func (u *Uploader) createDirectory(path string) error {

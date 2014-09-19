@@ -189,7 +189,7 @@ func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item
 func uploadOriginal(sc *core.ServerConfiguration, namespace string, item *Item, imageDetails *info.ImageDetails) error {
 
 	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, item.Hash)
-	uploader := uploader.DefaultUploader(sc.RemoteBasePath)
+	uploader := uploader.DefaultUploader(sc)
 
 	err := uploader.CreateDirectory(sc.Adapters.Paths.RemoteImageDirectory(namespace, item.Hash))
 	if err != nil {
@@ -206,13 +206,13 @@ func uploadOriginal(sc *core.ServerConfiguration, namespace string, item *Item, 
 	}
 
 	// upload info
-	err = uploader.Upload(localInfoPath, remoteInfoPath)
+	err = uploader.Upload(localInfoPath, remoteInfoPath, "application/json")
 	if err != nil {
 		return err
 	}
 
 	// upload original image
-	err = uploader.Upload(localOriginalPath, destination)
+	err = uploader.Upload(localOriginalPath, destination, "image")
 	if err != nil {
 		return err
 	}
@@ -253,9 +253,9 @@ func processImage(sc *core.ServerConfiguration, namespace string, hash string, l
 	select {
 	case <-pchan.ImageProcessed:
 		log.Println("about to upload to manta")
-		uploader := uploader.DefaultUploader(sc.RemoteBasePath)
+		uploader := uploader.DefaultUploader(sc)
 		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
-		err = uploader.Upload(localPath, remoteResizedPath)
+		err = uploader.Upload(localPath, remoteResizedPath, ic.ToContentType())
 		if err != nil {
 			log.Println(err)
 		}

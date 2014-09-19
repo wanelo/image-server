@@ -16,21 +16,20 @@ import (
 
 //
 //
-//
-//
 type ImageUpload struct {
 	ServerConfiguration *core.ServerConfiguration
 	Namespace           string
 	Hash                string
 	Filename            string
 	LocalPath           string
+	ContentType         string
 }
 
 func (iu *ImageUpload) Upload() error {
-	uploader := uploader.DefaultUploader("")
+	uploader := uploader.DefaultUploader(iu.ServerConfiguration)
 	remoteResizedPath := iu.ServerConfiguration.Adapters.Paths.RemoteImagePath(iu.Namespace, iu.Hash, iu.Filename)
 	log.Printf("uploading %s to manta: %s", iu.LocalPath, remoteResizedPath)
-	err := uploader.Upload(iu.LocalPath, remoteResizedPath)
+	err := uploader.Upload(iu.LocalPath, remoteResizedPath, iu.ContentType)
 	if err != nil {
 		log.Println(err)
 	}
