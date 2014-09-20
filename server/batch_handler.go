@@ -22,7 +22,7 @@ func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.Serve
 
 	job, err := mantajob.CreateJob(sc.Outputs, sc.RemoteBasePath, namespace, req.Body)
 	if err != nil {
-		errorHandlerJSON(err, w, r, http.StatusInternalServerError)
+		errorHandlerJSON(err, w, http.StatusInternalServerError)
 		return
 	}
 
