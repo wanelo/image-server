@@ -33,11 +33,11 @@ type ProcessorChannels struct {
 	Skipped        chan string
 }
 
-func (p *Processor) CreateImage() (string, error) {
+func (p *Processor) CreateImage() error {
 	c := make(chan ProcessorResult)
 	go p.uniqueCreateImage(c)
 	ipr := <-c
-	return ipr.ResizedPath, ipr.Error
+	return ipr.Error
 }
 
 func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {

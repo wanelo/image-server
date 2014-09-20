@@ -244,7 +244,7 @@ func processImage(sc *core.ServerConfiguration, namespace string, hash string, l
 		Channels:           pchan,
 	}
 
-	_, err = p.CreateImage()
+	err = p.CreateImage()
 
 	if err != nil {
 		return err

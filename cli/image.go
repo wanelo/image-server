@@ -187,7 +187,7 @@ func (i *Image) ProcessOutput(sc *core.ServerConfiguration, namespace string, fi
 		Channels:           pchan,
 	}
 
-	_, err = p.CreateImage()
+	err = p.CreateImage()
 
 	if err != nil {
 		return err
