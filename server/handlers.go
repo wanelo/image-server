@@ -5,85 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/fetcher"
-	"github.com/wanelo/image-server/parser"
-	"github.com/wanelo/image-server/processor"
-	"github.com/wanelo/image-server/uploader"
 )
-
-func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
-	vars := mux.Vars(req)
-	filename := vars["filename"]
-
-	ic, err := parser.NameToConfiguration(sc, filename)
-	if err != nil {
-		errorHandler(err, w, req, http.StatusNotFound)
-		return
-	}
-
-	namespace := vars["namespace"]
-	id1 := vars["id1"]
-	id2 := vars["id2"]
-	id3 := vars["id3"]
-	id4 := vars["id4"]
-	hash := fmt.Sprintf("%s%s%s%s", id1, id2, id3, id4)
-
-	ic.ID = hash
-	ic.Namespace = namespace
-
-	localPath := sc.Adapters.Paths.LocalImagePath(namespace, hash, filename)
-	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
-
-	// download original image
-	remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, hash)
-	log.Println(remoteOriginalPath)
-	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
-	_, err = f.Fetch()
-	if err != nil {
-		errorHandler(err, w, req, http.StatusNotFound)
-		return
-	}
-
-	// process image
-	pchan := &processor.ProcessorChannels{
-		ImageProcessed: make(chan *core.ImageConfiguration),
-		Skipped:        make(chan string),
-	}
-	defer close(pchan.ImageProcessed)
-	defer close(pchan.Skipped)
-
-	p := processor.Processor{
-		Source:             localOriginalPath,
-		Destination:        localPath,
-		ImageConfiguration: ic,
-		Channels:           pchan,
-	}
-
-	resizedPath, err := p.CreateImage()
-
-	if err != nil {
-		errorHandler(err, w, req, http.StatusNotFound)
-		return
-	}
-
-	select {
-	case <-pchan.ImageProcessed:
-		log.Println("about to upload to manta")
-		uploader := uploader.DefaultUploader(sc)
-		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
-		err = uploader.Upload(localPath, remoteResizedPath, ic.ToContentType())
-		if err != nil {
-			log.Println(err)
-		}
-	case path := <-pchan.Skipped:
-		log.Printf("Skipped processing %s", path)
-	}
-
-	http.ServeFile(w, req, resizedPath)
-}
 
 func errorHandlerJSON(err error, w http.ResponseWriter, status int) {
 	r := render.New(render.Options{
