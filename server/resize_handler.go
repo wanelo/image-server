@@ -13,6 +13,10 @@ import (
 	"github.com/wanelo/image-server/uploader"
 )
 
+// ResizeHandler asumes the original image is either stores locally or on the remote server
+// it returns the processed image in given dimension and format.
+// When an image is requested more than once, only one will do the processing,
+// and both requests will return the same output
 func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
 	vars := mux.Vars(req)
 	filename := vars["filename"]
@@ -23,7 +27,7 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 		return
 	}
 
-	ic.ID = unpartitionHash(vars["id1"], vars["id2"], vars["id3"], vars["id4"])
+	ic.ID = varsToHash(vars)
 	ic.Namespace = vars["namespace"]
 
 	localResizedPath := sc.Adapters.Paths.LocalImagePath(ic.Namespace, ic.ID, ic.Filename)
@@ -47,8 +51,25 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	http.ServeFile(w, req, localResizedPath)
 }
 
-func unpartitionHash(p1, p2, p3, p4 string) string {
-	return fmt.Sprintf("%s%s%s%s", p1, p2, p3, p4)
+func varsToHash(vars map[string]string) string {
+	return fmt.Sprintf("%s%s%s%s", vars["id1"], vars["id2"], vars["id3"], vars["id4"])
+}
+
+func processAndUploadFromOutputs(sc *core.ServerConfiguration, localOriginalPath string, namespace string, hash string, outputs []string) error {
+	for _, filename := range outputs {
+		ic, err := parser.NameToConfiguration(sc, filename)
+		if err != nil {
+			return err
+		}
+		ic.Namespace = namespace
+		ic.ID = hash
+
+		err = processAndUpload(sc, ic)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func processAndUpload(sc *core.ServerConfiguration, ic *core.ImageConfiguration) error {

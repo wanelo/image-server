@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
@@ -27,14 +28,17 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		return
 	}
 
+	localOriginalPath := f.Paths.LocalOriginalPath(namespace, imageDetails.Hash)
 	if downloaded {
-		localOriginalPath := f.Paths.LocalOriginalPath(namespace, imageDetails.Hash)
 		err := uploadOriginal(sc, namespace, imageDetails, localOriginalPath)
 		if err != nil {
 			errorHandlerJSON(err, w, http.StatusInternalServerError)
 			return
 		}
 	}
+
+	outputs := strings.Split(qs.Get("outputs"), ",")
+	processAndUploadFromOutputs(sc, localOriginalPath, namespace, imageDetails.Hash, outputs)
 
 	renderImageDetails(w, imageDetails)
 }
