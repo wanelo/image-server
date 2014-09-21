@@ -142,6 +142,9 @@ func globalFlags() []cli.Flag {
 		cli.StringFlag{Name: "namespace", Value: "p", Usage: "Namespace"},
 		cli.StringFlag{Name: "outputs", Value: default_outputs, Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
 		cli.StringFlag{Name: "listen", Value: "127.0.0.1", Usage: "IP address the server listens to"},
+		cli.StringFlag{Name: "aws_access_key_id", Value: "", Usage: "S3 Access Key"},
+		cli.StringFlag{Name: "aws_secret_key", Value: "", Usage: "S3 Secret"},
+		cli.StringFlag{Name: "aws_bucket", Value: "", Usage: "S3 Bucket"},
 		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
 		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
@@ -197,6 +200,7 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 
 		AWSAccessKeyID: c.GlobalString("aws_access_key_id"),
 		AWSSecretKey:   c.GlobalString("aws_secret_key"),
+		AWSBucket:      c.GlobalString("aws_bucket"),
 
 		Outputs:             c.GlobalString("outputs"),
 		DefaultQuality:      uint(c.GlobalInt("default_quality")),

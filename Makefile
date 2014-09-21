@@ -15,7 +15,7 @@ all: deps
 	@go test -race -v ./...
 
 devserver:
-	@go run `ls server/*.go | grep -v _test.go`
+	@go run `ls server/*.go | grep -v _test.go --outputs $IMG_OUTPUTS --aws_access_key_id $AWS_ACCESS_KEY_ID --aws_secret_key $AWS_SECRET_KEY --aws_bucket $AWS_BUCKET`
 
 # devcli:
 	# @go run `ls cli/*.go | grep -v _test.go`

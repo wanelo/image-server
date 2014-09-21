@@ -19,4 +19,5 @@ type ServerConfiguration struct {
 	Outputs               string
 	AWSAccessKeyID        string
 	AWSSecretKey          string
+	AWSBucket             string
 }

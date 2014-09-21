@@ -23,7 +23,11 @@ func DefaultUploader(sc *core.ServerConfiguration) *Uploader {
 	}
 
 	if sc.AWSAccessKeyID != "" {
-		u.Uploader = &s3.Uploader{}
+		u.Uploader = &s3.Uploader{
+			AccessKey:  sc.AWSAccessKeyID,
+			SecretKey:  sc.AWSSecretKey,
+			BucketName: sc.AWSBucket,
+		}
 	} else {
 		u.Uploader = manta.DefaultUploader(sc.RemoteBasePath)
 	}
