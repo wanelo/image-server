@@ -260,7 +260,7 @@ func processImage(sc *core.ServerConfiguration, namespace string, hash string, l
 			log.Println(err)
 		}
 	case path := <-pchan.Skipped:
-		log.Printf("Skipped processing %s", path)
+		log.Printf("Skipped processing (batch) %s", path)
 	}
 
 	return nil

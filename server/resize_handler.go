@@ -100,7 +100,7 @@ func processAndUpload(sc *core.ServerConfiguration, ic *core.ImageConfiguration)
 		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
 		err = uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
 	case path := <-pchan.Skipped:
-		log.Printf("Skipped processing %s", path)
+		log.Printf("Processed (resize handler) %s", localResizedPath)
 	}
 	return err
 }

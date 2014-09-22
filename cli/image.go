@@ -197,7 +197,7 @@ func (i *Image) ProcessOutput(sc *core.ServerConfiguration, namespace string, fi
 	case <-pchan.ImageProcessed:
 		i.processingChannel <- localPath
 	case path := <-pchan.Skipped:
-		log.Println("Skipped processing", path)
+		log.Println("Skipped processing (image)", path)
 		i.processingChannel <- localPath
 	}
 
