@@ -25,7 +25,7 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 		return err
 	}
 
-	if contType != "" {
+	if contType == "" {
 		contType = http.DetectContentType(data)
 	}
 
