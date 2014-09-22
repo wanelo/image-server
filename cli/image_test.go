@@ -8,7 +8,7 @@ import (
 )
 
 func TestItemToHash(t *testing.T) {
-	image := &cli.Image{OriginalPath: "public/p/6ad/554/4ba/a6f5e852e1af26f8c2e45db/original"}
+	image := &cli.Image{LocalOriginalPath: "public/p/6ad/554/4ba/a6f5e852e1af26f8c2e45db/original"}
 
 	Equals(t, "6ad5544baa6f5e852e1af26f8c2e45db", image.ToHash())
 }

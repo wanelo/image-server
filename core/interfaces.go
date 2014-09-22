@@ -26,10 +26,8 @@ type Processor interface {
 
 // Paths
 type Paths interface {
-	OriginalPath(string, string) string
 	LocalInfoPath(string, string) string
 	RemoteInfoPath(string, string) string
-	ImageDirectory(string, string) string
 	TempImagePath(string) string
 	LocalOriginalPath(string, string) string
 	LocalImagePath(namespace string, md5 string, imageName string) string

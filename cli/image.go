@@ -139,7 +139,7 @@ func (ip *ImageProcessor) ProcessOutput(sc *core.ServerConfiguration, filename s
 //
 //
 type Image struct {
-	OriginalPath      string
+	LocalOriginalPath string
 	Outputs           []string
 	Hash              string
 	processingChannel chan string
@@ -147,7 +147,7 @@ type Image struct {
 
 func NewImage(path string, outputs []string, c chan string) *Image {
 	img := &Image{
-		OriginalPath:      path,
+		LocalOriginalPath: path,
 		Outputs:           outputs,
 		processingChannel: c,
 	}
@@ -157,7 +157,7 @@ func NewImage(path string, outputs []string, c chan string) *Image {
 
 func (i *Image) ToHash() string {
 	exp := regexp.MustCompile(`\/([0-9a-f]{3})\/([0-9a-f]{3})\/([0-9a-f]{3})\/([0-9a-f]{23})\/`)
-	m := exp.FindStringSubmatch(i.OriginalPath)
+	m := exp.FindStringSubmatch(i.LocalOriginalPath)
 	return fmt.Sprintf("%s%s%s%s", m[1], m[2], m[3], m[4])
 }
 
@@ -181,7 +181,7 @@ func (i *Image) ProcessOutput(sc *core.ServerConfiguration, namespace string, fi
 	localPath := sc.Adapters.Paths.LocalImagePath(namespace, i.Hash, filename)
 
 	p := processor.Processor{
-		Source:             i.OriginalPath,
+		Source:             i.LocalOriginalPath,
 		Destination:        localPath,
 		ImageConfiguration: ic,
 		Channels:           pchan,
