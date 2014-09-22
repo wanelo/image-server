@@ -96,11 +96,13 @@ func processAndUpload(sc *core.ServerConfiguration, ic *core.ImageConfiguration)
 
 	select {
 	case <-pchan.ImageProcessed:
-		uploader := uploader.DefaultUploader(sc)
-		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
-		err = uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
-	case path := <-pchan.Skipped:
 		log.Printf("Processed (resize handler) %s", localResizedPath)
+	case <-pchan.Skipped:
+		log.Printf("Skipped processing (resize handler) %s", localResizedPath)
 	}
+
+	uploader := uploader.DefaultUploader(sc)
+	remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
+	err = uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
 	return err
 }
