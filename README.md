@@ -35,13 +35,9 @@ POST http://localhost:7000/p?source=http://example.com/image.jpg
 
 It is possible to pre-generate images and save them to the configured file store by passing the outputs when posting the image.
 
-```
-POST http://localhost:7000/p?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
-```
-
 Example with curl
 ```shell
-curl -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp&source=http://example.com/image.jpg
+curl -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp\&source=http://example.com/image.jpg
 ```
 
 The request returns the *"Image Information"* after the original image is saved to the file store.
