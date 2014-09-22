@@ -5,6 +5,10 @@ WARN_COLOR=\033[33;01m
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 MANTA_USER := $(shell echo $(MANTA_USER))
 VERSION=1.1.0
+AWS_ACCESS_KEY_ID := $(shell echo $(AWS_ACCESS_KEY_ID))
+AWS_SECRET_KEY := $(shell echo $(AWS_SECRET_KEY))
+AWS_BUCKET := $(shell echo $(AWS_BUCKET))
+IMG_OUTPUTS := $(shell echo $(IMG_OUTPUTS))
 
 all: deps
 	@mkdir -p bin/
@@ -15,7 +19,7 @@ all: deps
 	@go test -race -v ./...
 
 devserver:
-	@go run `ls server/*.go | grep -v _test.go --outputs $IMG_OUTPUTS --aws_access_key_id $AWS_ACCESS_KEY_ID --aws_secret_key $AWS_SECRET_KEY --aws_bucket $AWS_BUCKET`
+	@go run `go run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path images server`
 
 # devcli:
 	# @go run `ls cli/*.go | grep -v _test.go`
