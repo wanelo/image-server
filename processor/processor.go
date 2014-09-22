@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/wanelo/image-server/core"
@@ -16,6 +17,7 @@ type ProcessorResult struct {
 }
 
 var ImageProcessings map[string][]chan ProcessorResult
+var processingMutex sync.RWMutex // To protect ImageProcessings
 
 func init() {
 	ImageProcessings = make(map[string][]chan ProcessorResult)
@@ -44,19 +46,27 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 	key := p.Destination
 	_, present := ImageProcessings[key]
 
+	processingMutex.Lock()
+
 	if present {
 		ImageProcessings[key] = append(ImageProcessings[key], c)
+		processingMutex.Unlock()
 		p.notifySkipped(key)
 	} else {
 		ImageProcessings[key] = []chan ProcessorResult{c}
+		processingMutex.Unlock()
+
 		err := p.createIfNotAvailable()
 
 		for _, cc := range ImageProcessings[key] {
 			cc <- ProcessorResult{p.Destination, err}
 		}
+		processingMutex.Lock()
 		delete(ImageProcessings, key)
+		processingMutex.Unlock()
 		p.notifyProcessed()
 	}
+
 }
 
 func (p *Processor) createIfNotAvailable() error {
