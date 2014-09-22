@@ -42,11 +42,14 @@ clean:
 format:
 	go fmt ./...
 
-buildtomanta:
+build:
 	@echo "$(OK_COLOR)==> Building for solaris amd64$(NO_COLOR)"
 	@mkdir -p bin/solaris
 	@GOOS=solaris GOARCH=amd64 go build -o bin/solaris/images
+
+release: build
 	# @echo "$(OK_COLOR)==> Compressing$(NO_COLOR)"
 	# @cd bin/solaris && tar -czvf images.tar.gz images
 	@echo "$(OK_COLOR)==> Uploading to manta$(NO_COLOR)"
 	@mput -f bin/solaris/images /$(MANTA_USER)/public/images/bin/images-solaris-$(VERSION)
+	@echo "$(VERSION)" | mput -H 'content-type: text/plain' /$(MANTA_USER)/public/images/bin/images-solaris-version
