@@ -211,7 +211,7 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 
 func handleShutdownSignals() {
 	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT)
 
 	<-shutdown
 	os.Exit(0)
