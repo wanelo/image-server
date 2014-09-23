@@ -19,7 +19,7 @@ all: deps
 	@go test -race -v ./...
 
 devserver:
-	@go run `go run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path images server`
+	@go run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path images server
 
 # devcli:
 	# @go run `ls cli/*.go | grep -v _test.go`
