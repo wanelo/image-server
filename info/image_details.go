@@ -12,6 +12,7 @@ type ImageDetails struct {
 	Width  int    `json:"width"`
 }
 
+// ImageDetailsToJSON returns a string with JSON representation of the ImageDetails
 func ImageDetailsToJSON(d *ImageDetails) (string, error) {
 	b, err := json.Marshal(d)
 	if err != nil {
@@ -20,6 +21,7 @@ func ImageDetailsToJSON(d *ImageDetails) (string, error) {
 	return string(b), nil
 }
 
+// SaveImageDetail saves ImageDetails in a JSON file on "path"
 func SaveImageDetail(d *ImageDetails, path string) error {
 	json, err := ImageDetailsToJSON(d)
 	if err != nil {
