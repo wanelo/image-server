@@ -3,10 +3,11 @@ package job
 import (
 	"fmt"
 
+	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/uploader/manta/client"
 )
 
-var ImageExecutable = "/wanelo/public/images/bin/images-solaris-1.1.5"
+var ImageExecutable = fmt.Sprintf("/wanelo/public/images/bin/images-solaris-%s", core.VERSION)
 var ImageInitScript = "/wanelo/stor/images/init.sh"
 
 type JobCreator interface {

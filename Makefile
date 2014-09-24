@@ -4,7 +4,7 @@ ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 MANTA_USER := $(shell echo $(MANTA_USER))
-VERSION=1.1.5
+VERSION = $(shell cat core/version.go | grep 'const VERSION' | egrep -o '\d+\.\d+\.\d+')
 AWS_ACCESS_KEY_ID := $(shell echo $(AWS_ACCESS_KEY_ID))
 AWS_SECRET_KEY := $(shell echo $(AWS_SECRET_KEY))
 AWS_BUCKET := $(shell echo $(AWS_BUCKET))
@@ -23,6 +23,9 @@ devserver:
 
 # devcli:
 	# @go run `ls cli/*.go | grep -v _test.go`
+	
+version:
+	@echo $(VERSION)
 
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
