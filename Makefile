@@ -10,20 +10,22 @@ AWS_SECRET_KEY := $(shell echo $(AWS_SECRET_KEY))
 AWS_BUCKET := $(shell echo $(AWS_BUCKET))
 IMG_OUTPUTS := $(shell echo $(IMG_OUTPUTS))
 
-all: deps
+all: deps tests
 	@mkdir -p bin/
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
 	@go build -o bin/images
 	# @cd cli; go build
 	# @mv cli/cli bin/image-cli
-	@go test -race -v ./...
 
 devserver:
 	@go run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path images server
 
 # devcli:
 	# @go run `ls cli/*.go | grep -v _test.go`
-	
+
+tests:
+	@go test -race -v ./...
+
 version:
 	@echo $(VERSION)
 
