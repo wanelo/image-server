@@ -25,7 +25,6 @@ func NewSourceFetcher(paths core.Paths) *SourceFetcher {
 // downloaded is false when the file was already present locally
 func (f *SourceFetcher) Fetch(url string, namespace string) (*info.ImageDetails, bool, error) {
 	c := make(chan FetchResult)
-	defer close(c)
 	go f.uniqueFetchSource(c, url, namespace)
 	r := <-c
 	return r.ImageDetails, r.Downloaded, r.Error
