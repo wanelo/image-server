@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -29,7 +30,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "images"
-	app.Version = "1.1.2"
+	app.Version = "1.1.4"
 	app.Usage = "Image server and CLI"
 	app.Action = func(c *cli.Context) {
 		println("Need to provide subcommand: server or process")
@@ -43,6 +44,12 @@ func main() {
 			ShortName: "s",
 			Usage:     "image server",
 			Action: func(c *cli.Context) {
+				maxprocs := c.GlobalInt("gomaxprocs")
+				if maxprocs != 0 {
+
+					runtime.GOMAXPROCS(maxprocs)
+				}
+
 				sc, err := serverConfiguration(c)
 				if err != nil {
 					log.Println(err)
@@ -127,9 +134,9 @@ func main() {
 // globalFlags returns flags. If the flags are not present, it will try
 // extracting values from the environment, otherwise it will use default values
 func globalFlags() []cli.Flag {
-	default_outputs := os.Getenv("IMG_OUTPUTS")
-	if default_outputs == "" {
-		default_outputs = "full_size.jpg,full_size.webp,x110-q90.jpg,x200-q90.jpg,x354-q80.jpg,w620-q80.jpg,w736-q75.jpg,w1472-q65.jpg,x110-q90.webp,x200-q90.webp,x354-q80.webp,w620-q80.webp,w736-q75.webp,w1472-q65.webp"
+	defaultOutputs := os.Getenv("IMG_OUTPUTS")
+	if defaultOutputs == "" {
+		defaultOutputs = "full_size.jpg,full_size.webp,x110-q90.jpg,x200-q90.jpg,x354-q80.jpg,w620-q80.jpg,w736-q75.jpg,w1472-q65.jpg,x110-q90.webp,x200-q90.webp,x354-q80.webp,w620-q80.webp,w736-q75.webp,w1472-q65.webp"
 	}
 
 	return []cli.Flag{
@@ -140,7 +147,7 @@ func globalFlags() []cli.Flag {
 		cli.StringFlag{Name: "remote_base_path", Value: "public/images/development", Usage: "base path for manta storage"},
 		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
 		cli.StringFlag{Name: "namespace", Value: "p", Usage: "Namespace"},
-		cli.StringFlag{Name: "outputs", Value: default_outputs, Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
+		cli.StringFlag{Name: "outputs", Value: defaultOutputs, Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
 		cli.StringFlag{Name: "listen", Value: "127.0.0.1", Usage: "IP address the server listens to"},
 		cli.StringFlag{Name: "aws_access_key_id", Value: "", Usage: "S3 Access Key"},
 		cli.StringFlag{Name: "aws_secret_key", Value: "", Usage: "S3 Secret"},
@@ -151,6 +158,7 @@ func globalFlags() []cli.Flag {
 		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
 		cli.IntFlag{Name: "processor_concurrency", Value: 4, Usage: "Processor concurrency"},
 		cli.IntFlag{Name: "http_timeout", Value: 5, Usage: "HTTP request timeout in seconds"},
+		cli.IntFlag{Name: "gomaxprocs", Value: 0, Usage: "It will use the default when set to 0"},
 	}
 }
 
