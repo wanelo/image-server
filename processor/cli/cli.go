@@ -78,6 +78,7 @@ func (p *Processor) originalDimensions(source string, ic *core.ImageConfiguratio
 	args := []string{"-format", "%[fx:w]x%[fx:h]", source}
 	out, err := exec.Command("identify", args...).Output()
 	dimensions := fmt.Sprintf("%s", out)
+	dimensions = strings.TrimSpace(dimensions)
 
 	if err != nil {
 		return 0, 0, err
