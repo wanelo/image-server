@@ -44,11 +44,7 @@ func main() {
 			ShortName: "s",
 			Usage:     "image server",
 			Action: func(c *cli.Context) {
-				maxprocs := c.GlobalInt("gomaxprocs")
-				if maxprocs != 0 {
-
-					runtime.GOMAXPROCS(maxprocs)
-				}
+				setGoMaxProcs(c.GlobalInt("gomaxprocs"))
 
 				sc, err := serverConfiguration(c)
 				if err != nil {
@@ -227,4 +223,10 @@ func handleShutdownSignals() {
 
 func initializePprofServer() {
 	log.Println(http.ListenAndServe("localhost:6060", nil))
+}
+
+func setGoMaxProcs(maxprocs int) {
+	if maxprocs != 0 {
+		runtime.GOMAXPROCS(maxprocs)
+	}
 }
