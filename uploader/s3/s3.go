@@ -3,6 +3,7 @@ package s3
 import (
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
@@ -19,17 +20,28 @@ type Uploader struct {
 // Upload copies a file int a bucket in S3
 func (u *Uploader) Upload(source string, destination string, contType string) error {
 	bucket := u.retrieveBucket()
-	data, err := ioutil.ReadFile(source)
+	reader, err := os.Open(source)
 
 	if err != nil {
 		return err
 	}
 
 	if contType == "" {
+		data, err := ioutil.ReadFile(source)
+		if err != nil {
+			return err
+		}
 		contType = http.DetectContentType(data)
 	}
 
-	err = bucket.Put(destination, data, contType, s3.PublicRead)
+	var stat os.FileInfo
+	stat, err = os.Stat(source)
+	if err != nil {
+		return err
+	}
+	size := stat.Size()
+
+	err = bucket.PutReader(destination, reader, size, contType, s3.PublicRead)
 	return err
 }
 
