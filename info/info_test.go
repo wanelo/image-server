@@ -1,8 +1,10 @@
-package info
+package info_test
 
 import (
 	"os"
 	"testing"
+
+	"github.com/wanelo/image-server/info"
 )
 
 func assert(t *testing.T, value int, expected int) {
@@ -12,7 +14,7 @@ func assert(t *testing.T, value int, expected int) {
 }
 
 func TestImageHash(t *testing.T) {
-	i := Info{"../test/images/a.jpg"}
+	i := info.Info{"../test/images/a.jpg"}
 	expectedHash := "31e8b3187a9f63f26d58c88bf09a7bbd"
 	hash, _ := i.FileHash()
 	if hash != expectedHash {
@@ -21,7 +23,7 @@ func TestImageHash(t *testing.T) {
 }
 
 func TestImageDetailsOnJPEG(t *testing.T) {
-	i := Info{"../test/images/a.jpg"}
+	i := info.Info{"../test/images/a.jpg"}
 	imageDetails, _ := i.ImageDetails()
 	expectedHash := "31e8b3187a9f63f26d58c88bf09a7bbd"
 	if imageDetails.Hash != expectedHash {
@@ -33,7 +35,7 @@ func TestImageDetailsOnJPEG(t *testing.T) {
 }
 
 func TestImageDetailsOnPNG(t *testing.T) {
-	i := Info{"../test/images/a.png"}
+	i := info.Info{"../test/images/a.png"}
 	imageDetails, _ := i.ImageDetails()
 	expectedHash := "117813b6a51e74c77d0fc7d5de510f42"
 	if imageDetails.Hash != expectedHash {
@@ -57,8 +59,8 @@ func TestImageDetailsOnPNG(t *testing.T) {
 // }
 
 func TestImageDetailsToJSON(t *testing.T) {
-	d := &ImageDetails{"THISISAHASH", 10, 20}
-	json, _ := ImageDetailsToJSON(d)
+	d := &info.ImageDetails{"THISISAHASH", 10, 20}
+	json, _ := info.ImageDetailsToJSON(d)
 	expected := "{\"hash\":\"THISISAHASH\",\"height\":10,\"width\":20}"
 
 	if expected != json {
@@ -68,8 +70,8 @@ func TestImageDetailsToJSON(t *testing.T) {
 
 func TestSaveImageDetail(t *testing.T) {
 	path := "../test/test-image-detail.json"
-	d := &ImageDetails{"THISISAHASH", 10, 20}
-	SaveImageDetail(d, path)
+	d := &info.ImageDetails{"THISISAHASH", 10, 20}
+	info.SaveImageDetail(d, path)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		t.Errorf("expected file to exist on %v", path)

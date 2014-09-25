@@ -7,7 +7,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -16,12 +16,14 @@ type Info struct {
 }
 
 func (i Info) FileHash() (hash string, err error) {
-	var contents []byte
-	if contents, err = ioutil.ReadFile(i.Path); err == nil {
-		hash := fmt.Sprintf("%x", md5.Sum(contents))
-		return hash, nil
+	infile, err := os.Open(i.Path)
+	if err != nil {
+		return "", err
 	}
-	return hash, err
+	h := md5.New()
+	io.Copy(h, infile)
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
 // ImageDetails extracts file hash, height, and width when providing a image path
