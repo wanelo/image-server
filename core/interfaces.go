@@ -46,5 +46,6 @@ type SourceMapper interface {
 type Uploader interface {
 	CreateDirectory(string) error
 	Upload(string, string, string) error
+	ListDirectory(string) ([]string, error)
 	Initialize() error
 }

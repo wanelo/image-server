@@ -42,6 +42,10 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 	return err
 }
 
+func (u *Uploader) ListDirectory(directory string) ([]string, error) {
+	return u.Uploader.ListDirectory(directory)
+}
+
 func (u *Uploader) CreateDirectory(path string) error {
 	start := time.Now()
 	directoryPath := u.Uploader.CreateDirectory(path)

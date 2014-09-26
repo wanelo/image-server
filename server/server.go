@@ -27,6 +27,10 @@ func NewRouter(sc *core.ServerConfiguration) *mux.Router {
 		NewImageHandler(wr, req, sc)
 	}).Methods("POST").Name("newImage")
 
+	router.HandleFunc("/{namespace:[a-z0-9_]+}/{id1:[a-f0-9]{3}}/{id2:[a-f0-9]{3}}/{id3:[a-f0-9]{3}}/{id4:[a-f0-9]{23}}/process", func(wr http.ResponseWriter, req *http.Request) {
+		ResizeManyHandler(wr, req, sc)
+	}).Methods("POST").Name("resizeMany")
+
 	router.HandleFunc("/{namespace:[a-z0-9_]+}/{id1:[a-f0-9]{3}}/{id2:[a-f0-9]{3}}/{id3:[a-f0-9]{3}}/{id4:[a-f0-9]{23}}/{filename}", func(wr http.ResponseWriter, req *http.Request) {
 		ResizeHandler(wr, req, sc)
 	}).Methods("GET").Name("resizeImage")

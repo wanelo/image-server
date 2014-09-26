@@ -81,6 +81,11 @@ func (u *Uploader) CreateDirectory(dir string) error {
 	return nil
 }
 
+func (u *Uploader) ListDirectory(directory string) ([]string, error) {
+	var names []string
+	return names, nil
+}
+
 func (u *Uploader) Initialize() error {
 	return u.CreateDirectory(u.BaseDir)
 }

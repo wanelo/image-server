@@ -31,12 +31,9 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	ic.Namespace = vars["namespace"]
 
 	localResizedPath := sc.Adapters.Paths.LocalImagePath(ic.Namespace, ic.ID, ic.Filename)
-	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(ic.Namespace, ic.ID)
-	remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(ic.Namespace, ic.ID)
 
 	// download original image
-	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
-	_, err = f.Fetch()
+	err = downloadOriginal(sc, ic.Namespace, ic.ID)
 	if err != nil {
 		errorHandler(err, w, req, http.StatusNotFound)
 		return
@@ -49,6 +46,16 @@ func ResizeHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConf
 	}
 
 	http.ServeFile(w, req, localResizedPath)
+}
+
+func downloadOriginal(sc *core.ServerConfiguration, namespace string, hash string) error {
+	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, hash)
+	remoteOriginalPath := sc.Adapters.Paths.RemoteOriginalURL(namespace, hash)
+
+	// download original image
+	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
+	_, err := f.Fetch()
+	return err
 }
 
 func varsToHash(vars map[string]string) string {
