@@ -9,6 +9,8 @@ AWS_ACCESS_KEY_ID := $(shell echo $(AWS_ACCESS_KEY_ID))
 AWS_SECRET_KEY := $(shell echo $(AWS_SECRET_KEY))
 AWS_BUCKET := $(shell echo $(AWS_BUCKET))
 IMG_OUTPUTS := $(shell echo $(IMG_OUTPUTS))
+IMG_REMOTE_BASE_PATH := $(shell echo $(IMG_REMOTE_BASE_PATH))
+IMG_REMOTE_BASE_URL := $(shell echo $(IMG_REMOTE_BASE_URL))
 
 all: deps tests
 	@mkdir -p bin/
@@ -18,7 +20,7 @@ all: deps tests
 	# @mv cli/cli bin/image-cli
 
 devserver:
-	@go run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path images server
+	@go run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path $(IMG_REMOTE_BASE_PATH) --remote_base_url $(IMG_REMOTE_BASE_URL) server
 
 # devcli:
 	# @go run `ls cli/*.go | grep -v _test.go`
