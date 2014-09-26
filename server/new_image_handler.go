@@ -38,7 +38,11 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	}
 
 	outputs := strings.Split(qs.Get("outputs"), ",")
-	processAndUploadFromOutputs(sc, localOriginalPath, namespace, imageDetails.Hash, outputs)
+	err = processAndUploadFromOutputs(sc, localOriginalPath, namespace, imageDetails.Hash, outputs)
+	if err != nil {
+		errorHandlerJSON(err, w, http.StatusNotFound)
+		return
+	}
 
 	renderImageDetails(w, imageDetails)
 }
