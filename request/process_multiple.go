@@ -48,6 +48,12 @@ func (r *Request) ProcessMultiple() error {
 }
 
 func (r *Request) Process(ic *core.ImageConfiguration) error {
+	// The original file will be downloaded only once, even when every dimension requests it
+	err := r.DownloadOriginal()
+	if err != nil {
+		return err
+	}
+
 	localResizedPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, ic.Filename)
 	localOriginalPath := r.Paths.LocalOriginalPath(r.Namespace, r.Hash)
 
@@ -64,7 +70,7 @@ func (r *Request) Process(ic *core.ImageConfiguration) error {
 		Channels:           pchan,
 	}
 
-	err := p.CreateImage()
+	err = p.CreateImage()
 	if err != nil {
 		return err
 	}
