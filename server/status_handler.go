@@ -1,7 +1,17 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/wanelo/image-server/processor/cli"
+)
 
 func StatusHandler(w http.ResponseWriter, req *http.Request) {
-	w.WriteHeader(200)
+	processorAvailable := cli.Available
+
+	if processorAvailable {
+		w.WriteHeader(200)
+	} else {
+		w.WriteHeader(501)
+	}
 }

@@ -14,6 +14,17 @@ import (
 
 type Processor struct{}
 
+var Available bool
+
+func init() {
+	Available = true
+	cmd := exec.Command("convert", "--version")
+	err := cmd.Run()
+	if err != nil {
+		Available = false
+	}
+}
+
 func (p *Processor) CreateImage(source string, destination string, ic *core.ImageConfiguration) error {
 	cmd := exec.Command("convert", p.commandArgs(source, destination, ic)...)
 
