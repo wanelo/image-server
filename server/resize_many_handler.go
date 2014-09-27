@@ -33,4 +33,5 @@ func ResizeManyHandler(w http.ResponseWriter, req *http.Request, sc *core.Server
 		errorHandlerJSON(err, w, http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(200)
 }
