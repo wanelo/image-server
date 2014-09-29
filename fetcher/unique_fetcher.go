@@ -43,7 +43,12 @@ func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 	} else {
 		ImageDownloads[url] = []chan FetchResult{c}
 		mu.Unlock()
-		defer delete(ImageDownloads, url)
+
+		defer func() {
+			mu.Lock()
+			delete(ImageDownloads, url)
+			mu.Unlock()
+		}()
 
 		// only copy image if does not exist
 		if _, err = os.Stat(destination); os.IsNotExist(err) {
