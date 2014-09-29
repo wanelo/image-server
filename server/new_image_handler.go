@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -91,11 +90,5 @@ func renderImageDetails(w http.ResponseWriter, imageDetails *info.ImageDetails) 
 		IndentJSON: true,
 	})
 
-	json := map[string]string{
-		"hash":   imageDetails.Hash,
-		"height": fmt.Sprintf("%v", imageDetails.Height),
-		"width":  fmt.Sprintf("%v", imageDetails.Width),
-	}
-
-	r.JSON(w, http.StatusOK, json)
+	r.JSON(w, http.StatusOK, imageDetails)
 }
