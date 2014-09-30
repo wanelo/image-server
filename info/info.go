@@ -10,11 +10,12 @@ import (
 	_ "image/png"
 	"io"
 	"log"
-	"mime"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/wanelo/image-server/mime"
 )
 
 type Info struct {
@@ -37,12 +38,15 @@ func (i Info) FileHash() (hash string, err error) {
 func (i Info) ImageDetails() (*ImageDetails, error) {
 	if reader, err := os.Open(i.Path); err == nil {
 		defer reader.Close()
-		im, format, err := image.DecodeConfig(reader)
 		var contentType string
 		var details *ImageDetails
 
-		if err == nil {
+		im, format, err := image.DecodeConfig(reader)
+		if err == nil && format != "" {
 			contentType, err = getContentTypeFromExtension(format)
+			if err != nil {
+				return nil, err
+			}
 
 			details = &ImageDetails{
 				Height:      im.Height,
@@ -107,6 +111,10 @@ func getContentTypeFromExtension(format string) (string, error) {
 		return "", errors.New("Can't extract format")
 	}
 
-	ext := strings.ToLower(fmt.Sprintf(".%s", format))
-	return mime.TypeByExtension(ext), nil
+	contentType := mime.ExtToContentType(format)
+	if contentType == "" {
+		return "", fmt.Errorf("Can't extract content type from format. format=%s, contentType=%s", format, contentType)
+	}
+
+	return contentType, nil
 }
