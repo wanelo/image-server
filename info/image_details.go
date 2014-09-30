@@ -7,9 +7,10 @@ import (
 )
 
 type ImageDetails struct {
-	Hash   string `json:"hash"`
-	Height int    `json:"height"`
-	Width  int    `json:"width"`
+	Hash        string `json:"hash"`
+	Height      int    `json:"height"`
+	Width       int    `json:"width"`
+	ContentType string `json:"content_type"`
 }
 
 // ImageDetailsToJSON returns a string with JSON representation of the ImageDetails

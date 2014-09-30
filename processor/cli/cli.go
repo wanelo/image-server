@@ -3,30 +3,22 @@ package cli
 import (
 	"container/list"
 	"fmt"
-	"log"
 	"math"
 	"os/exec"
-	"strconv"
-	"strings"
 
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/info"
 )
 
-type Processor struct{}
-
-var Available bool
-
-func init() {
-	Available = true
-	cmd := exec.Command("convert", "--version")
-	err := cmd.Run()
-	if err != nil {
-		Available = false
-	}
+type Processor struct {
+	ImageDetails       *info.ImageDetails
+	ImageConfiguration *core.ImageConfiguration
+	Source             string
+	Destination        string
 }
 
-func (p *Processor) CreateImage(source string, destination string, ic *core.ImageConfiguration) error {
-	cmd := exec.Command("convert", p.commandArgs(source, destination, ic)...)
+func (p *Processor) CreateImage() error {
+	cmd := exec.Command("convert", p.commandArgs()...)
 
 	err := cmd.Run()
 	if err != nil {
@@ -36,7 +28,11 @@ func (p *Processor) CreateImage(source string, destination string, ic *core.Imag
 	return nil
 }
 
-func (p *Processor) commandArgs(source string, destination string, ic *core.ImageConfiguration) []string {
+func (p *Processor) commandArgs() []string {
+	ic := p.ImageConfiguration
+	source := p.Source
+	destination := p.Destination
+
 	args := list.New()
 
 	args.PushBack("-format")
@@ -45,9 +41,10 @@ func (p *Processor) commandArgs(source string, destination string, ic *core.Imag
 	args.PushBack("-flatten")
 
 	if ic.Height > 0 && ic.Width > 0 {
-		cols, rows, err := p.originalDimensions(source, ic)
+		cols := p.ImageDetails.Width
+		rows := p.ImageDetails.Height
 
-		if err == nil && (ic.Width != cols || ic.Height != rows) {
+		if ic.Width != cols || ic.Height != rows {
 			w := float64(ic.Width) / float64(cols)
 			h := float64(ic.Height) / float64(rows)
 			scale := math.Max(w, h)
@@ -83,32 +80,6 @@ func (p *Processor) commandArgs(source string, destination string, ic *core.Imag
 	args.PushBack(destination)
 
 	return p.convertArgumentsToSlice(args)
-}
-
-func (p *Processor) originalDimensions(source string, ic *core.ImageConfiguration) (int, int, error) {
-	args := []string{"-format", "%[fx:w]x%[fx:h]", source}
-	out, err := exec.Command("identify", args...).Output()
-	dimensions := fmt.Sprintf("%s", out)
-	dimensions = strings.TrimSpace(dimensions)
-
-	if err != nil {
-		return 0, 0, err
-	}
-
-	d := strings.Split(dimensions, "x")
-	w, err := strconv.Atoi(d[0])
-	if err != nil {
-		log.Printf("Can't convert width to integer: %s\n", d[0])
-		return 0, 0, err
-	}
-
-	h, err := strconv.Atoi(d[1])
-	if err != nil {
-		log.Printf("Can't convert height to integer: %s\n", d[1])
-		return 0, 0, err
-	}
-
-	return w, h, nil
 }
 
 func (p *Processor) convertArgumentsToSlice(arguments *list.List) []string {

@@ -1,10 +1,9 @@
 package core
 
 type Adapters struct {
-	Fetcher   Fetcher
-	Processor Processor
-	Paths     Paths
-	Logger    Logger
+	Fetcher Fetcher
+	Paths   Paths
+	Logger  Logger
 }
 
 type Fetcher interface {
@@ -21,7 +20,7 @@ type Logger interface {
 
 // Processor
 type Processor interface {
-	CreateImage(string, string, *ImageConfiguration) error
+	CreateImage() error
 }
 
 // Paths

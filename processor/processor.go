@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/info"
 	adapter "github.com/wanelo/image-server/processor/cli"
 )
 
@@ -27,6 +28,7 @@ type Processor struct {
 	Source             string
 	Destination        string
 	ImageConfiguration *core.ImageConfiguration
+	ImageDetails       *info.ImageDetails
 	Channels           *ProcessorChannels
 }
 
@@ -36,6 +38,10 @@ type ProcessorChannels struct {
 }
 
 func (p *Processor) CreateImage() error {
+	if p.ImageDetails == nil {
+		log.Panic("ImageDetails is required")
+	}
+
 	c := make(chan ProcessorResult)
 	go p.uniqueCreateImage(c)
 	ipr := <-c
@@ -76,8 +82,13 @@ func (p *Processor) createIfNotAvailable() error {
 		dir := filepath.Dir(p.Destination)
 		os.MkdirAll(dir, 0700)
 
-		processor := &adapter.Processor{}
-		err = processor.CreateImage(p.Source, p.Destination, p.ImageConfiguration)
+		processor := &adapter.Processor{
+			Source:             p.Source,
+			Destination:        p.Destination,
+			ImageConfiguration: p.ImageConfiguration,
+			ImageDetails:       p.ImageDetails,
+		}
+		err = processor.CreateImage()
 
 		if err != nil {
 			log.Println(err)

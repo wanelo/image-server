@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/fetcher"
+	"github.com/wanelo/image-server/info"
 	"github.com/wanelo/image-server/parser"
 	"github.com/wanelo/image-server/processor"
 )
@@ -17,6 +17,7 @@ type Request struct {
 	Uploader            core.Uploader
 	Paths               core.Paths
 	Hash                string
+	SourceURL           string
 	directoryListing    map[string]string
 }
 
@@ -63,10 +64,19 @@ func (r *Request) Process(ic *core.ImageConfiguration) error {
 		Skipped:        make(chan string),
 	}
 
+	info := &info.Info{
+		Path: localOriginalPath,
+	}
+	id, err := info.ImageDetails()
+	if err != nil {
+		return err
+	}
+
 	p := processor.Processor{
 		Source:             localOriginalPath,
 		Destination:        localResizedPath,
 		ImageConfiguration: ic,
+		ImageDetails:       id,
 		Channels:           pchan,
 	}
 
@@ -132,14 +142,4 @@ func (r *Request) FetchRemoteFileListing() error {
 		r.directoryListing[entry] = entry
 	}
 	return nil
-}
-
-func (r *Request) DownloadOriginal() error {
-	localOriginalPath := r.Paths.LocalOriginalPath(r.Namespace, r.Hash)
-	remoteOriginalPath := r.Paths.RemoteOriginalURL(r.Namespace, r.Hash)
-
-	// download original image
-	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
-	_, err := f.Fetch()
-	return err
 }

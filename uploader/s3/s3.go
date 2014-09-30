@@ -1,8 +1,6 @@
 package s3
 
 import (
-	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -26,14 +24,6 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 
 	if err != nil {
 		return err
-	}
-
-	if contType == "" {
-		data, err := ioutil.ReadFile(source)
-		if err != nil {
-			return err
-		}
-		contType = http.DetectContentType(data)
 	}
 
 	var stat os.FileInfo

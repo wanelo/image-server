@@ -14,7 +14,6 @@ import (
 	"github.com/wanelo/image-server/logger"
 	"github.com/wanelo/image-server/logger/graphite"
 	"github.com/wanelo/image-server/paths"
-	processor "github.com/wanelo/image-server/processor/cli"
 	"github.com/wanelo/image-server/server"
 
 	. "github.com/wanelo/image-server/test"
@@ -79,10 +78,9 @@ func buildTestServerConfiguration() *core.ServerConfiguration {
 	}
 
 	adapters := &core.Adapters{
-		Fetcher:   &fetcher.Fetcher{},
-		Processor: &processor.Processor{},
-		Paths:     &paths.Paths{LocalBasePath: sc.LocalBasePath, RemoteBasePath: sc.RemoteBasePath, RemoteBaseURL: sc.RemoteBaseURL},
-		Logger:    &logger.Logger{Loggers: loggers},
+		Fetcher: &fetcher.Fetcher{},
+		Paths:   &paths.Paths{LocalBasePath: sc.LocalBasePath, RemoteBasePath: sc.RemoteBasePath, RemoteBaseURL: sc.RemoteBaseURL},
+		Logger:  &logger.Logger{Loggers: loggers},
 	}
 	sc.Adapters = adapters
 	return sc

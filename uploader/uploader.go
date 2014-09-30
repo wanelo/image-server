@@ -1,6 +1,7 @@
 package uploader
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -36,6 +37,11 @@ func DefaultUploader(sc *core.ServerConfiguration) *Uploader {
 
 func (u *Uploader) Upload(source string, destination string, contType string) error {
 	start := time.Now()
+
+	if contType == "" {
+		return errors.New("uploader.Upload is missing content type: " + source)
+	}
+
 	err := u.Uploader.Upload(source, destination, contType)
 	elapsed := time.Since(start)
 	log.Printf("Took %s to upload image: %s", elapsed, destination)

@@ -1,0 +1,83 @@
+package request
+
+import (
+	"log"
+
+	"github.com/wanelo/image-server/fetcher"
+	"github.com/wanelo/image-server/info"
+	"github.com/wanelo/image-server/uploader"
+)
+
+func (r *Request) Create() (*info.ImageDetails, error) {
+	f := fetcher.NewSourceFetcher(r.Paths)
+	imageDetails, downloaded, err := f.Fetch(r.SourceURL, r.Namespace)
+
+	if err != nil {
+		return nil, err
+	}
+
+	r.Hash = imageDetails.Hash
+
+	if downloaded {
+		err = r.UploadOriginal(imageDetails)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = r.ProcessMultiple()
+	if err != nil {
+		return nil, err
+	}
+	return imageDetails, nil
+}
+
+func (r *Request) DownloadOriginal() error {
+	localOriginalPath := r.Paths.LocalOriginalPath(r.Namespace, r.Hash)
+	remoteOriginalPath := r.Paths.RemoteOriginalURL(r.Namespace, r.Hash)
+
+	// download original image
+	f := fetcher.NewUniqueFetcher(remoteOriginalPath, localOriginalPath)
+	_, err := f.Fetch()
+	return err
+}
+
+func (r *Request) UploadOriginal(imageDetails *info.ImageDetails) error {
+	uploader := uploader.DefaultUploader(r.ServerConfiguration)
+	err := uploader.CreateDirectory(r.Paths.RemoteImageDirectory(r.Namespace, imageDetails.Hash))
+	if err != nil {
+		return err
+	}
+
+	localOriginalPath := r.Paths.LocalOriginalPath(r.Namespace, imageDetails.Hash)
+
+	destination := r.Paths.RemoteOriginalPath(r.Namespace, imageDetails.Hash)
+
+	go r.ServerConfiguration.Adapters.Logger.OriginalDownloaded(localOriginalPath, destination)
+
+	r.UploadImageDetails(imageDetails, uploader)
+
+	// upload original image
+	err = uploader.Upload(localOriginalPath, destination, imageDetails.ContentType)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Request) UploadImageDetails(imageDetails *info.ImageDetails, uploader *uploader.Uploader) {
+	localInfoPath := r.Paths.LocalInfoPath(r.Namespace, imageDetails.Hash)
+	remoteInfoPath := r.Paths.RemoteInfoPath(r.Namespace, imageDetails.Hash)
+
+	err := info.SaveImageDetail(imageDetails, localInfoPath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// upload info
+	err = uploader.Upload(localInfoPath, remoteInfoPath, "application/json")
+	if err != nil {
+		log.Println(err)
+	}
+}
