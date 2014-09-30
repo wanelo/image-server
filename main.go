@@ -24,7 +24,6 @@ import (
 )
 
 func main() {
-	go initializePprofServer()
 	go handleShutdownSignals()
 
 	app := cli.NewApp()
@@ -44,6 +43,9 @@ func main() {
 			Usage:     "image server",
 			Action: func(c *cli.Context) {
 				setGoMaxProcs(c.GlobalInt("gomaxprocs"))
+				if c.GlobalBool("profile") {
+					go initializePprofServer()
+				}
 
 				sc, err := serverConfiguration(c)
 				if err != nil {
@@ -154,6 +156,7 @@ func globalFlags() []cli.Flag {
 		cli.IntFlag{Name: "processor_concurrency", Value: 4, Usage: "Processor concurrency"},
 		cli.IntFlag{Name: "http_timeout", Value: 5, Usage: "HTTP request timeout in seconds"},
 		cli.IntFlag{Name: "gomaxprocs", Value: 0, Usage: "It will use the default when set to 0"},
+		cli.BoolFlag{Name: "profile", Usage: "Enable pprof"},
 	}
 }
 
