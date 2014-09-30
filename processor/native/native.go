@@ -17,6 +17,7 @@ func (p *Processor) CreateImage(source string, destination string, ic *core.Imag
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	// decode jpeg into image.Image
 	img, err := jpeg.Decode(file)

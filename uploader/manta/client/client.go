@@ -93,6 +93,7 @@ func (c *Client) GetObject(path string) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
+	// FIXME: Must close resp.Body, and we're not currently.
 	// defer resp.Body.Close()
 
 	err = c.ensureStatus(resp, 200)

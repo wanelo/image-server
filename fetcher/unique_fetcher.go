@@ -32,11 +32,10 @@ func (f *UniqueFetcher) Fetch() (bool, error) {
 func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 	url := f.Source
 	destination := f.Destination
+	var err error
 
 	mu.Lock()
 	_, present := ImageDownloads[url]
-	var err error
-
 	if present {
 		ImageDownloads[url] = append(ImageDownloads[url], c)
 		mu.Unlock()
@@ -68,7 +67,6 @@ func (f *UniqueFetcher) uniqueFetch(c chan FetchResult) {
 			f.notifyDownloadFailed(url, err)
 		}
 		mu.Unlock()
-
 	}
 }
 
