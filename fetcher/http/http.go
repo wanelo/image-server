@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	gohttp "net/http"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -16,7 +16,11 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 	if _, err := os.Stat(destination); os.IsNotExist(err) {
 		start := time.Now()
 
-		resp, err := gohttp.Get(url)
+		timeout := 5 * time.Second
+		tr := &http.Transport{ResponseHeaderTimeout: timeout}
+		client := &http.Client{Transport: tr}
+		resp, err := client.Get(url)
+
 		if err != nil {
 			return err
 		}
