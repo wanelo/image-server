@@ -14,8 +14,12 @@ import (
 	mantaclient "github.com/wanelo/image-server/uploader/manta/client"
 )
 
-//
-//
+var pathHashRegex *regexp.Regexp
+
+func init() {
+	pathHashRegex = regexp.MustCompile(`\/([0-9a-f]{3})\/([0-9a-f]{3})\/([0-9a-f]{3})\/([0-9a-f]{23})\/`)
+}
+
 type ImageUpload struct {
 	ServerConfiguration *core.ServerConfiguration
 	Namespace           string
@@ -36,10 +40,6 @@ func (iu *ImageUpload) Upload() error {
 	return nil
 }
 
-//
-//
-//
-//
 type ImageProcessor struct {
 	Image     *Image
 	Outputs   []string
@@ -134,10 +134,6 @@ func (ip *ImageProcessor) ProcessOutput(sc *core.ServerConfiguration, filename s
 	return nil
 }
 
-//
-//
-//
-//
 type Image struct {
 	LocalOriginalPath string
 	Outputs           []string
@@ -156,8 +152,7 @@ func NewImage(path string, outputs []string, c chan string) *Image {
 }
 
 func (i *Image) ToHash() string {
-	exp := regexp.MustCompile(`\/([0-9a-f]{3})\/([0-9a-f]{3})\/([0-9a-f]{3})\/([0-9a-f]{23})\/`)
-	m := exp.FindStringSubmatch(i.LocalOriginalPath)
+	m := pathHashRegex.FindStringSubmatch(i.LocalOriginalPath)
 	return fmt.Sprintf("%s%s%s%s", m[1], m[2], m[3], m[4])
 }
 

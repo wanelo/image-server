@@ -8,14 +8,18 @@ import (
 	"github.com/wanelo/image-server/core"
 )
 
+var reR, reS, reW, reF *regexp.Regexp
+
+func init() {
+	reR = regexp.MustCompile(`^([0-9]+)x([0-9]+)(?:-q([0-9]+))?\.(\w{3,4})$`)
+	reS = regexp.MustCompile(`^x([0-9]+)(?:-q([0-9]+))?\.(\w{3,4})$`)
+	reW = regexp.MustCompile(`^w([0-9]+)(?:-q([0-9]+))?\.(\w{3,4})$`)
+	reF = regexp.MustCompile(`^full_size(?:-q([0-9]+))?\.(\w{3,4})$`)
+}
+
 func NameToConfiguration(sc *core.ServerConfiguration, filename string) (*core.ImageConfiguration, error) {
 	var w, h, q, f string
 	var quality uint
-
-	reR := regexp.MustCompile(`^([0-9]+)x([0-9]+)(?:-q([0-9]+))?\.(\w{3,4})$`)
-	reS := regexp.MustCompile(`^x([0-9]+)(?:-q([0-9]+))?\.(\w{3,4})$`)
-	reW := regexp.MustCompile(`^w([0-9]+)(?:-q([0-9]+))?\.(\w{3,4})$`)
-	reF := regexp.MustCompile(`^full_size(?:-q([0-9]+))?\.(\w{3,4})$`)
 
 	if reR.MatchString(filename) {
 		m := reR.FindStringSubmatch(filename)
