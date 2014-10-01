@@ -21,7 +21,6 @@ func NewUniqueFetcher(source string, destination string) *UniqueFetcher {
 // This value is false when the image is already present in the filesystem
 func (f *UniqueFetcher) Fetch() (bool, error) {
 	c := make(chan FetchResult)
-	defer close(c)
 	go f.uniqueFetch(c)
 	r := <-c
 	return r.Downloaded, r.Error
@@ -75,6 +74,7 @@ func (f *UniqueFetcher) notifyDownloadComplete(url string) {
 		downloaded := i == 0
 		fr := FetchResult{nil, nil, downloaded}
 		cc <- fr
+		close(cc)
 	}
 }
 
@@ -82,5 +82,6 @@ func (f *UniqueFetcher) notifyDownloadFailed(url string, err error) {
 	for _, cc := range ImageDownloads[url] {
 		fr := FetchResult{err, nil, false}
 		cc <- fr
+		close(cc)
 	}
 }

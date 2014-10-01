@@ -63,6 +63,7 @@ func (f *SourceFetcher) uniqueFetchSource(c chan FetchResult, url string, namesp
 	}
 
 	c <- FetchResult{nil, imageDetails, downloaded}
+	close(c)
 }
 
 func (f *SourceFetcher) copyImageFromTmp(tmpOriginalPath string, destination string) error {
@@ -92,4 +93,5 @@ func (f *SourceFetcher) downloadTempSource(url string) (string, bool, error) {
 
 func (f *SourceFetcher) notifyDownloadSourceFailed(c chan FetchResult, err error) {
 	c <- FetchResult{err, nil, false}
+	close(c)
 }

@@ -66,6 +66,7 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 
 		for _, cc := range ImageProcessings[key] {
 			cc <- ProcessorResult{p.Destination, err}
+			close(cc)
 		}
 		processingMutex.Lock()
 		delete(ImageProcessings, key)
@@ -109,10 +110,12 @@ func (p *Processor) createIfNotAvailable() (bool, error) {
 
 func (p *Processor) notifyProcessed() {
 	p.Channels.ImageProcessed <- p.ImageConfiguration
+	close(p.Channels.ImageProcessed)
 	close(p.Channels.Skipped)
 }
 
 func (p *Processor) notifySkipped() {
 	p.Channels.Skipped <- p.Destination
 	close(p.Channels.ImageProcessed)
+	close(p.Channels.Skipped)
 }
