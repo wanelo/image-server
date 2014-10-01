@@ -4,15 +4,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/s3"
+	"github.com/goamz/goamz/aws"
+	"github.com/goamz/goamz/s3"
 )
 
 // Uploader for S3
 type Uploader struct {
 	AccessKey  string
 	SecretKey  string
-	Token      string
 	BucketName string
 	BaseDir    string
 }
@@ -21,10 +20,10 @@ type Uploader struct {
 func (u *Uploader) Upload(source string, destination string, contType string) error {
 	bucket := u.retrieveBucket()
 	reader, err := os.Open(source)
-
 	if err != nil {
 		return err
 	}
+	defer reader.Close()
 
 	var stat os.FileInfo
 	stat, err = os.Stat(source)
@@ -33,7 +32,7 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 	}
 	size := stat.Size()
 
-	err = bucket.PutReader(destination, reader, size, contType, s3.PublicRead)
+	err = bucket.PutReader(destination, reader, size, contType, s3.PublicRead, s3.Options{})
 	return err
 }
 
@@ -67,7 +66,7 @@ func (u *Uploader) Initialize() error {
 }
 
 func (u *Uploader) retrieveBucket() *s3.Bucket {
-	auth := aws.Auth{AccessKey: u.AccessKey, SecretKey: u.SecretKey, Token: u.Token}
+	auth := aws.Auth{AccessKey: u.AccessKey, SecretKey: u.SecretKey}
 	client := s3.New(auth, aws.USEast)
 	return client.Bucket(u.BucketName)
 }
