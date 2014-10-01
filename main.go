@@ -162,8 +162,7 @@ func globalFlags() []cli.Flag {
 
 // initializeUploader creates base path on destination server
 func initializeUploader(sc *core.ServerConfiguration) {
-	uploader := uploader.DefaultUploader(sc)
-	err := uploader.Initialize()
+	err := uploader.Initialize(sc)
 	if err != nil {
 		log.Println("EXITING: Unable to initialize uploader: ", err)
 		os.Exit(2)

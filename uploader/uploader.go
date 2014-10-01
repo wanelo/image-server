@@ -24,13 +24,9 @@ func DefaultUploader(sc *core.ServerConfiguration) *Uploader {
 	}
 
 	if sc.AWSAccessKeyID != "" {
-		u.Uploader = &s3.Uploader{
-			AccessKey:  sc.AWSAccessKeyID,
-			SecretKey:  sc.AWSSecretKey,
-			BucketName: sc.AWSBucket,
-		}
+		u.Uploader = &s3.Uploader{}
 	} else {
-		u.Uploader = manta.DefaultUploader(sc.RemoteBasePath)
+		u.Uploader = manta.DefaultUploader()
 	}
 	return u
 }
@@ -60,6 +56,11 @@ func (u *Uploader) CreateDirectory(path string) error {
 	return directoryPath
 }
 
-func (u *Uploader) Initialize() error {
-	return u.Uploader.Initialize()
+func Initialize(sc *core.ServerConfiguration) error {
+	if sc.AWSAccessKeyID != "" {
+		s3.Initialize(sc.AWSAccessKeyID, sc.AWSSecretKey, sc.AWSBucket)
+	} else {
+		manta.Initialize(sc.RemoteBasePath)
+	}
+	return nil
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/wanelo/image-server/logger/graphite"
 	"github.com/wanelo/image-server/paths"
 	"github.com/wanelo/image-server/server"
+	"github.com/wanelo/image-server/uploader"
 
 	. "github.com/wanelo/image-server/test"
 )
@@ -23,6 +24,8 @@ func TestNewImageHandlerWithS3(t *testing.T) {
 	deleteS3TestDirectory()
 
 	sc := buildTestServerConfiguration()
+	uploader.Initialize(sc)
+
 	router := server.NewRouter(sc)
 
 	request, _ := http.NewRequest("POST", "/test_namespace?outputs=x300.jpg,x300.webp&source=http%3A%2F%2Fcdn-s3-3.wanelo.com%2Fproduct%2Fimage%2F15209365%2Fx354.jpg", nil)

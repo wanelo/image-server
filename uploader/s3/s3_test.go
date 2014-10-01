@@ -14,11 +14,14 @@ func TestItemToHash(t *testing.T) {
 		return
 	}
 
+	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretKey := os.Getenv("AWS_SECRET_KEY")
+	bucketName := os.Getenv("AWS_BUCKET")
+
+	s3.Initialize(accessKey, secretKey, bucketName)
+
 	uploader := s3.Uploader{
-		AccessKey:  os.Getenv("AWS_ACCESS_KEY_ID"),
-		SecretKey:  os.Getenv("AWS_SECRET_KEY"),
-		BucketName: os.Getenv("AWS_BUCKET"),
-		BaseDir:    os.Getenv("IMG_REMOTE_BASE_PATH"),
+		BaseDir: os.Getenv("IMG_REMOTE_BASE_PATH"),
 	}
 
 	existing, err := uploader.ListDirectory("p/543/47c/442/1c41f9467a3f5afed64943b")

@@ -15,16 +15,14 @@ type MantaClient interface {
 }
 
 type Uploader struct {
-	Client  MantaClient
-	BaseDir string
+	Client MantaClient
 }
 
-func DefaultUploader(baseDir string) *Uploader {
+func DefaultUploader() *Uploader {
 	c := client.DefaultClient()
 
 	return &Uploader{
-		Client:  c,
-		BaseDir: baseDir,
+		Client: c,
 	}
 }
 
@@ -86,8 +84,9 @@ func (u *Uploader) ListDirectory(directory string) ([]string, error) {
 	return names, nil
 }
 
-func (u *Uploader) Initialize() error {
-	return u.CreateDirectory(u.BaseDir)
+func Initialize(baseDir string) error {
+	u := DefaultUploader()
+	return u.CreateDirectory(baseDir)
 }
 
 func (u *Uploader) createDirectory(path string) error {

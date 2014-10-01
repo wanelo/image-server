@@ -10,15 +10,13 @@ import (
 
 // Uploader for S3
 type Uploader struct {
-	AccessKey  string
-	SecretKey  string
-	BucketName string
-	BaseDir    string
+	BaseDir string
 }
+
+var bucket *s3.Bucket
 
 // Upload copies a file int a bucket in S3
 func (u *Uploader) Upload(source string, destination string, contType string) error {
-	bucket := u.retrieveBucket()
 	reader, err := os.Open(source)
 	if err != nil {
 		return err
@@ -38,7 +36,6 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 
 func (u *Uploader) ListDirectory(directory string) ([]string, error) {
 	var names []string
-	bucket := u.retrieveBucket()
 	prefix := directory
 	delim := ""
 	marker := ""
@@ -60,13 +57,12 @@ func (u *Uploader) CreateDirectory(path string) error {
 	return nil
 }
 
-// Initialize does nothing
-func (u *Uploader) Initialize() error {
-	return nil
+func Initialize(accessKey string, secretKey string, bucketName string) {
+	bucket = retrieveBucket(accessKey, secretKey, bucketName)
 }
 
-func (u *Uploader) retrieveBucket() *s3.Bucket {
-	auth := aws.Auth{AccessKey: u.AccessKey, SecretKey: u.SecretKey}
+func retrieveBucket(accessKey, secretKey, bucketName string) *s3.Bucket {
+	auth := aws.Auth{AccessKey: accessKey, SecretKey: secretKey}
 	client := s3.New(auth, aws.USEast)
-	return client.Bucket(u.BucketName)
+	return client.Bucket(bucketName)
 }
