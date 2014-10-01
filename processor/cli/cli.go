@@ -2,6 +2,7 @@ package cli
 
 import (
 	"container/list"
+	"errors"
 	"fmt"
 	"math"
 	"os/exec"
@@ -18,17 +19,17 @@ type Processor struct {
 }
 
 func (p *Processor) CreateImage() error {
-	cmd := exec.Command("convert", p.commandArgs()...)
+	cmd := exec.Command("convert", p.CommandArgs()...)
 
 	err := cmd.Run()
 	if err != nil {
-		return err
+		return errors.New("ImageMagick failed to process the image")
 	}
 
 	return nil
 }
 
-func (p *Processor) commandArgs() []string {
+func (p *Processor) CommandArgs() []string {
 	ic := p.ImageConfiguration
 	source := p.Source
 	destination := p.Destination
