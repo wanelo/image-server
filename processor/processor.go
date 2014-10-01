@@ -57,12 +57,12 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 	if present {
 		ImageProcessings[key] = append(ImageProcessings[key], c)
 		processingMutex.Unlock()
-		p.notifySkipped(key)
+		p.notifySkipped()
 	} else {
 		ImageProcessings[key] = []chan ProcessorResult{c}
 		processingMutex.Unlock()
 
-		err := p.createIfNotAvailable()
+		processed, err := p.createIfNotAvailable()
 
 		for _, cc := range ImageProcessings[key] {
 			cc <- ProcessorResult{p.Destination, err}
@@ -70,12 +70,16 @@ func (p *Processor) uniqueCreateImage(c chan ProcessorResult) {
 		processingMutex.Lock()
 		delete(ImageProcessings, key)
 		processingMutex.Unlock()
-		p.notifyProcessed()
-	}
 
+		if processed {
+			p.notifyProcessed()
+		} else {
+			p.notifySkipped()
+		}
+	}
 }
 
-func (p *Processor) createIfNotAvailable() error {
+func (p *Processor) createIfNotAvailable() (bool, error) {
 	if _, err := os.Stat(p.Destination); os.IsNotExist(err) {
 		start := time.Now()
 
@@ -92,27 +96,23 @@ func (p *Processor) createIfNotAvailable() error {
 
 		if err != nil {
 			log.Println(err)
-			return err
+			return false, err
 		}
 
 		elapsed := time.Since(start)
 		log.Printf("Took %s to generate image: %s", elapsed, p.Destination)
-		p.notifyProcessed()
+		return true, nil
 	} else {
-		p.notifySkipped(p.Destination)
+		return false, nil
 	}
-
-	return nil
 }
 
 func (p *Processor) notifyProcessed() {
-	go func() {
-		p.Channels.ImageProcessed <- p.ImageConfiguration
-	}()
+	p.Channels.ImageProcessed <- p.ImageConfiguration
+	close(p.Channels.Skipped)
 }
 
-func (p *Processor) notifySkipped(path string) {
-	go func() {
-		p.Channels.Skipped <- path
-	}()
+func (p *Processor) notifySkipped() {
+	p.Channels.Skipped <- p.Destination
+	close(p.Channels.ImageProcessed)
 }
