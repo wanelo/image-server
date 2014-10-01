@@ -2,3 +2,4 @@ public/
 bin/solaris
 bin/images
 tmp/
+*.prof
