@@ -134,6 +134,15 @@ brew bundle
 make deps
 ```
 
+Install go from source:
+
+```
+hg clone https://code.google.com/p/go $HOME/go.trunk
+cd $HOME/go.trunk/src && ./all.bash
+cd $HOME/go.trunk/src && ./make.bash
+cd $HOME/go.trunk/src && GOOS=solaris GOARCH=amd64 ./make.bash
+```
+
 Set up editor:
 
   - Atom.io package `go plus`
