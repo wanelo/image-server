@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -44,6 +45,17 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 		defer out.Close()
 
 		io.Copy(out, resp.Body)
+
+		fileInfo, err := out.Stat()
+		if err != nil {
+			return err
+		}
+
+		if fileInfo.Size() < 10 {
+			defer os.Remove(destination)
+			return errors.New("File is empty")
+		}
+
 		log.Printf("Took %s to download image: %s", time.Since(start), destination)
 	} else {
 		log.Printf("Fetcher: image is already present on destination: %s", destination)

@@ -1,0 +1,43 @@
+package http_test
+
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
+	httpFetcher "github.com/wanelo/image-server/fetcher/http"
+
+	. "github.com/wanelo/image-server/test"
+)
+
+func TestUniqueFetcher(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/jpeg")
+		fmt.Fprintln(w, `there is some content`)
+	}))
+	defer ts.Close()
+
+	f := &httpFetcher.Fetcher{}
+
+	defer os.Remove("valid")
+	err := f.Fetch(ts.URL, "valid")
+
+	Ok(t, err)
+}
+
+func TestUniqueFetcherOnEmptyFiles(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "image/jpeg")
+		fmt.Fprintf(w, ``)
+	}))
+	defer ts.Close()
+
+	f := &httpFetcher.Fetcher{}
+
+	defer os.Remove("blank.jpg")
+	err := f.Fetch(ts.URL, "blank.jpg")
+
+	Equals(t, "File is empty", fmt.Sprintf("%s", err))
+}
