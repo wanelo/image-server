@@ -11,7 +11,7 @@ import (
 
 // InitializeServer creates a new http server to handle image processing requests
 func InitializeServer(sc *core.ServerConfiguration, listen string, port string) {
-	go InitializeServerStatus(listen, "7001")
+	go InitializeServerStatus(listen, "7002")
 	log.Printf("starting server on http://%s:%s", listen, port)
 	router := NewRouter(sc)
 	n := negroni.Classic()
