@@ -1,5 +1,5 @@
 public/
 bin/solaris
-bin/images
+bin/images*
 tmp/
 *.prof
