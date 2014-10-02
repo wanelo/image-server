@@ -149,18 +149,18 @@ Set up editor:
 
 Compile the app:
 
-`make` will build the executable under `./bin`
+To build the executables under `./bin`
+
 ```bash
-make
+make build
 ```
 
 ## Deploy
 
-Make sure you increase the version number in the Makefile.
-Update chef configuration to use this new version.
+Make sure you increase the version number in core/version.go
 
 ```bash
-make buildtomanta
+make release
 ```
 
 ## Graphite Events
