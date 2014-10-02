@@ -31,7 +31,7 @@ func (l *Logger) OriginalDownloadFailed(source string) {
 }
 
 func (l *Logger) OriginalDownloadSkipped(source string) {
-  for _, logger := range l.Loggers {
-    go logger.OriginalDownloadSkipped(source)
-  }
+	for _, logger := range l.Loggers {
+		go logger.OriginalDownloadSkipped(source)
+	}
 }
