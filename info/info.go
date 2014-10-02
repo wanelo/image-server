@@ -27,6 +27,8 @@ func (i Info) FileHash() (hash string, err error) {
 	if err != nil {
 		return "", err
 	}
+	defer infile.Close()
+
 	h := md5.New()
 	io.Copy(h, infile)
 
