@@ -190,6 +190,20 @@ The original image is not available, and a 404 was returned
 stats.image_server.original_unavailable
 ```
 
+## Profiling
+
+On the production server
+
+```
+curl http://localhost:6060/debug/pprof/heap > images.pprof
+```
+
+on development machine
+```
+scp user@example.com:images.pprof .
+go tool pprof bin/solaris/images --inuse_objects images.pprof
+```
+
 ## Benchmarks
 
 Make sure your computer can handle enough simultaneous connections. MacOS X by default allows 128. Need a lot more!
