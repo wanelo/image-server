@@ -24,7 +24,6 @@ import (
 )
 
 func main() {
-	go handleShutdownSignals()
 
 	app := cli.NewApp()
 	app.Name = "images"
@@ -43,6 +42,8 @@ func main() {
 			Usage:     "image server",
 			Action: func(c *cli.Context) {
 				setGoMaxProcs(c.GlobalInt("gomaxprocs"))
+				go handleShutdownSignals()
+
 				if c.GlobalBool("profile") {
 					go initializePprofServer()
 				}
@@ -218,6 +219,19 @@ func handleShutdownSignals() {
 	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT)
 
 	<-shutdown
+	server.ShuttingDown = true
+	log.Println("Shutting down in 20 seconds. Allowing requests to finish. Interrupt again to quit immediately.")
+
+	go func() {
+		shutdown := make(chan os.Signal, 1)
+		signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT)
+
+		<-shutdown
+		log.Println("Forced to shutdown.")
+		os.Exit(0)
+	}()
+
+	time.Sleep(20 * time.Second)
 	os.Exit(0)
 }
 
