@@ -8,12 +8,7 @@ The default port number is 7000
 
 To start the server under development
 ```bash
-make run
-```
-
-To run the compiled executable
-```
-./bin/image-server -e production
+make devserver
 ```
 
 ## Configuration
