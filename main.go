@@ -57,7 +57,7 @@ func main() {
 				go initializeUploader(sc)
 
 				port := c.GlobalString("port")
-				server.InitializeRouter(sc, c.GlobalString("listen"), port)
+				server.InitializeServer(sc, c.GlobalString("listen"), port)
 			},
 		},
 		{

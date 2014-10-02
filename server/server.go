@@ -9,14 +9,13 @@ import (
 	"github.com/wanelo/image-server/core"
 )
 
-func InitializeRouter(sc *core.ServerConfiguration, listen string, port string) {
+// InitializeServer creates a new http server to handle image processing requests
+func InitializeServer(sc *core.ServerConfiguration, listen string, port string) {
+	go InitializeServerStatus(listen, "7001")
 	log.Printf("starting server on http://%s:%s", listen, port)
-
 	router := NewRouter(sc)
-
 	n := negroni.Classic()
 	n.UseHandler(router)
-
 	n.Run(listen + ":" + port)
 }
 
