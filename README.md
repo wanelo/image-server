@@ -226,15 +226,6 @@ launchctl limit maxfiles 400000 1000000
 
 to increase them [permanently](https://coderwall.com/p/lfjoaq)
 
-## Pending
-
-### Required
-- Adapter for fetching original image from manta
-- Accept signals. QUIT needs to stop accepting requests, and finish processing what is on the queue.
-- Document flag usage. In readme and with --help
-- Strip metadata
-- Default background color needs to be white (for transparent gifs, etc)
-
 ### After Release
 
 - Zero-downtime restart: http://rcrowley.org/talks/strange-loop-2013.html#27
