@@ -1,3 +1,5 @@
+// +build !solaris
+
 package magick
 
 import (
@@ -8,6 +10,8 @@ import (
 	"github.com/wanelo/image-server/core"
 	m "gopkgs.com/magick.v1"
 )
+
+const Available = true
 
 type Processor struct{}
 
