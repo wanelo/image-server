@@ -23,6 +23,12 @@ type Request struct {
 
 func (r *Request) ProcessMultiple() error {
 	missing, err := r.CalculateMissingOutputs()
+	uploadQueue := make(chan *core.ImageConfiguration)
+	errorProcessingChannel := make(chan error)
+	uploadedChannel := make(chan error)
+
+	defer close(errorProcessingChannel)
+	defer close(uploadedChannel)
 	if err != nil {
 		return err
 	}
@@ -32,20 +38,59 @@ func (r *Request) ProcessMultiple() error {
 		return nil
 	}
 
-	for _, filename := range missing {
-		ic, err := parser.NameToConfiguration(r.ServerConfiguration, filename)
-		if err != nil {
-			return err
-		}
-		ic.Namespace = r.Namespace
-		ic.ID = r.Hash
+	// Process all the outputs
+	go func() {
+		for _, filename := range missing {
+			log.Println(filename, "started")
+			ic, err := parser.NameToConfiguration(r.ServerConfiguration, filename)
+			if err != nil {
+				errorProcessingChannel <- err
+				return
+			}
+			ic.Namespace = r.Namespace
+			ic.ID = r.Hash
 
-		err = r.Process(ic)
-		if err != nil {
-			return err
+			err = r.Process(ic)
+			if err != nil {
+				errorProcessingChannel <- err
+				return
+			}
+			uploadQueue <- ic
+			log.Println(filename, "complete")
+		}
+	}()
+
+	// Upload all the outputs in parallel. This might be sequential if the
+	// processing is slower than the uplaod
+	for _, _ = range missing {
+		go func() {
+			select {
+			case ic := <-uploadQueue:
+				log.Println("about to upload!")
+				localResizedPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, ic.Filename)
+				remoteResizedPath := r.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
+				err = r.Uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
+				if err != nil {
+					uploadedChannel <- err
+				}
+			case errP := <-errorProcessingChannel:
+				err = errP
+			}
+			uploadedChannel <- err
+		}()
+	}
+
+	// wait till everything finishes, return on first error
+	for _, _ = range missing {
+		select {
+		case err = <-uploadedChannel:
+			if err != nil {
+				return err
+			}
 		}
 	}
-	return err
+
+	return nil
 }
 
 func (r *Request) Process(ic *core.ImageConfiguration) error {
@@ -92,9 +137,7 @@ func (r *Request) Process(ic *core.ImageConfiguration) error {
 		log.Printf("Skipped processing (resize handler) %s", localResizedPath)
 	}
 
-	remoteResizedPath := r.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
-	err = r.Uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
-	return err
+	return nil
 }
 
 // CalculateMissingOutputs determine what versions need to be generated
