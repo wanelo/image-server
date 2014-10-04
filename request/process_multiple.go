@@ -23,15 +23,14 @@ type Request struct {
 
 func (r *Request) ProcessMultiple() error {
 	missing, err := r.CalculateMissingOutputs()
-	uploadQueue := make(chan *core.ImageConfiguration)
-	errorProcessingChannel := make(chan error)
-	uploadedChannel := make(chan error)
-
-	defer close(errorProcessingChannel)
-	defer close(uploadedChannel)
 	if err != nil {
 		return err
 	}
+
+	uploadQueue := make(chan *core.ImageConfiguration)
+	errorProcessingChannel := make(chan error)
+	uploadedChannel := make(chan error)
+	defer close(uploadedChannel)
 
 	if missing == nil {
 		// All the files are already uploaded. Nothing do do!
@@ -40,6 +39,7 @@ func (r *Request) ProcessMultiple() error {
 
 	// Process all the outputs
 	go func() {
+		defer close(errorProcessingChannel)
 		for _, filename := range missing {
 			log.Println(filename, "started")
 			ic, err := parser.NameToConfiguration(r.ServerConfiguration, filename)
@@ -70,9 +70,6 @@ func (r *Request) ProcessMultiple() error {
 				localResizedPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, ic.Filename)
 				remoteResizedPath := r.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
 				err = r.Uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
-				if err != nil {
-					uploadedChannel <- err
-				}
 			case errP := <-errorProcessingChannel:
 				err = errP
 			}
@@ -80,17 +77,18 @@ func (r *Request) ProcessMultiple() error {
 		}()
 	}
 
+	var firstErr error
 	// wait till everything finishes, return on first error
 	for _, _ = range missing {
 		select {
 		case err = <-uploadedChannel:
-			if err != nil {
-				return err
+			if err != nil && firstErr == nil {
+				firstErr = err
 			}
 		}
 	}
 
-	return nil
+	return firstErr
 }
 
 func (r *Request) Process(ic *core.ImageConfiguration) error {
