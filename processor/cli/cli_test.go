@@ -64,5 +64,5 @@ func TestBlankImage(t *testing.T) {
 
 	err := p.CreateImage()
 	errorMsg := fmt.Sprintf("%s", err)
-	Equals(t, "ImageMagick failed to process the image", errorMsg)
+	Equals(t, "ImageMagick failed to process the image: convert -format jpg -flatten -resize 600 -background rgba(255,255,255,1) -quality 85 test/images/empty.jpg public/test/00/of/rA/empty.jpg", errorMsg)
 }

@@ -2,10 +2,10 @@ package cli
 
 import (
 	"container/list"
-	"errors"
 	"fmt"
 	"math"
 	"os/exec"
+	"strings"
 
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/info"
@@ -19,11 +19,12 @@ type Processor struct {
 }
 
 func (p *Processor) CreateImage() error {
-	cmd := exec.Command("convert", p.CommandArgs()...)
+	args := p.CommandArgs()
+	cmd := exec.Command("convert", args...)
 
 	err := cmd.Run()
 	if err != nil {
-		return errors.New("ImageMagick failed to process the image")
+		return fmt.Errorf("ImageMagick failed to process the image: convert %s", strings.Join(args, " "))
 	}
 
 	return nil

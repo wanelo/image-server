@@ -80,7 +80,7 @@ func (i Info) DetailsFromImageMagick() (*ImageDetails, error) {
 	dimensions = strings.TrimSpace(dimensions)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ImageMagick failed to identify properties")
 	}
 
 	d := strings.Split(dimensions, ":")
