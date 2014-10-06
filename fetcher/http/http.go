@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,7 +19,13 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 		start := time.Now()
 
 		timeout := 5 * time.Second
-		tr := &http.Transport{ResponseHeaderTimeout: timeout}
+		tr := &http.Transport{
+			ResponseHeaderTimeout: timeout,
+			Dial: (&net.Dialer{
+				Timeout:   5 * time.Second,
+				KeepAlive: 5 * time.Second,
+			}).Dial,
+		}
 		client := &http.Client{Transport: tr}
 		resp, err := client.Get(url)
 
