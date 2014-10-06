@@ -64,16 +64,17 @@ func (r *Request) ProcessMultiple() error {
 	// processing is slower than the uplaod
 	for _, _ = range missing {
 		go func() {
+			var errU error
 			select {
 			case ic := <-uploadQueue:
 				log.Println("about to upload!")
 				localResizedPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, ic.Filename)
 				remoteResizedPath := r.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
-				err = r.Uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
+				errU = r.Uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
 			case errP := <-errorProcessingChannel:
-				err = errP
+				errU = errP
 			}
-			uploadedChannel <- err
+			uploadedChannel <- errU
 		}()
 	}
 
@@ -81,7 +82,7 @@ func (r *Request) ProcessMultiple() error {
 	// wait till everything finishes, return on first error
 	for _, _ = range missing {
 		select {
-		case err = <-uploadedChannel:
+		case err := <-uploadedChannel:
 			if err != nil && firstErr == nil {
 				firstErr = err
 			}
