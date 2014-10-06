@@ -22,8 +22,8 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 		tr := &http.Transport{
 			ResponseHeaderTimeout: timeout,
 			Dial: (&net.Dialer{
-				Timeout:   5 * time.Second,
-				KeepAlive: 5 * time.Second,
+				Timeout:   timeout,
+				KeepAlive: timeout,
 			}).Dial,
 		}
 		client := &http.Client{Transport: tr}
