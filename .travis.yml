@@ -6,5 +6,7 @@ go:
 before_script:
   - sudo apt-get install giflib-dbg
 
+script: go test -race ./...
+
 notifications:
   webhooks: "http://ci.wanelo.com/projects/e64003b3-d018-4c60-9532-67c635414c11/status"
