@@ -71,9 +71,9 @@ func retrieveBucket(accessKey, secretKey, bucketName string) *s3.Bucket {
 			Total: 5 * time.Second,
 			Delay: 200 * time.Millisecond,
 		},
-		ConnectTimeout: 1 * time.Second,
-		ReadTimeout:    5 * time.Second,
-		RequestTimeout: 5 * time.Second,
+		// ConnectTimeout: 1 * time.Second,
+		// ReadTimeout:    5 * time.Second,
+		// RequestTimeout: 10 * time.Second,
 	}
 	return client.Bucket(bucketName)
 }
