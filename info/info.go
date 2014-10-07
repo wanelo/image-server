@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	_ "code.google.com/p/go.image/webp"
 	"github.com/wanelo/image-server/mime"
 )
 
