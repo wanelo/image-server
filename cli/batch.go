@@ -252,7 +252,6 @@ func processImage(sc *core.ServerConfiguration, namespace string, hash string, l
 
 	select {
 	case <-pchan.ImageProcessed:
-		log.Println("about to upload to manta")
 		uploader := uploader.DefaultUploader(sc)
 		remoteResizedPath := sc.Adapters.Paths.RemoteImagePath(namespace, hash, filename)
 		err = uploader.Upload(localPath, remoteResizedPath, ic.ToContentType())

@@ -41,7 +41,6 @@ func (r *Request) ProcessMultiple() error {
 	go func() {
 		defer close(errorProcessingChannel)
 		for _, filename := range missing {
-			log.Println(filename, "started")
 			ic, err := parser.NameToConfiguration(r.ServerConfiguration, filename)
 			if err != nil {
 				errorProcessingChannel <- err
@@ -56,7 +55,6 @@ func (r *Request) ProcessMultiple() error {
 				return
 			}
 			uploadQueue <- ic
-			log.Println(filename, "complete")
 		}
 	}()
 
@@ -67,7 +65,6 @@ func (r *Request) ProcessMultiple() error {
 			var errU error
 			select {
 			case ic := <-uploadQueue:
-				log.Println("about to upload!")
 				localResizedPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, ic.Filename)
 				remoteResizedPath := r.Paths.RemoteImagePath(ic.Namespace, ic.ID, ic.Filename)
 				errU = r.Uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
