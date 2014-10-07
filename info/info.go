@@ -9,7 +9,11 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"log"
 	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 
 	_ "code.google.com/p/go.image/webp"
 	"github.com/wanelo/image-server/mime"
@@ -41,10 +45,7 @@ func (i Info) ImageDetails() (*ImageDetails, error) {
 		var details *ImageDetails
 
 		im, format, err := image.DecodeConfig(reader)
-		if err != nil {
-			return nil, err
-		}
-		if format != "" {
+		if err == nil && format != "" {
 			contentType, err = getContentTypeFromExtension(format)
 			if err != nil {
 				return nil, err
@@ -56,7 +57,12 @@ func (i Info) ImageDetails() (*ImageDetails, error) {
 				ContentType: contentType,
 			}
 		} else {
-			return nil, errors.New("Unable to extract the format of the image")
+			// can't calculate content type, so will use ImageMagick as fallback
+			// use fallback
+			details, err = i.DetailsFromImageMagick()
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		hash, err := i.FileHash()
@@ -66,6 +72,41 @@ func (i Info) ImageDetails() (*ImageDetails, error) {
 	} else {
 		return nil, err
 	}
+}
+
+func (i Info) DetailsFromImageMagick() (*ImageDetails, error) {
+	args := []string{"-format", "%[fx:w]:%[fx:h]:%m", i.Path}
+	out, err := exec.Command("identify", args...).Output()
+	dimensions := fmt.Sprintf("%s", out)
+	dimensions = strings.TrimSpace(dimensions)
+
+	if err != nil {
+		return nil, fmt.Errorf("ImageMagick failed to identify properties")
+	}
+
+	d := strings.Split(dimensions, ":")
+	w, err := strconv.Atoi(d[0])
+	if err != nil {
+		log.Printf("Can't convert width to integer: %s\n", d[0])
+		return nil, err
+	}
+
+	h, err := strconv.Atoi(d[1])
+	if err != nil {
+		log.Printf("Can't convert height to integer: %s\n", d[1])
+		return nil, err
+	}
+
+	contentType, err := getContentTypeFromExtension(d[2])
+	if err != nil {
+		return nil, err
+	}
+
+	return &ImageDetails{
+		Height:      h,
+		Width:       w,
+		ContentType: contentType,
+	}, nil
 }
 
 func getContentTypeFromExtension(format string) (string, error) {
