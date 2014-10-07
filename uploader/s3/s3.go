@@ -3,6 +3,7 @@ package s3
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/s3"
@@ -62,7 +63,17 @@ func Initialize(accessKey string, secretKey string, bucketName string) {
 }
 
 func retrieveBucket(accessKey, secretKey, bucketName string) *s3.Bucket {
-	auth := aws.Auth{AccessKey: accessKey, SecretKey: secretKey}
-	client := s3.New(auth, aws.USEast)
+	client := s3.S3{
+		Auth:   aws.Auth{AccessKey: accessKey, SecretKey: secretKey},
+		Region: aws.USEast,
+		AttemptStrategy: aws.AttemptStrategy{
+			Min:   2,
+			Total: 5 * time.Second,
+			Delay: 200 * time.Millisecond,
+		},
+		ConnectTimeout: 1 * time.Second,
+		ReadTimeout:    5 * time.Second,
+		RequestTimeout: 5 * time.Second,
+	}
 	return client.Bucket(bucketName)
 }
