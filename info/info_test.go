@@ -28,6 +28,17 @@ func TestImageDetailsOnJPEG(t *testing.T) {
 	Equals(t, "image/jpeg", imageDetails.ContentType)
 }
 
+func TestImageDetailsOnJPEGUnsupported(t *testing.T) {
+	i := info.Info{"../test/images/unsupported.jpg"}
+	imageDetails, err := i.ImageDetails()
+	expectedHash := "94899754878d302636308bfcb956c4c8"
+	Ok(t, err)
+	Equals(t, expectedHash, imageDetails.Hash)
+	Equals(t, 1200, imageDetails.Height)
+	Equals(t, 900, imageDetails.Width)
+	Equals(t, "image/jpeg", imageDetails.ContentType)
+}
+
 func TestImageDetailsOnPNG(t *testing.T) {
 	i := info.Info{"../test/images/a.png"}
 	imageDetails, err := i.ImageDetails()

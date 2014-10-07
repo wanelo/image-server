@@ -80,6 +80,8 @@ func (i Info) DetailsFromImageMagick() (*ImageDetails, error) {
 	dimensions := fmt.Sprintf("%s", out)
 	dimensions = strings.TrimSpace(dimensions)
 
+	log.Println("Info.DetailsFromImageMagick - Using ImageMagick as fallback:", i.Path)
+
 	if err != nil {
 		return nil, fmt.Errorf("ImageMagick failed to identify properties")
 	}
