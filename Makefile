@@ -12,16 +12,16 @@ IMG_OUTPUTS := $(shell echo $(IMG_OUTPUTS))
 IMG_REMOTE_BASE_PATH := $(shell echo $(IMG_REMOTE_BASE_PATH))
 IMG_REMOTE_BASE_URL := $(shell echo $(IMG_REMOTE_BASE_URL))
 HOME := $(shell echo $(HOME))
-GO = go
-# GO := $(shell echo $(HOME)/go.trunk/bin/go)
+# GO = go
+GO := $(shell echo $(HOME)/go.trunk/bin/go)
 
-all: format deps tests build
+all: format deps tests
 
 devserver:
 	@$(GO) run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path $(IMG_REMOTE_BASE_PATH) --remote_base_url $(IMG_REMOTE_BASE_URL) server
 
 tests:
-	@$(GO) test -race ./...
+	@$(GO) test -race -v ./...
 
 version:
 	@echo $(VERSION)
