@@ -50,6 +50,17 @@ func TestImageDetailsOnWEBP(t *testing.T) {
 	Equals(t, "image/webp", imageDetails.ContentType)
 }
 
+func TestImageDetailsOnWEBPWihtoutExtension(t *testing.T) {
+	i := info.Info{"../test/images/webp_without_ext"}
+	imageDetails, err := i.ImageDetails()
+	expectedHash := "2a9d1753531a2c060c002a97b983854c"
+	Ok(t, err)
+	Equals(t, expectedHash, imageDetails.Hash)
+	Equals(t, imageDetails.Height, 496)
+	Equals(t, imageDetails.Width, 574)
+	Equals(t, "image/webp", imageDetails.ContentType)
+}
+
 func TestImageDetailsToJSON(t *testing.T) {
 	d := &info.ImageDetails{"THISISAHASH", 10, 20, "image/jpeg"}
 	json, err := info.ImageDetailsToJSON(d)
