@@ -8,7 +8,7 @@ The default port number is 7000
 
 To start the server under development
 ```bash
-make devserver
+make dev-server
 ```
 
 ## Configuration
