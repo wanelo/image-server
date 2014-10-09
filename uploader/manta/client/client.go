@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -41,11 +40,12 @@ type Entry struct {
 }
 
 // manta_url := os.Getenv("MANTA_URL")
-func init() {
-	MANTA_URL = os.Getenv("MANTA_URL")
-	MANTA_USER = os.Getenv("MANTA_USER")
-	MANTA_KEY_ID = os.Getenv("MANTA_KEY_ID")
-	SDC_IDENTITY = os.Getenv("SDC_IDENTITY")
+func Initialize(url string, user string, keyID string, identityPath string) {
+	MANTA_URL = url
+	MANTA_USER = user
+	MANTA_KEY_ID = keyID
+	SDC_IDENTITY = identityPath
+
 	if SDC_IDENTITY == "" {
 		homeDir, err := homeDir()
 		if err == nil {

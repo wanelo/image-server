@@ -138,25 +138,44 @@ func globalFlags() []cli.Flag {
 	}
 
 	return []cli.Flag{
+		// HTTP Server settings
 		cli.StringFlag{Name: "port", Value: "7000", Usage: "Specifies the server port."},
 		cli.StringFlag{Name: "extensions", Value: "jpg,gif,webp", Usage: "Whitelisted extensions (separated by commas)"},
 		cli.StringFlag{Name: "local_base_path", Value: "public", Usage: "Directory where the images will be saved"},
-		cli.StringFlag{Name: "remote_base_url", Value: "http://us-east.manta.joyent.com/wanelo", Usage: "Source domain for images"},
-		cli.StringFlag{Name: "remote_base_path", Value: "public/images/development", Usage: "base path for manta storage"},
-		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
-		cli.StringFlag{Name: "namespace", Value: "p", Usage: "Namespace"},
+
+		// Uploader paths
+		cli.StringFlag{Name: "remote_base_url", Value: "", Usage: "Source domain for images"},
+		cli.StringFlag{Name: "remote_base_path", Value: "", Usage: "base path for cloud storage"},
+
+		// For CLI
+		cli.StringFlag{Name: "namespace", Value: "", Usage: "Namespace"},
 		cli.StringFlag{Name: "outputs", Value: defaultOutputs, Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
 		cli.StringFlag{Name: "listen", Value: "127.0.0.1", Usage: "IP address the server listens to"},
+
+		// S3 uploader
 		cli.StringFlag{Name: "aws_access_key_id", Value: "", Usage: "S3 Access Key"},
 		cli.StringFlag{Name: "aws_secret_key", Value: "", Usage: "S3 Secret"},
 		cli.StringFlag{Name: "aws_bucket", Value: "", Usage: "S3 Bucket"},
-		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
+
+		// Manta uploader
+		cli.StringFlag{Name: "manta_url", Value: "", Usage: "URL of Manta endpoint. https://us-east.manta.joyent.com"},
+		cli.StringFlag{Name: "manta_user", Value: "", Usage: "The account name"},
+		cli.StringFlag{Name: "manta_key_id", Value: "", Usage: "The fingerprint of the account or user SSH public key. Example: $(ssh-keygen -l -f $HOME/.ssh/id_rsa.pub | awk '{print $2}')"},
+		cli.StringFlag{Name: "sdc_identity", Value: "", Usage: "Example: $HOME/.ssh/id_rsa"},
+
+		// Default image settings
 		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
 		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
+
+		// Settings
 		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
 		cli.IntFlag{Name: "processor_concurrency", Value: 4, Usage: "Processor concurrency"},
 		cli.IntFlag{Name: "http_timeout", Value: 5, Usage: "HTTP request timeout in seconds"},
 		cli.IntFlag{Name: "gomaxprocs", Value: 0, Usage: "It will use the default when set to 0"},
+
+		// Monitoring and Profiling
+		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
+		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
 		cli.BoolFlag{Name: "profile", Usage: "Enable pprof"},
 	}
 }
@@ -206,6 +225,12 @@ func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
 		AWSAccessKeyID: c.GlobalString("aws_access_key_id"),
 		AWSSecretKey:   c.GlobalString("aws_secret_key"),
 		AWSBucket:      c.GlobalString("aws_bucket"),
+
+		// Manta uploader
+		MantaURL:    c.GlobalString("manta_url"),
+		MantaUser:   c.GlobalString("manta_user"),
+		MantaKeyID:  c.GlobalString("manta_key_id"),
+		SDCIdentity: c.GlobalString("sdc_identity"),
 
 		Outputs:             c.GlobalString("outputs"),
 		DefaultQuality:      uint(c.GlobalInt("default_quality")),

@@ -20,4 +20,8 @@ type ServerConfiguration struct {
 	AWSAccessKeyID        string
 	AWSSecretKey          string
 	AWSBucket             string
+	MantaURL              string
+	MantaUser             string
+	MantaKeyID            string
+	SDCIdentity           string
 }

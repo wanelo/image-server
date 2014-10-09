@@ -18,6 +18,13 @@ type Uploader struct {
 	Client MantaClient
 }
 
+var (
+	MantaURL    string
+	MantaUser   string
+	MantaKeyID  string
+	SDCIdentity string
+)
+
 func DefaultUploader() *Uploader {
 	c := client.DefaultClient()
 
@@ -84,8 +91,15 @@ func (u *Uploader) ListDirectory(directory string) ([]string, error) {
 	return names, nil
 }
 
-func Initialize(baseDir string) error {
+func Initialize(baseDir string, url string, user string, keyID string, identityPath string) error {
 	u := DefaultUploader()
+	MantaURL = url
+	MantaUser = user
+	MantaKeyID = keyID
+	SDCIdentity = identityPath
+
+	client.Initialize(MantaURL, MantaUser, MantaKeyID, SDCIdentity)
+
 	return u.CreateDirectory(baseDir)
 }
 
