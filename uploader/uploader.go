@@ -7,6 +7,7 @@ import (
 
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/uploader/manta"
+	"github.com/wanelo/image-server/uploader/noop"
 	"github.com/wanelo/image-server/uploader/s3"
 )
 
@@ -27,6 +28,8 @@ func DefaultUploader(sc *core.ServerConfiguration) *Uploader {
 		u.Uploader = &s3.Uploader{}
 	} else if sc.MantaKeyID != "" {
 		u.Uploader = manta.DefaultUploader()
+	} else {
+		u.Uploader = &noop.Uploader{}
 	}
 	return u
 }
