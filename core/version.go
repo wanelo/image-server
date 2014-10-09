@@ -1,4 +1,4 @@
 package core
 
 // VERSION number of current image server
-const VERSION = "1.6.8"
+const VERSION = "1.7.0"
