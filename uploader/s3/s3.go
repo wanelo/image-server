@@ -68,12 +68,12 @@ func retrieveBucket(accessKey, secretKey, bucketName string) *s3.Bucket {
 		Region: aws.USEast,
 		AttemptStrategy: aws.AttemptStrategy{
 			Min:   2,
-			Total: 5 * time.Second,
-			Delay: 200 * time.Millisecond,
+			Total: 4 * time.Second,
+			Delay: 500 * time.Millisecond,
 		},
-		ConnectTimeout: 2 * time.Second,
-		ReadTimeout:    8 * time.Second,
-		RequestTimeout: 10 * time.Second,
+		ConnectTimeout: 15 * time.Second,
+		ReadTimeout:    18 * time.Second,
+		RequestTimeout: 20 * time.Second,
 	}
 	return client.Bucket(bucketName)
 }

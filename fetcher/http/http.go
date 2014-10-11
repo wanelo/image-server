@@ -18,7 +18,7 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 	if _, err := os.Stat(destination); os.IsNotExist(err) {
 		start := time.Now()
 
-		timeout := 5 * time.Second
+		timeout := 10 * time.Second
 		tr := &http.Transport{
 			ResponseHeaderTimeout: timeout,
 			Dial: (&net.Dialer{
