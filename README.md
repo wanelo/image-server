@@ -2,18 +2,6 @@
 
 [![Build Status](https://magnum.travis-ci.com/wanelo/image-server.svg?token=xxYxjHDAXkDK41qZ1dqA&branch=master)](https://magnum.travis-ci.com/wanelo/image-server)
 
-## Usage
-
-The default port number is 7000
-
-To start the server under development
-```bash
-make dev-server
-```
-
-## Configuration
-
-All configuration is passed by flags
 
 ## Image Generation
 
@@ -56,46 +44,23 @@ GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a91/info.json
 
 ### Sample images
 
-**Image Types**
-
-    User Avatar
-    GET http://localhost:7000/user/avatar/3589782/w500.jpg
-
-    Product
-    GET http://localhost:7000/product/image/10855050/x400.jpeg
-
-
 **Dimensions**
 
     Maximum Width
-    GET http://localhost:7000/user/avatar/3589782/w500.jpg
+    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/w500.jpg
 
     Square
-    GET http://localhost:7000/user/avatar/3589782/x600.jpg
+    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/x600.jpg
 
     Rectangle
-    GET http://localhost:7000/user/avatar/3589782/300x400.jpg
+    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/300x400.jpg
 
 **Quality**
 
 The default compression of the image can modified by appending `-q` and the desired quality `1-100`.
 
     Square with quality 50
-    GET http://localhost:7000/user/avatar/3589782/x600-q50.jpg
-
-## CLI
-
-Allows to create a range of images in parallel
-```shell
-images -namespace p -outputs x300.jpg,x300.webp -start 1000000 -end 1001000
-```
-
-## Manta CLI
-
-Allows to download a range of images in parallel
-```shell
-images-manta -start 10000000 -end 10001000 -concurrency 100
-```
+    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/x600-q50.jpg
 
 ## Manta
 
@@ -149,6 +114,42 @@ To build the executables under `./bin`
 ```bash
 make build
 ```
+
+## Development Usage
+
+There are few `make` helpers that start the development server. They all translate environment variables into flags.
+
+### S3
+Required ENV variables: `IMG_OUTPUTS`, `AWS_BUCKET`, `IMG_REMOTE_BASE_PATH`, `IMG_REMOTE_BASE_URL`
+```
+make dev-server-s3
+```
+
+### Manta
+Required ENV variables: `IMG_OUTPUTS`, `MANTA_URL`, `MANTA_USER`, `MANTA_KEY_ID`, `SDC_IDENTITY`, `IMG_MANTA_BASE_PATH`
+```
+make dev-server-manta
+```
+
+### No uploader, only store images locally
+Required ENV variables: `IMG_OUTPUTS`
+
+```bash
+make dev-server
+```
+
+## Tests
+
+S3 tests make real HTTP calls when you have S3 ENV variables set.
+
+```
+make tests
+```
+
+## Configuration
+
+All configuration is passed by flags
+
 
 ## Deploy
 
