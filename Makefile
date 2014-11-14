@@ -10,7 +10,7 @@ IMG_MANTA_BASE_PATH ?= public/images
 all: format deps tests
 
 dev-server:
-	@$(GO) run main.go --outputs $(IMG_OUTPUTS) server
+	@$(GO) run main.go --outputs '$(IMG_OUTPUTS)' server
 
 dev-server-s3:
 	@$(GO) run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path $(IMG_REMOTE_BASE_PATH) --remote_base_url $(IMG_REMOTE_BASE_URL) server
