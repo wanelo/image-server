@@ -12,8 +12,8 @@ import (
 	"os/user"
 	"time"
 
-	"code.google.com/p/go.crypto/ssh"
-	"code.google.com/p/go.crypto/ssh/agent"
+	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/agent"
 )
 
 func homeDir() (string, error) {

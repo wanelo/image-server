@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/go.crypto/ssh"
+	"golang.org/x/crypto/ssh"
 )
 
 var MANTA_URL, MANTA_USER, MANTA_KEY_ID, SDC_IDENTITY string
