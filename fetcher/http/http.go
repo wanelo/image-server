@@ -14,25 +14,30 @@ import (
 
 type Fetcher struct{}
 
+var transport *http.Transport
+
+func init() {
+	transport = &http.Transport{
+		ResponseHeaderTimeout: 10 * time.Second, // Timeout waiting for header
+		Dial: (&net.Dialer{
+			Timeout: 10 * time.Second, // Connection timeout
+			// KeepAlive: 0, // Disable connection keepalive for fetcher transport
+		}).Dial,
+	}
+}
+
 func (f *Fetcher) Fetch(url string, destination string) error {
 	if _, err := os.Stat(destination); os.IsNotExist(err) {
 		start := time.Now()
 
-		timeout := 10 * time.Second
-		tr := &http.Transport{
-			ResponseHeaderTimeout: timeout,
-			Dial: (&net.Dialer{
-				Timeout:   timeout,
-				KeepAlive: timeout,
-			}).Dial,
-		}
-		client := &http.Client{Transport: tr}
+		client := &http.Client{Transport: transport}
 		resp, err := client.Get(url)
 
 		if err != nil {
 			return err
 		}
 		defer resp.Body.Close()
+		defer transport.CloseIdleConnections()
 
 		if resp.StatusCode != 200 {
 			return fmt.Errorf("Unable to download image: %s, status code: %d", url, resp.StatusCode)
