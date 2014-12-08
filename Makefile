@@ -56,6 +56,9 @@ build:
 	@mkdir -p bin/solaris
 	@GOOS=solaris GOARCH=amd64 $(GO) build -o bin/solaris/images-$(VERSION)
 	@cd bin/solaris && ln -s images-$(VERSION) images
+	@echo "$(OK_COLOR)==> Building for darwin amd64$(NO_COLOR)"
+	@mkdir -p bin/darwin
+	@GOOS=darwin GOARCH=amd64 $(GO) build -o bin/darwin/images-$(VERSION)
 	@echo "$(OK_COLOR)==> Compressing$(NO_COLOR)"
 	@cd bin/solaris && tar -czvf images-$(VERSION).tar.gz images-$(VERSION)
 	@echo "$(OK_COLOR)==> Build OK$(NO_COLOR)"
@@ -64,3 +67,5 @@ release: tests build
 	@echo "$(OK_COLOR)==> Uploading to manta$(NO_COLOR)"
 	@mput -f bin/solaris/images-$(VERSION) /$(MANTA_USER)/public/images/bin/images-solaris-$(VERSION)
 	@echo "$(VERSION)" | mput -H 'content-type: text/plain' /$(MANTA_USER)/public/images/bin/images-solaris-version
+	@mput -f bin/darwin/images-$(VERSION) /$(MANTA_USER)/public/images/bin/images-darwin-$(VERSION)
+	@echo "$(VERSION)" | mput -H 'content-type: text/plain' /$(MANTA_USER)/public/images/bin/images-darwin-version
