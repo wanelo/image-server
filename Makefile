@@ -30,8 +30,8 @@ deps:
 
 dev-deps: deps
 	@echo $(DEPS) | xargs -n1 go get -d
-	@$(GO) get code.google.com/p/go.tools/cmd/godoc
-	@$(GO) get code.google.com/p/go.tools/cmd/vet
+	@$(GO) get golang.org/x/tools/cmd/godoc
+	@$(GO) get golang.org/x/tools/cmd/vet
 
 update-deps:
 	@echo "$(OK_COLOR)==> Updating all dependencies$(NO_COLOR)"
