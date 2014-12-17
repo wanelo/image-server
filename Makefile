@@ -4,7 +4,7 @@ ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 DEPS = $(go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
 VERSION = $(shell cat core/version.go | grep 'const VERSION' | egrep -o '\d+\.\d+\.\d+')
-GO ?= $(shell echo $(HOME)/go.trunk/bin/go)
+GO ?= $(shell echo go)
 IMG_MANTA_BASE_PATH ?= public/images
 
 all: format deps tests
