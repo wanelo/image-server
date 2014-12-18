@@ -2,6 +2,7 @@ package request
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/wanelo/image-server/core"
@@ -18,6 +19,7 @@ type Request struct {
 	Paths               core.Paths
 	Hash                string
 	SourceURL           string
+	SourceData          io.ReadCloser
 	directoryListing    map[string]string
 }
 

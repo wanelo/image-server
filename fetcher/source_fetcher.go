@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -28,6 +29,35 @@ func (f *SourceFetcher) Fetch(url string, namespace string) (*info.ImageDetails,
 	go f.uniqueFetchSource(c, url, namespace)
 	r := <-c
 	return r.ImageDetails, r.Downloaded, r.Error
+}
+
+func (f *SourceFetcher) StoreBinary(body io.ReadCloser, namespace string) (*info.ImageDetails, error) {
+	tmpOriginalPath := f.Paths.RandomTempPath()
+	defer body.Close()
+
+	out, err := os.Create(tmpOriginalPath)
+	if err != nil {
+		return nil, err
+	}
+
+	defer out.Close()
+
+	_, err = io.Copy(out, body)
+	if err != nil {
+		return nil, err
+	}
+
+	i := info.Info{Path: tmpOriginalPath}
+
+	md5, err := i.FileHash()
+	if err != nil {
+		return nil, err
+	}
+
+	destination := f.Paths.LocalOriginalPath(namespace, md5)
+	err = f.copyImageFromTmp(tmpOriginalPath, destination)
+
+	return i.ImageDetails()
 }
 
 // Even if simultaneous calls request the same image, only the first one will download

@@ -2,6 +2,7 @@ package paths
 
 import (
 	"crypto/md5"
+	"crypto/rand"
 	"fmt"
 	"strings"
 )
@@ -57,6 +58,13 @@ func (p *Paths) RemoteInfoPath(namespace string, md5 string) string {
 func (p *Paths) TempImagePath(url string) string {
 	data := []byte(url)
 	name := fmt.Sprintf("%x", md5.Sum(data))
+	return fmt.Sprintf("%s/tmp/%s", p.LocalBasePath, name)
+}
+
+func (p *Paths) RandomTempPath() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	name := fmt.Sprintf("%x", b)
 	return fmt.Sprintf("%s/tmp/%s", p.LocalBasePath, name)
 }
 

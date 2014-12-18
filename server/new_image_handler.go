@@ -16,7 +16,7 @@ import (
 func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
 	qs := req.URL.Query()
 	vars := mux.Vars(req)
-	source := qs.Get("source")
+	sourceURL := qs.Get("source")
 	namespace := vars["namespace"]
 
 	request := &request.Request{
@@ -25,7 +25,8 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 		Outputs:             strings.Split(qs.Get("outputs"), ","),
 		Uploader:            uploader.DefaultUploader(sc),
 		Paths:               sc.Adapters.Paths,
-		SourceURL:           source,
+		SourceURL:           sourceURL,
+		SourceData:          req.Body,
 	}
 
 	imageDetails, err := request.Create()

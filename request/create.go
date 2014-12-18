@@ -10,7 +10,16 @@ import (
 
 func (r *Request) Create() (*info.ImageDetails, error) {
 	f := fetcher.NewSourceFetcher(r.Paths)
-	imageDetails, downloaded, err := f.Fetch(r.SourceURL, r.Namespace)
+	var imageDetails *info.ImageDetails
+	var downloaded bool
+	var err error
+
+	if r.SourceURL != "" {
+		imageDetails, downloaded, err = f.Fetch(r.SourceURL, r.Namespace)
+	} else {
+		imageDetails, err = f.StoreBinary(r.SourceData, r.Namespace)
+		downloaded = true
+	}
 
 	if err != nil {
 		return nil, err

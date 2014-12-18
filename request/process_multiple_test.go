@@ -19,6 +19,7 @@ type FakePaths struct{}
 func (u FakePaths) LocalInfoPath(string, string) string                                  { return "" }
 func (u FakePaths) RemoteInfoPath(string, string) string                                 { return "" }
 func (u FakePaths) TempImagePath(string) string                                          { return "" }
+func (u FakePaths) RandomTempPath() string                                               { return "" }
 func (u FakePaths) LocalOriginalPath(string, string) string                              { return "" }
 func (u FakePaths) LocalImagePath(namespace string, md5 string, imageName string) string { return "" }
 func (u FakePaths) RemoteImageDirectory(namespace string, md5 string) string {

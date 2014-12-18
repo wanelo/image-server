@@ -1,7 +1,9 @@
 package test
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -43,4 +45,10 @@ func Matches(tb *testing.T, exp string, act string) {
 		fmt.Printf("\033[31m%s:%d:\n\nexpected: %#v\n\n\tto match: %#v\033[39m\n\n", filepath.Base(file), line, act, exp)
 		tb.FailNow()
 	}
+}
+
+func ReaderToString(input io.Reader) string {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(input)
+	return buf.String()
 }
