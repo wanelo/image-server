@@ -35,6 +35,9 @@ func (f *SourceFetcher) StoreBinary(body io.ReadCloser, namespace string) (*info
 	tmpOriginalPath := f.Paths.RandomTempPath()
 	defer body.Close()
 
+	dir := filepath.Dir(tmpOriginalPath)
+	os.MkdirAll(dir, 0700)
+
 	out, err := os.Create(tmpOriginalPath)
 	if err != nil {
 		return nil, err
