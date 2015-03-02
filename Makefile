@@ -44,7 +44,7 @@ clean:
 	@rm -fr public
 
 format:
-	@go fmt ./...
+	@gofmt -l -w .
 
 build:
 	@mkdir -p bin/
