@@ -62,7 +62,7 @@ func (r *Request) ProcessMultiple() error {
 
 	// Upload all the outputs in parallel. This might be sequential if the
 	// processing is slower than the uplaod
-	for _, _ = range missing {
+	for range missing {
 		go func() {
 			var errU error
 			select {
@@ -79,7 +79,7 @@ func (r *Request) ProcessMultiple() error {
 
 	var firstErr error
 	// wait till everything finishes, return on first error
-	for _, _ = range missing {
+	for range missing {
 		select {
 		case err := <-uploadedChannel:
 			if err != nil && firstErr == nil {
