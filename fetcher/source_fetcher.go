@@ -3,7 +3,6 @@ package fetcher
 import (
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/wanelo/image-server/core"
@@ -105,8 +104,7 @@ func (f *SourceFetcher) copyImageFromTmp(tmpOriginalPath string, destination str
 		dir := filepath.Dir(destination)
 		os.MkdirAll(dir, 0700)
 
-		cpCmd := exec.Command("cp", "-rf", tmpOriginalPath, destination)
-		err = cpCmd.Run()
+		err := os.Link(tmpOriginalPath, destination)
 
 		if err != nil {
 			return err
