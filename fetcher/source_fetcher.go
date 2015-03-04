@@ -57,7 +57,9 @@ func (f *SourceFetcher) StoreBinary(body io.ReadCloser, namespace string) (*info
 	}
 
 	destination := f.Paths.LocalOriginalPath(namespace, md5)
-	err = f.copyImageFromTmp(tmpOriginalPath, destination)
+	ensureDestinationDirectory(destination)
+	err = os.Rename(tmpOriginalPath, destination)
+	i.Path = destination
 
 	return i.ImageDetails()
 }
@@ -101,9 +103,7 @@ func (f *SourceFetcher) uniqueFetchSource(c chan FetchResult, url string, namesp
 func (f *SourceFetcher) copyImageFromTmp(tmpOriginalPath string, destination string) error {
 	// only copy image if does not exist
 	if _, err := os.Stat(destination); os.IsNotExist(err) {
-		dir := filepath.Dir(destination)
-		os.MkdirAll(dir, 0700)
-
+		ensureDestinationDirectory(destination)
 		err := os.Link(tmpOriginalPath, destination)
 
 		if err != nil {
@@ -111,6 +111,11 @@ func (f *SourceFetcher) copyImageFromTmp(tmpOriginalPath string, destination str
 		}
 	}
 	return nil
+}
+
+func ensureDestinationDirectory(path string) {
+	dir := filepath.Dir(path)
+	os.MkdirAll(dir, 0700)
 }
 
 // downloadedTempSource returns the path of the downloaded source
