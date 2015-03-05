@@ -89,18 +89,14 @@ cd ~/workspace/image-server
 
 Install dependencies:
 
+Go needs to be installed with cross compilation.
+
+On Mac
 ```bash
-brew bundle
+brew install --force go --with-cc-all
+brew install --force giflib
+brew install --force imagemagick --with-webp
 make deps
-```
-
-Install go from source:
-
-```
-hg clone https://code.google.com/p/go $HOME/go.trunk
-cd $HOME/go.trunk/src && ./all.bash
-cd $HOME/go.trunk/src && ./make.bash
-cd $HOME/go.trunk/src && GOOS=solaris GOARCH=amd64 ./make.bash
 ```
 
 Set up editor:

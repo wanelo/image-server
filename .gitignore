@@ -1,5 +1,7 @@
 public/
 bin/solaris
+bin/darwin
+bin/linux
 bin/images*
 tmp/
 *.prof
