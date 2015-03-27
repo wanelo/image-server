@@ -132,11 +132,6 @@ func main() {
 // globalFlags returns flags. If the flags are not present, it will try
 // extracting values from the environment, otherwise it will use default values
 func globalFlags() []cli.Flag {
-	defaultOutputs := os.Getenv("IMG_OUTPUTS")
-	if defaultOutputs == "" {
-		defaultOutputs = "full_size.jpg,full_size.webp,x110-q90.jpg,x200-q90.jpg,x354-q80.jpg,w620-q80.jpg,w736-q75.jpg,w1472-q65.jpg,x110-q90.webp,x200-q90.webp,x354-q80.webp,w620-q80.webp,w736-q75.webp,w1472-q65.webp"
-	}
-
 	return []cli.Flag{
 		// HTTP Server settings
 		cli.StringFlag{Name: "port", Value: "7000", Usage: "Specifies the server port."},
@@ -149,7 +144,7 @@ func globalFlags() []cli.Flag {
 
 		// For CLI
 		cli.StringFlag{Name: "namespace", Value: "", Usage: "Namespace"},
-		cli.StringFlag{Name: "outputs", Value: defaultOutputs, Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
+		cli.StringFlag{Name: "outputs", Value: "", Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
 		cli.StringFlag{Name: "listen", Value: "127.0.0.1", Usage: "IP address the server listens to"},
 
 		// S3 uploader

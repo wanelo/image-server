@@ -140,6 +140,10 @@ func (r *Request) Process(ic *core.ImageConfiguration) error {
 
 // CalculateMissingOutputs determine what versions need to be generated
 func (r *Request) CalculateMissingOutputs() (itemOutputs []string, err error) {
+	if r.Outputs == nil {
+		return nil, nil
+	}
+
 	err = r.FetchRemoteFileListing()
 
 	if err == nil {

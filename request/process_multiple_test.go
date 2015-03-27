@@ -45,3 +45,12 @@ func TestCalculateMissingOutputs(t *testing.T) {
 	Ok(t, err)
 	Equals(t, []string{"c"}, missing)
 }
+
+func TestCalculateMissingOutputsWhenOutputIsNotPresent(t *testing.T) {
+	r := sampleRequest()
+	r.Outputs = []string{}
+
+	missing, err := r.CalculateMissingOutputs()
+	Ok(t, err)
+	Equals(t, []string(nil), missing)
+}

@@ -18,11 +18,16 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	vars := mux.Vars(req)
 	sourceURL := qs.Get("source")
 	namespace := vars["namespace"]
+	outputs := []string{}
+
+	if qs.Get("outputs") != "" {
+		outputs = strings.Split(qs.Get("outputs"), ",")
+	}
 
 	request := &request.Request{
 		ServerConfiguration: sc,
 		Namespace:           namespace,
-		Outputs:             strings.Split(qs.Get("outputs"), ","),
+		Outputs:             outputs,
 		Uploader:            uploader.DefaultUploader(sc),
 		Paths:               sc.Adapters.Paths,
 		SourceURL:           sourceURL,
