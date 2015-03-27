@@ -9,7 +9,7 @@
 
 An image needs to be uploaded to a namespace.
 
-    Namespaces allow to group image types. This allows different groups of images. For example avatars will require different image sizes than product images.
+Namespaces allow to group image types. This allows different groups of images. For example avatars will require different image sizes than product images.
 
 Uploading an image requires a source
 ```shell
@@ -18,11 +18,11 @@ curl -X POST http://localhost:7000/p?source=http://example.com/image.jpg
 
 A binary file might be uploaded as well. The contents of the image need to be included in the body of the request.
 ```
-> curl --data-binary "@./test/images/a.jpg" -X POST http://localhost:7000/p?outputs=x300.jpg
+> curl --data-binary "@./test/images/wine.jpg" -X POST http://localhost:7000/p
 {
-  "hash": "31e8b3187a9f63f26d58c88bf09a7bbd",
-  "height": 496,
-  "width": 574,
+  "hash": "6e0072682e66287b662827da75b244a3",
+  "height": 600,
+  "width": 800,
   "content_type": "image/jpeg"
 }
 ```
@@ -30,7 +30,13 @@ A binary file might be uploaded as well. The contents of the image need to be in
 It is possible to pre-generate images and save them to the configured file store by passing the outputs when posting the image.
 
 ```shell
-curl -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp\&source=http://example.com/image.jpg
+> curl --data-binary "@./test/images/wine.jpg" -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp
+{
+  "hash": "6e0072682e66287b662827da75b244a3",
+  "height": 496,
+  "width": 574,
+  "content_type": "image/jpeg"
+}
 ```
 
 The request returns the *"Image Information"* after the original image is saved to the file store.
@@ -39,38 +45,46 @@ Image outputs are generated after the request is complete. The response includes
 ### Image Information
 
 Image properties can be retrieved by visiting the info page. The response is the same as the one returned when creating the image.
-```
-GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a91/info.json
-```
-
-```json
+```shell
+> curl http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/info.json
 {
-	"hash": "f840ee339d264d4bab1b169a653b1a91",
-	"partitionedHash": "f84/0ee/339d264d4bab1b169a653b1a91",
-	"height": "520",
-	"width": "400"
+  "hash": "6e0072682e66287b662827da75b244a3",
+  "height": 496,
+  "width": 574,
+  "content_type": "image/jpeg"
 }
 ```
 
-### Sample images
+### Image processing
 
 **Dimensions**
 
-    Maximum Width
-    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/w500.jpg
+    By With
+    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/w200.jpg
+
+![Image](test/images/wine/w200.jpg?raw=true)
+
 
     Square
-    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/x600.jpg
+    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/x200.jpg
+
+![Image](test/images/wine/x200.jpg?raw=true)
 
     Rectangle
-    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/300x400.jpg
+    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/300x200.jpg
+
+![Image](test/images/wine/300x200.jpg?raw=true)
+
 
 **Quality**
 
 The default compression of the image can modified by appending `-q` and the desired quality `1-100`.
 
     Square with quality 50
-    GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a9/x600-q50.jpg
+    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/x200-q30.jpg
+
+![Image](test/images/wine/x200-q30.jpg?raw=true)
+
 
 ## Manta
 
