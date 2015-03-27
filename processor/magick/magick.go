@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	m "github.com/rainycape/magick"
 	"github.com/wanelo/image-server/core"
-	m "gopkgs.com/magick.v1"
 )
 
 const Available = true
