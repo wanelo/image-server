@@ -17,7 +17,7 @@ curl -X POST http://localhost:7000/p?source=http://example.com/image.jpg
 ```
 
 A binary file might be uploaded as well. The contents of the image need to be included in the body of the request.
-```
+```shell
 > curl --data-binary "@./test/images/wine.jpg" -X POST http://localhost:7000/p
 {
   "hash": "6e0072682e66287b662827da75b244a3",
@@ -27,7 +27,7 @@ A binary file might be uploaded as well. The contents of the image need to be in
 }
 ```
 
-It is possible to pre-generate images and save them to the configured file store by passing the outputs when posting the image.
+It is possible to pre-generate images by passing the outputs when posting the image.
 
 ```shell
 > curl --data-binary "@./test/images/wine.jpg" -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp
@@ -81,10 +81,24 @@ Image properties can be retrieved by visiting the info page. The response is the
 The default compression of the image can modified by appending `-q` and the desired quality `1-100`.
 
     Square with quality 50
-    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/x200-q30.jpg
+    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/x200-q30.jpgMM
 
 ![Image](test/images/wine/x200-q30.jpg?raw=true)
 
+
+### Cloud Storage
+
+Images will be uploaded to either Amazon S3 or Joyent's Manta
+
+To store images in S3 the following flags need to be set
+```shell
+--aws_access_key_id $AWS_ACCESS_KEY_ID --aws_secret_key $AWS_SECRET_KEY --aws_bucket $AWS_BUCKET
+```
+
+For Manta the following flags are required
+```shell
+--manta_url $MANTA_URL --manta_user $MANTA_USER --manta_key_id $MANTA_KEY_ID --sdc_identity $SDC_IDENTITY --remote_base_path $IMG_MANTA_BASE_PATH
+```
 
 ## Manta
 
