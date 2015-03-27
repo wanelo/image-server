@@ -9,16 +9,26 @@
 
 An image needs to be uploaded to a namespace.
 
-    Namespaces allow to group image types. This allows different groups of images to have different dimensions and proccessings. For example avatars will require different image sizes than product images.
+    Namespaces allow to group image types. This allows different groups of images. For example avatars will require different image sizes than product images.
 
 Uploading an image requires a source
+```shell
+curl -X POST http://localhost:7000/p?source=http://example.com/image.jpg
 ```
-POST http://localhost:7000/p?source=http://example.com/image.jpg
+
+A binary file might be uploaded as well. The contents of the image need to be included in the body of the request.
+```
+> curl --data-binary "@./test/images/a.jpg" -X POST http://localhost:7000/p?outputs=x300.jpg
+{
+  "hash": "31e8b3187a9f63f26d58c88bf09a7bbd",
+  "height": 496,
+  "width": 574,
+  "content_type": "image/jpeg"
+}
 ```
 
 It is possible to pre-generate images and save them to the configured file store by passing the outputs when posting the image.
 
-Example with curl
 ```shell
 curl -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp\&source=http://example.com/image.jpg
 ```
@@ -36,7 +46,7 @@ GET http://localhost:7000/p/f84/0ee/339d264d4bab1b169a653b1a91/info.json
 ```json
 {
 	"hash": "f840ee339d264d4bab1b169a653b1a91",
-	"partitionedHash": "f84/0ee/339d264d4bab1b169a653b1a91"
+	"partitionedHash": "f84/0ee/339d264d4bab1b169a653b1a91",
 	"height": "520",
 	"width": "400"
 }
@@ -184,16 +194,26 @@ stats.image_server.original_unavailable
 
 ## Profiling
 
-On the production server
+The server allows to be profiled when started with the profile flag
 
 ```
-curl http://localhost:6060/debug/pprof/heap > images.pprof
+bin/images --profile server
 ```
 
-on development machine
+The profiling information is available on `localhost:6060`
+
+It is important to run the profiler
+
+You will need the profiled data from the server, and analize it with the same executable file used on the server.
+
+You will need to download the profiled data from the server.
 ```
-scp user@example.com:images.pprof .
-go tool pprof bin/solaris/images --inuse_objects images.pprof
+ssh example.com "curl http://localhost:6060/debug/pprof/heap" > images.pprof
+```
+
+Use `go tool pprof` to analize the profile. Remember to use the same executable file as the one on production.
+```
+go tool pprof --inuse_objects bin/solaris/images images.pprof
 ```
 
 ## Benchmarks
@@ -217,11 +237,3 @@ launchctl limit maxfiles 400000 1000000
 ```
 
 to increase them [permanently](https://coderwall.com/p/lfjoaq)
-
-### After Release
-
-- Zero-downtime restart: http://rcrowley.org/talks/strange-loop-2013.html#27
-- Configuration reload with signal
-- Status page
-  - current images processing count
-  - current original download count
