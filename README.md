@@ -9,7 +9,7 @@
 
 An image needs to be uploaded to a namespace.
 
-Namespaces allow to group image types. This allows different groups of images. For example avatars will require different image sizes than product images.
+Namespaces allow to group image types. For example avatars will require different image sizes than product images.
 
 Uploading an image requires a source
 ```shell
@@ -59,7 +59,7 @@ Image properties can be retrieved by visiting the info page. The response is the
 
 **Dimensions**
 
-    By With
+    By Width
     GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/w200.jpg
 
 ![Image](test/images/wine/w200.jpg?raw=true)
@@ -78,10 +78,10 @@ Image properties can be retrieved by visiting the info page. The response is the
 
 **Quality**
 
-The default compression of the image can modified by appending `-q` and the desired quality `1-100`.
+The default compression of the image can be modified by appending `-q` and the desired quality `1-100`.
 
     Square with quality 50
-    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/x200-q30.jpgMM
+    GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/x200-q30.jpg
 
 ![Image](test/images/wine/x200-q30.jpg?raw=true)
 
@@ -127,7 +127,7 @@ cd ~/workspace/image-server
 
 Install dependencies:
 
-Go needs to be installed with cross compilation.
+Go needs to be installed with cross compilation. Imagemagick will require giflib and webp support.
 
 On Mac
 ```bash
@@ -139,7 +139,7 @@ make deps
 
 Set up editor:
 
-  - Atom.io package `go plus`
+  - Atom.io package [go-plus](https://github.com/joefitzgerald/go-plus)
 
 Compile the app:
 
