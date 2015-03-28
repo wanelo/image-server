@@ -7,42 +7,45 @@ import (
 	"github.com/wanelo/image-server/processor/cli"
 )
 
-// ShuttingDown is used to note that a shutdown signal has been sent
+// ShuttingDown variable is used to note that the server is about to shut down.
+// It is false by default, and set to true when a shutdown signal is received.
 var ShuttingDown bool
-var OkMsg []byte
+
+// StatusOkMsg stores the response body for the server status server.
+var StatusOkMsg []byte
 
 func init() {
 	ShuttingDown = false
-	OkMsg = []byte("OK")
+	StatusOkMsg = []byte("OK")
 }
 
-func InitializeServerStatus(listen string, port string) {
+// InitializeStatusServer starts a web server that can be used to monitor the health of the application.
+// It returns a response with status code 200 if the system is healthy.
+func InitializeStatusServer(listen string, port string) {
 	log.Printf("starting startus check server on http://%s:%s", listen, port)
 	http.ListenAndServe(listen+":"+port, &ServerStatus{})
 }
 
+// ServerStatus implements the http.Handler interface
 type ServerStatus struct{}
 
+// ServeHTTP serves the http response for the status page.
+// It returns a response code 200 when the image server is available to process images.
+
+// It returns a status code 501 when the server is shutting down, or when a processor is not detected.
+// Details are provided in the body of the request.
+//
 func (f *ServerStatus) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	processorAvailable := cli.Available
 
-	if processorAvailable && !ShuttingDown {
+	if ShuttingDown {
+		w.WriteHeader(501)
+		w.Write([]byte("Shutting down"))
+	} else if processorAvailable {
 		w.WriteHeader(200)
-		w.Write(OkMsg)
+		w.Write(StatusOkMsg)
 	} else {
 		w.WriteHeader(501)
-	}
-}
-
-// StatusHandler returns success when the server is available
-// - image processor is available
-// - server is not shutting down
-func StatusHandler(w http.ResponseWriter, req *http.Request) {
-	processorAvailable := cli.Available
-
-	if processorAvailable && !ShuttingDown {
-		w.WriteHeader(200)
-	} else {
-		w.WriteHeader(501)
+		w.Write([]byte("There is no processor available. Make sure you have image magick installed."))
 	}
 }
