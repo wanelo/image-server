@@ -3,7 +3,7 @@
 [![Build Status](https://magnum.travis-ci.com/wanelo/image-server.svg?token=xxYxjHDAXkDK41qZ1dqA&branch=master)](https://magnum.travis-ci.com/wanelo/image-server)
 
 
-## Image Generation
+## Server
 
 ### Posting New Images
 
@@ -11,12 +11,12 @@ An image needs to be uploaded to a namespace.
 
 Namespaces allow to group image types. For example avatars will require different image sizes than product images.
 
-Uploading an image requires a source
+Uploading an image requires a source, which is the URL of the original image.
 ```shell
 curl -X POST http://localhost:7000/p?source=http://example.com/image.jpg
 ```
 
-A binary file might be uploaded as well. The contents of the image need to be included in the body of the request.
+A binary file might be uploaded instead of providing an URL. The contents of the image need to be included in the body of the request.
 ```shell
 > curl --data-binary "@./test/images/wine.jpg" -X POST http://localhost:7000/p
 {
@@ -27,8 +27,7 @@ A binary file might be uploaded as well. The contents of the image need to be in
 }
 ```
 
-It is possible to pre-generate images by passing the outputs when posting the image.
-
+It is possible to process images when uploading an image by providing the desired image dimensions in the `outputs` parameter.
 ```shell
 > curl --data-binary "@./test/images/wine.jpg" -X POST http://localhost:7000/p?outputs=x300.jpg,x300.webp
 {
@@ -39,12 +38,13 @@ It is possible to pre-generate images by passing the outputs when posting the im
 }
 ```
 
-The request returns the *"Image Information"* after the original image is saved to the file store.
-Image outputs are generated after the request is complete. The response includes properties of the image, and the image hash to be used to retrieve it in the future.
+An upload request will block till all images have been created (various sizes) *and* uploaded (either manta or s3, configured in the app).
 
 ### Image Information
 
-Image properties can be retrieved by visiting the info page. The response is the same as the one returned when creating the image.
+The request returns the *"Image Information"* after an image is uploaded. The response includes properties of the image, and the image hash to be used to retrieve it in the future.
+
+Image properties can be retrieved by visiting the info page. The response is the same as the one returned when creating the image. Please not url has partitioned the image hash `/123/456/789/<REST_OF_HASH>/`
 ```shell
 > curl http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/info.json
 {
@@ -56,6 +56,8 @@ Image properties can be retrieved by visiting the info page. The response is the
 ```
 
 ### Image processing
+
+Images can be processed on demand. This will re-size and also upload the image to the configured data store!
 
 **Dimensions**
 
@@ -70,7 +72,7 @@ Image properties can be retrieved by visiting the info page. The response is the
 
 ![Image](test/images/wine/x200.jpg?raw=true)
 
-    Rectangle
+    Rectangle (width x height)
     GET http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/300x200.jpg
 
 ![Image](test/images/wine/300x200.jpg?raw=true)
@@ -88,7 +90,7 @@ The default compression of the image can be modified by appending `-q` and the d
 
 ### Cloud Storage
 
-Images will be uploaded to either Amazon S3 or Joyent's Manta
+Images can be uploaded to either Amazon S3 or Joyent's Manta (we support only one upload config at a time)
 
 To store images in S3 the following flags need to be set
 ```shell
@@ -100,19 +102,20 @@ For Manta the following flags are required
 --manta_url $MANTA_URL --manta_user $MANTA_USER --manta_key_id $MANTA_KEY_ID --sdc_identity $SDC_IDENTITY --remote_base_path $IMG_MANTA_BASE_PATH
 ```
 
-## Manta
+### Error Handling
+
+Few errors will cause the server to return error pages
+
+- Source image is not found: NotFound (404)
+
+## CLI
+
+Images can be processed with the command line.
 
 Command for manta task:
 ```shell
 image --remote_base_path public/images --outputs x300.webp,x300.jpg process $MANTA_INPUT_FILE
 ```
-
-## Error Handling
-
-Few errors will cause the server to return error pages
-
-- Source image is not found: NotFound (404)
-- Image requested is larger than maximum_width: NotAcceptable (406)
 
 ## Development
 
@@ -184,6 +187,7 @@ make tests
 
 All configuration is passed by flags
 
+go run main.go --help
 
 ## Deploy
 
