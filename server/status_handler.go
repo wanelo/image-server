@@ -3,7 +3,9 @@ package server
 import (
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/tylerb/graceful"
 	"github.com/wanelo/image-server/processor/cli"
 )
 
@@ -23,7 +25,16 @@ func init() {
 // It returns a response with status code 200 if the system is healthy.
 func InitializeStatusServer(listen string, port string) {
 	log.Printf("starting startus check server on http://%s:%s", listen, port)
-	http.ListenAndServe(listen+":"+port, &ServerStatus{})
+
+	srv := &graceful.Server{
+		Timeout: 30 * time.Second,
+		Server: &http.Server{
+			Addr:    listen + ":" + port,
+			Handler: &ServerStatus{},
+		},
+	}
+
+	srv.ListenAndServe()
 }
 
 // ServerStatus implements the http.Handler interface

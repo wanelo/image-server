@@ -240,7 +240,7 @@ func handleShutdownSignals() {
 
 	<-shutdown
 	server.ShuttingDown = true
-	log.Println("Shutting down in 20 seconds. Allowing requests to finish. Interrupt again to quit immediately.")
+	log.Println("Shutting down. Allowing requests to finish within 30 seconds. Interrupt again to quit immediately.")
 
 	go func() {
 		shutdown := make(chan os.Signal, 1)
@@ -250,9 +250,6 @@ func handleShutdownSignals() {
 		log.Println("Forced to shutdown.")
 		os.Exit(0)
 	}()
-
-	time.Sleep(20 * time.Second)
-	os.Exit(0)
 }
 
 func initializePprofServer() {

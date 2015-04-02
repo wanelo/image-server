@@ -3,9 +3,11 @@ package server
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/tylerb/graceful"
 	"github.com/wanelo/image-server/core"
 )
 
@@ -16,7 +18,7 @@ func InitializeServer(sc *core.ServerConfiguration, listen string, port string) 
 	router := NewRouter(sc)
 	n := negroni.Classic()
 	n.UseHandler(router)
-	n.Run(listen + ":" + port)
+	graceful.Run(listen+":"+port, 30*time.Second, n)
 }
 
 // NewRouter creates a mux.Router for use in code or in tests
