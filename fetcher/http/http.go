@@ -30,7 +30,7 @@ func (f *Fetcher) Fetch(url string, destination string) error {
 	if _, err := os.Stat(destination); os.IsNotExist(err) {
 		start := time.Now()
 
-		client := &http.Client{Transport: transport}
+		client := Client{http.Client{Transport: transport}}
 		resp, err := client.Get(url)
 
 		if err != nil {
