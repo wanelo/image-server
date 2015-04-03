@@ -8,18 +8,22 @@ import (
 
 	"github.com/tylerb/graceful"
 	"github.com/unrolled/render"
+	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/processor/cli"
 )
 
-// Counters store atomic values
-type Counters struct {
-	Posting uint64 `json:"posting"`
+// Stats store atomic values
+type Stats struct {
+	Current     uint64 `json:"current"`
+	TotalCount  uint64 `json:"total_count"`
+	FailedCount uint64 `json:"failed_count"`
 }
 
 // Status keeps the current state of the server
 type Status struct {
-	Message  string
-	Counters *Counters
+	Version string `json:"version"`
+	Message string `json:"message"`
+	Posting *Stats `json:"posting"`
 }
 
 // ShuttingDown variable is used to note that the server is about to shut down.
@@ -57,7 +61,8 @@ func DecrCounter(addr *uint64) {
 }
 
 var status = &Status{
-	Counters: &Counters{Posting: 0},
+	Version: core.VERSION,
+	Posting: &Stats{Current: 0, TotalCount: 0, FailedCount: 0},
 }
 
 // ServerStatus implements the http.Handler interface

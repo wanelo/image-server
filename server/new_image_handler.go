@@ -14,7 +14,8 @@ import (
 
 // NewImageHandler handles posting new images
 func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
-	IncrCounter(&status.Counters.Posting)
+	IncrCounter(&status.Posting.Current)
+	IncrCounter(&status.Posting.TotalCount)
 	qs := req.URL.Query()
 	vars := mux.Vars(req)
 	sourceURL := qs.Get("source")
@@ -36,8 +37,9 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	}
 
 	imageDetails, err := request.Create()
-	DecrCounter(&status.Counters.Posting)
+	DecrCounter(&status.Posting.Current)
 	if err != nil {
+		IncrCounter(&status.Posting.FailedCount)
 		errorHandlerJSON(err, w, http.StatusNotFound)
 		return
 	}
