@@ -3,22 +3,31 @@ package server
 import (
 	"log"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/tylerb/graceful"
+	"github.com/unrolled/render"
 	"github.com/wanelo/image-server/processor/cli"
 )
+
+// Counters store atomic values
+type Counters struct {
+	Posting uint64 `json:"posting"`
+}
+
+// Status keeps the current state of the server
+type Status struct {
+	Message  string
+	Counters *Counters
+}
 
 // ShuttingDown variable is used to note that the server is about to shut down.
 // It is false by default, and set to true when a shutdown signal is received.
 var ShuttingDown bool
 
-// StatusOkMsg stores the response body for the server status server.
-var StatusOkMsg []byte
-
 func init() {
 	ShuttingDown = false
-	StatusOkMsg = []byte("OK")
 }
 
 // InitializeStatusServer starts a web server that can be used to monitor the health of the application.
@@ -37,6 +46,20 @@ func InitializeStatusServer(listen string, port string) {
 	srv.ListenAndServe()
 }
 
+// IncrCounter increments a given counter by 1
+func IncrCounter(addr *uint64) {
+	atomic.AddUint64(addr, 1)
+}
+
+// DecrCounter decrements a given counter by 1
+func DecrCounter(addr *uint64) {
+	atomic.AddUint64(addr, ^uint64(0))
+}
+
+var status = &Status{
+	Counters: &Counters{Posting: 0},
+}
+
 // ServerStatus implements the http.Handler interface
 type ServerStatus struct{}
 
@@ -49,14 +72,22 @@ type ServerStatus struct{}
 func (f *ServerStatus) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	processorAvailable := cli.Available
 
+	r := render.New(render.Options{
+		IndentJSON: true,
+	})
+
+	var code int
+
 	if ShuttingDown {
-		w.WriteHeader(501)
-		w.Write([]byte("Shutting down"))
+		status.Message = "Shutting down"
+		code = 501
 	} else if processorAvailable {
-		w.WriteHeader(200)
-		w.Write(StatusOkMsg)
+		status.Message = "OK"
+		code = 200
 	} else {
-		w.WriteHeader(501)
-		w.Write([]byte("There is no processor available. Make sure you have image magick installed."))
+		status.Message = "There is no processor available. Make sure you have image magick installed."
+		code = 501
 	}
+
+	r.JSON(w, code, status)
 }
