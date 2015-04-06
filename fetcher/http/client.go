@@ -28,15 +28,11 @@ type Client struct {
 // Caller should close resp.Body when done reading from it.
 //
 func (c *Client) Get(urlStr string) (resp *http.Response, err error) {
-	fu, err := url.Parse(urlStr)
+	u, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
 	}
-	u := &url.URL{
-		Scheme: fu.Scheme,
-		Host:   fu.Host,
-		Opaque: fu.Path,
-	}
+	u.Opaque = u.Path
 
 	req := &http.Request{
 		Method:     "GET",
