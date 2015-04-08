@@ -3,7 +3,9 @@ package cli
 import (
 	"container/list"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -19,10 +21,17 @@ type Processor struct {
 }
 
 func (p *Processor) CreateImage() error {
+	tmpDir, err := ioutil.TempDir("", "magick")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+
 	args := p.CommandArgs()
 	cmd := exec.Command("convert", args...)
+	cmd.Env = []string{"TMPDIR=" + tmpDir}
 
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("ImageMagick failed to process the image: convert %s", strings.Join(args, " "))
 	}
