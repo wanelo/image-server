@@ -29,7 +29,7 @@ func (p *Processor) CreateImage() error {
 
 	args := p.CommandArgs()
 	cmd := exec.Command("convert", args...)
-	cmd.Env = []string{"TMPDIR=" + tmpDir}
+	cmd.Env = []string{"TMPDIR=" + tmpDir, "MAGICK_DISK_LIMIT=100000000"}
 
 	err = cmd.Run()
 	if err != nil {
