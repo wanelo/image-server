@@ -46,6 +46,8 @@ func (p *Processor) CommandArgs() []string {
 
 	args := list.New()
 
+	args.PushBack("-strip")
+
 	args.PushBack("-format")
 	args.PushBack(ic.Format)
 
