@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // A Client extends http.Client and patches incorrect URL path escaping
@@ -32,7 +33,8 @@ func (c *Client) Get(urlStr string) (resp *http.Response, err error) {
 	if err != nil {
 		return nil, err
 	}
-	u.Opaque = u.Path
+	p := strings.Replace(u.Path, " ", "%20", -1)
+	u.Opaque = p
 
 	req := &http.Request{
 		Method:     "GET",
