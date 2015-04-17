@@ -43,9 +43,11 @@ func TestUniqueFetcherOnEmptyFiles(t *testing.T) {
 }
 
 func TestURLEscaping(t *testing.T) {
-	path := "/hell[o]/(x)/two%20words/boo.jpg?something=fo(o)"
+	path := "//hell[o]/(x)/two%20words/boo.jpg?something=fo(o)"
+	expectedPath := "/hell[o]/(x)/two%20words/boo.jpg?something=fo(o)"
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.RequestURI != path {
+		if r.RequestURI != expectedPath {
 			t.Fail()
 		}
 		w.Header().Set("Content-Type", "image/jpeg")

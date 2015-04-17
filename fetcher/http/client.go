@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 )
 
@@ -10,6 +11,12 @@ import (
 // for more information on bug: https://github.com/golang/go/issues/5684
 type Client struct {
 	http.Client
+}
+
+var slashReg *regexp.Regexp
+
+func init() {
+	slashReg = regexp.MustCompile("^/+")
 }
 
 // Get issues a GET to the specified URL.  If the response is one of the
@@ -34,6 +41,7 @@ func (c *Client) Get(urlStr string) (resp *http.Response, err error) {
 		return nil, err
 	}
 	p := strings.Replace(u.Path, " ", "%20", -1)
+	p = slashReg.ReplaceAllString(p, "/")
 	u.Opaque = p
 
 	req := &http.Request{
