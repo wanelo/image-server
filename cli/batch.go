@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"sync"
 
+	"github.com/golang/glog"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/fetcher"
 	"github.com/wanelo/image-server/info"
@@ -47,7 +48,7 @@ func ProcessStream(sc *core.ServerConfiguration, namespace string, outputs []str
 	// End of pipeline. OMIT
 
 	for r := range c {
-		log.Printf("Completed processing image %v", r.ID)
+		glog.Infof("Completed processing image %v", r.ID)
 	}
 
 	return nil
@@ -116,7 +117,7 @@ func digester(sc *core.ServerConfiguration, namespace string, outputs []string, 
 			}
 		}
 
-		log.Printf("About to process image: %s", item.Hash)
+		glog.Infof("About to process image: %s", item.Hash)
 		localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, item.Hash)
 
 		for _, filename := range itemOutputs {
@@ -156,7 +157,7 @@ func calculateMissingOutputs(sc *core.ServerConfiguration, namespace string, ima
 
 		for _, output := range outputs {
 			if _, ok := m[output]; ok {
-				log.Printf("Skipping %s/%s", remoteDirectory, output)
+				glog.Infof("Skipping %s/%s", remoteDirectory, output)
 			} else {
 				itemOutputs = append(itemOutputs, output)
 			}
@@ -259,7 +260,7 @@ func processImage(sc *core.ServerConfiguration, namespace string, hash string, l
 			log.Println(err)
 		}
 	case path := <-pchan.Skipped:
-		log.Printf("Skipped processing (batch) %s", path)
+		glog.Infof("Skipped processing (batch) %s", path)
 	}
 
 	return nil

@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golang/glog"
 	"github.com/wanelo/image-server/mime"
 	_ "golang.org/x/image/webp"
 )
@@ -89,13 +90,13 @@ func (i Info) DetailsFromImageMagick() (*ImageDetails, error) {
 	d := strings.Split(dimensions, ":")
 	w, err := strconv.Atoi(d[0])
 	if err != nil {
-		log.Printf("Can't convert width to integer: %s\n", d[0])
+		glog.Infof("Can't convert width to integer: %s\n", d[0])
 		return nil, err
 	}
 
 	h, err := strconv.Atoi(d[1])
 	if err != nil {
-		log.Printf("Can't convert height to integer: %s\n", d[1])
+		glog.Infof("Can't convert height to integer: %s\n", d[1])
 		return nil, err
 	}
 

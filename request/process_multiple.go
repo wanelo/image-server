@@ -3,8 +3,8 @@ package request
 import (
 	"fmt"
 	"io"
-	"log"
 
+	"github.com/golang/glog"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/info"
 	"github.com/wanelo/image-server/parser"
@@ -130,9 +130,9 @@ func (r *Request) Process(ic *core.ImageConfiguration) error {
 
 	select {
 	case <-pchan.ImageProcessed:
-		log.Printf("Processed (resize handler) %s", localResizedPath)
+		glog.Infof("Processed (resize handler) %s", localResizedPath)
 	case <-pchan.Skipped:
-		log.Printf("Skipped processing (resize handler) %s", localResizedPath)
+		glog.Infof("Skipped processing (resize handler) %s", localResizedPath)
 	}
 
 	return nil

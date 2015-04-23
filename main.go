@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/golang/glog"
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/logger"
@@ -104,6 +105,8 @@ func main() {
 	registerFlags()
 	flag.Parse()
 	args := flag.Args()
+
+	defer glog.Flush()
 
 	for _, cmd := range commands {
 		if cmd.Name() == args[0] && cmd.Run != nil {

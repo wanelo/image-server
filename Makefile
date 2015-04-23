@@ -10,13 +10,13 @@ IMG_MANTA_BASE_PATH ?= public/images
 all: format deps tests
 
 dev-server:
-	@$(GO) run main.go --outputs '$(IMG_OUTPUTS)' server
+	@$(GO) run *.go -v=0 -alsologtostderr=true --outputs '$(IMG_OUTPUTS)' server
 
 dev-server-s3:
-	@$(GO) run main.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path $(IMG_REMOTE_BASE_PATH) --remote_base_url $(IMG_REMOTE_BASE_URL) server
+	@$(GO) run *.go --outputs $(IMG_OUTPUTS) --aws_access_key_id $(AWS_ACCESS_KEY_ID) --aws_secret_key $(AWS_SECRET_KEY) --aws_bucket $(AWS_BUCKET) --listen 127.0.0.1 --remote_base_path $(IMG_REMOTE_BASE_PATH) --remote_base_url $(IMG_REMOTE_BASE_URL) server
 
 dev-server-manta:
-	@$(GO) run main.go --outputs $(IMG_OUTPUTS) --manta_url $(MANTA_URL) --manta_user $(MANTA_USER) --manta_key_id $(MANTA_KEY_ID) --sdc_identity $(SDC_IDENTITY) --remote_base_path $(IMG_MANTA_BASE_PATH) server
+	@$(GO) run *.go --outputs $(IMG_OUTPUTS) --manta_url $(MANTA_URL) --manta_user $(MANTA_USER) --manta_key_id $(MANTA_KEY_ID) --sdc_identity $(SDC_IDENTITY) --remote_base_path $(IMG_MANTA_BASE_PATH) server
 
 tests:
 	@$(GO) test -race -v ./...

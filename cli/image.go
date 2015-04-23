@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/golang/glog"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/parser"
 	"github.com/wanelo/image-server/processor"
@@ -32,7 +33,7 @@ type ImageUpload struct {
 func (iu *ImageUpload) Upload() error {
 	uploader := uploader.DefaultUploader(iu.ServerConfiguration)
 	remoteResizedPath := iu.ServerConfiguration.Adapters.Paths.RemoteImagePath(iu.Namespace, iu.Hash, iu.Filename)
-	log.Printf("uploading %s to manta: %s", iu.LocalPath, remoteResizedPath)
+	glog.Infof("uploading %s to manta: %s", iu.LocalPath, remoteResizedPath)
 	err := uploader.Upload(iu.LocalPath, remoteResizedPath, iu.ContentType)
 	if err != nil {
 		log.Println(err)
@@ -77,7 +78,7 @@ func (ip *ImageProcessor) calculateMissingOutputs(sc *core.ServerConfiguration) 
 
 		for _, output := range ip.Outputs {
 			if _, ok := m[output]; ok {
-				log.Printf("Skipping %s/%s", remoteDirectory, output)
+				glog.Infof("Skipping %s/%s", remoteDirectory, output)
 			} else {
 				itemOutputs = append(itemOutputs, output)
 			}

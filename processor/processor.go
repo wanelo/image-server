@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/golang/glog"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/info"
 	adapter "github.com/wanelo/image-server/processor/cli"
@@ -101,7 +102,7 @@ func (p *Processor) createIfNotAvailable() (bool, error) {
 		}
 
 		elapsed := time.Since(start)
-		log.Printf("Took %s to generate image: %s", elapsed, p.Destination)
+		glog.Infof("Took %s to generate image: %s", elapsed, p.Destination)
 		return true, nil
 	} else {
 		return false, nil

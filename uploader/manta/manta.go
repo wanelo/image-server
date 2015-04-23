@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/golang/glog"
 	client "github.com/wanelo/image-server/uploader/manta/client"
 )
 
@@ -38,7 +39,7 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 	fi, err := os.Open(source)
 
 	if err != nil {
-		log.Printf("Manta::sentToManta unable to read file %s, %s", source, err)
+		glog.Infof("Manta::sentToManta unable to read file %s, %s", source, err)
 		return err
 	}
 
@@ -47,9 +48,9 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 	err = u.Client.PutObject(destination, contentType, fi)
 
 	if err != nil {
-		log.Printf("Error uploading image to manta: %s", err)
+		glog.Infof("Error uploading image to manta: %s", err)
 	} else {
-		log.Printf("Uploaded file to manta: %s", destination)
+		glog.Infof("Uploaded file to manta: %s", destination)
 	}
 	return err
 }
@@ -111,6 +112,6 @@ func (u *Uploader) createDirectory(path string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Created directory on manta: %s", path)
+	glog.Infof("Created directory on manta: %s", path)
 	return nil
 }

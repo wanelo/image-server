@@ -12,6 +12,7 @@ import (
 	"os/user"
 	"time"
 
+	"github.com/golang/glog"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
@@ -36,7 +37,7 @@ func (c *Client) SignRequest(req *http.Request) error {
 	}
 	err := signRequest(req, fmt.Sprintf("/%s/keys/%s", MANTA_USER, MANTA_KEY_ID), c.signer)
 	elapsed := time.Since(start)
-	log.Printf("Took %s to sign request", elapsed)
+	glog.Infof("Took %s to sign request", elapsed)
 	return err
 }
 
