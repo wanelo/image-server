@@ -1,178 +1,173 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
+	_ "net/http/pprof"
 	"os"
-	"os/signal"
-	"runtime"
 	"strings"
-	"syscall"
 	"time"
 
-	"net/http"
-	_ "net/http/pprof"
-
-	"github.com/codegangsta/cli"
-	cliprocessor "github.com/wanelo/image-server/cli"
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/logger"
 	"github.com/wanelo/image-server/logger/graphite"
 	"github.com/wanelo/image-server/paths"
-	"github.com/wanelo/image-server/server"
 	"github.com/wanelo/image-server/uploader"
 )
 
+// configT collects all the global state of the logging setup.
+type configT struct {
+	port          string
+	extensions    string
+	localBasePath string
+
+	remoteBaseURL  string
+	remoteBasePath string
+
+	namespace string
+	outputs   string
+	listen    string
+
+	awsAccessKeyID string
+	awsSecretKey   string
+	awsBucket      string
+
+	mantaURL    string
+	mantaUser   string
+	mantaKeyID  string
+	sdcIdentity string
+
+	maximumWidth   int
+	defaultQuality int
+
+	uploaderConcurrency  int
+	processorConcurrency int
+	httpTimeout          int
+	gomaxprocs           int
+
+	graphiteHost string
+	graphitePort int
+	profile      bool
+}
+
+var config configT
+
+var commands = []*Command{
+	cmdServer,
+	cmdCli,
+}
+
+// A Command is an implementation of a images command
+// like images server or images cli.
+type Command struct {
+	// Run runs the command.
+	// The args are the arguments after the command name.
+	Run func(cmd *Command, args []string)
+
+	// UsageLine is the one-line usage message.
+	// The first word in the line is taken to be the command name.
+	UsageLine string
+
+	// Short is the short description shown in the 'go help' output.
+	Short string
+
+	// Long is the long message shown in the 'go help <this-command>' output.
+	Long string
+
+	// Flag is a set of flags specific to this command.
+	Flag flag.FlagSet
+
+	// CustomFlags indicates that the command will do its own
+	// flag parsing.
+	CustomFlags bool
+}
+
+// Name returns the command's name: the first word in the usage line.
+func (c *Command) Name() string {
+	name := c.UsageLine
+	i := strings.Index(name, " ")
+	if i >= 0 {
+		name = name[:i]
+	}
+	return name
+}
+
+func (c *Command) Usage() {
+	fmt.Fprintf(os.Stderr, "usage: %s\n\n", c.UsageLine)
+	fmt.Fprintf(os.Stderr, "%s\n", strings.TrimSpace(c.Long))
+	os.Exit(2)
+}
+
 func main() {
+	registerFlags()
+	flag.Parse()
+	args := flag.Args()
 
-	app := cli.NewApp()
-	app.Name = "images"
-	app.Version = core.VERSION
-	app.Usage = "Image server and CLI"
-	app.Action = func(c *cli.Context) {
-		println("Need to provide subcommand: server or process")
+	for _, cmd := range commands {
+		if cmd.Name() == args[0] && cmd.Run != nil {
+			cmd.Flag.Usage = func() { cmd.Usage() }
+			if cmd.CustomFlags {
+				args = args[1:]
+			} else {
+				cmd.Flag.Parse(args[1:])
+				args = cmd.Flag.Args()
+			}
+			cmd.Run(cmd, args)
+			exit()
+			return
+		}
 	}
+}
 
-	app.Flags = globalFlags()
-
-	app.Commands = []cli.Command{
-		{
-			Name:      "server",
-			ShortName: "s",
-			Usage:     "image server",
-			Action: func(c *cli.Context) {
-				setGoMaxProcs(c.GlobalInt("gomaxprocs"))
-				go handleShutdownSignals()
-
-				if c.GlobalBool("profile") {
-					go initializePprofServer()
-				}
-
-				sc, err := serverConfiguration(c)
-				if err != nil {
-					log.Println(err)
-					os.Exit(1)
-				}
-
-				go initializeUploader(sc)
-
-				port := c.GlobalString("port")
-				server.InitializeServer(sc, c.GlobalString("listen"), port)
-			},
-		},
-		{
-			Name:      "process",
-			ShortName: "p",
-			Usage:     "process image dimensions",
-			Action: func(c *cli.Context) {
-				sc, err := serverConfiguration(c)
-				if err != nil {
-					log.Println(err)
-					os.Exit(1)
-				}
-
-				// initializeUploader(sc)
-				outputsStr := c.GlobalString("outputs")
-				if outputsStr == "" {
-					log.Println("Need to specify outputs: 'x300.jpg,x300.webp'")
-					os.Exit(1)
-				}
-
-				// input := bufio.NewReader(os.Stdin)
-				namespace := c.GlobalString("namespace")
-				outputs := strings.Split(outputsStr, ",")
-				path := c.Args().First()
-				if path == "" {
-					log.Println("Need to pass an image path ARG")
-					os.Exit(1)
-				}
-
-				err = cliprocessor.Process(sc, namespace, outputs, path)
-				if err != nil {
-					log.Println(err)
-					os.Exit(1)
-				}
-
-			},
-		},
-		{
-			Name:      "process_stream",
-			ShortName: "ps",
-			Usage:     "process image dimensions",
-			Action: func(c *cli.Context) {
-				sc, err := serverConfiguration(c)
-				if err != nil {
-					log.Println(err)
-					os.Exit(1)
-				}
-
-				// initializeUploader(sc)
-				outputsStr := c.GlobalString("outputs")
-				if outputsStr == "" {
-					log.Println("Need to specify outputs: 'x300.jpg,x300.webp'")
-					os.Exit(1)
-				}
-
-				// input := bufio.NewReader(os.Stdin)
-				namespace := c.GlobalString("namespace")
-				outputs := strings.Split(outputsStr, ",")
-				err = cliprocessor.ProcessStream(sc, namespace, outputs, os.Stdin)
-				if err != nil {
-					log.Println(err)
-					os.Exit(1)
-				}
-
-			},
-		},
-	}
-
-	app.Run(os.Args)
+func exit() {
+	os.Exit(0)
 }
 
 // globalFlags returns flags. If the flags are not present, it will try
 // extracting values from the environment, otherwise it will use default values
-func globalFlags() []cli.Flag {
-	return []cli.Flag{
-		// HTTP Server settings
-		cli.StringFlag{Name: "port", Value: "7000", Usage: "Specifies the server port."},
-		cli.StringFlag{Name: "extensions", Value: "jpg,gif,webp", Usage: "Whitelisted extensions (separated by commas)"},
-		cli.StringFlag{Name: "local_base_path", Value: "public", Usage: "Directory where the images will be saved"},
+func registerFlags() {
 
-		// Uploader paths
-		cli.StringFlag{Name: "remote_base_url", Value: "", Usage: "Source domain for images"},
-		cli.StringFlag{Name: "remote_base_path", Value: "", Usage: "base path for cloud storage"},
+	// HTTP Server settings
+	flag.StringVar(&config.port, "port", "7000", "Specifies the server port.")
+	flag.StringVar(&config.extensions, "extensions", "jpg,gif,webp", "Whitelisted extensions (separated by commas)")
+	flag.StringVar(&config.localBasePath, "local_base_path", "public", "Directory where the images will be saved")
 
-		// For CLI
-		cli.StringFlag{Name: "namespace", Value: "", Usage: "Namespace"},
-		cli.StringFlag{Name: "outputs", Value: "", Usage: "Output files with dimension and compression: 'x300.jpg,x300.webp'"},
-		cli.StringFlag{Name: "listen", Value: "127.0.0.1", Usage: "IP address the server listens to"},
+	// Uploader paths
+	flag.StringVar(&config.remoteBaseURL, "remote_base_url", "", "Source domain for images")
+	flag.StringVar(&config.remoteBasePath, "remote_base_path", "", "base path for cloud storage")
 
-		// S3 uploader
-		cli.StringFlag{Name: "aws_access_key_id", Value: "", Usage: "S3 Access Key"},
-		cli.StringFlag{Name: "aws_secret_key", Value: "", Usage: "S3 Secret"},
-		cli.StringFlag{Name: "aws_bucket", Value: "", Usage: "S3 Bucket"},
+	// For CLI
+	flag.StringVar(&config.namespace, "namespace", "", "Namespace")
+	flag.StringVar(&config.outputs, "outputs", "", "Output files with dimension and compression: 'x300.jpg,x300.webp'")
+	flag.StringVar(&config.listen, "listen", "127.0.0.1", "IP address the server listens to")
 
-		// Manta uploader
-		cli.StringFlag{Name: "manta_url", Value: "", Usage: "URL of Manta endpoint. https://us-east.manta.joyent.com"},
-		cli.StringFlag{Name: "manta_user", Value: "", Usage: "The account name"},
-		cli.StringFlag{Name: "manta_key_id", Value: "", Usage: "The fingerprint of the account or user SSH public key. Example: $(ssh-keygen -l -f $HOME/.ssh/id_rsa.pub | awk '{print $2}')"},
-		cli.StringFlag{Name: "sdc_identity", Value: "", Usage: "Example: $HOME/.ssh/id_rsa"},
+	// S3 uploader
+	flag.StringVar(&config.awsAccessKeyID, "aws_access_key_id", "", "S3 Access Key")
+	flag.StringVar(&config.awsSecretKey, "aws_secret_key", "", "S3 Secret")
+	flag.StringVar(&config.awsBucket, "aws_bucket", "", "S3 Bucket")
 
-		// Default image settings
-		cli.IntFlag{Name: "maximum_width", Value: 1000, Usage: "Maximum image width"},
-		cli.IntFlag{Name: "default_quality", Value: 75, Usage: "Default image compression quality"},
+	// Manta uploader
+	flag.StringVar(&config.mantaURL, "manta_url", "", "URL of Manta endpoint. https://us-east.manta.joyent.com")
+	flag.StringVar(&config.mantaUser, "manta_user", "", "The account name")
+	flag.StringVar(&config.mantaKeyID, "manta_key_id", "", "The fingerprint of the account or user SSH public key. Example: $(ssh-keygen -l -f $HOME/.ssh/id_rsa.pub | awk '{print $2}')")
+	flag.StringVar(&config.sdcIdentity, "sdc_identity", "", "Example: $HOME/.ssh/id_rsa")
 
-		// Settings
-		cli.IntFlag{Name: "uploader_concurrency", Value: 10, Usage: "Uploader concurrency"},
-		cli.IntFlag{Name: "processor_concurrency", Value: 4, Usage: "Processor concurrency"},
-		cli.IntFlag{Name: "http_timeout", Value: 5, Usage: "HTTP request timeout in seconds"},
-		cli.IntFlag{Name: "gomaxprocs", Value: 0, Usage: "It will use the default when set to 0"},
+	// Default image settings
+	flag.IntVar(&config.maximumWidth, "maximum_width", 1000, "Maximum image width")
+	flag.IntVar(&config.defaultQuality, "default_quality", 75, "Default image compression quality")
 
-		// Monitoring and Profiling
-		cli.StringFlag{Name: "graphite_host", Value: "127.0.0.1", Usage: "Graphite host"},
-		cli.IntFlag{Name: "graphite_port", Value: 8125, Usage: "Graphite port"},
-		cli.BoolFlag{Name: "profile", Usage: "Enable pprof"},
-	}
+	// Settings
+	flag.IntVar(&config.uploaderConcurrency, "uploader_concurrency", 10, "Uploader concurrency")
+	flag.IntVar(&config.processorConcurrency, "processor_concurrency", 4, "Processor concurrency")
+	flag.IntVar(&config.httpTimeout, "http_timeout", 5, "HTTP request timeout in seconds")
+	flag.IntVar(&config.gomaxprocs, "gomaxprocs", 0, "It will use the default when set to 0")
+
+	// Monitoring and Profiling
+	flag.StringVar(&config.graphiteHost, "graphite_host", "127.0.0.1", "Graphite host")
+	flag.IntVar(&config.graphitePort, "graphite_port", 8125, "Graphite port")
+	flag.BoolVar(&config.profile, "profile", false, "Enable pprof")
 }
 
 // initializeUploader creates base path on destination server
@@ -184,8 +179,10 @@ func initializeUploader(sc *core.ServerConfiguration) {
 	}
 }
 
-func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
-	sc := serverConfigurationFromContext(c)
+func serverConfiguration() (*core.ServerConfiguration, error) {
+	sc := serverConfigurationFromConfig()
+
+	log.Println(sc)
 
 	loggers := []core.Logger{
 		graphite.New(sc.GraphiteHost, sc.GraphitePort),
@@ -205,59 +202,31 @@ func serverConfiguration(c *cli.Context) (*core.ServerConfiguration, error) {
 // from command line flags or defaults.
 // Command line flags preceding the Command (server, process, etc) are registered
 // as globals. Flags succeeding the Command are not globals.
-func serverConfigurationFromContext(c *cli.Context) *core.ServerConfiguration {
-	httpTimeout := time.Duration(c.GlobalInt("http_timeout")) * time.Second
+func serverConfigurationFromConfig() *core.ServerConfiguration {
+	httpTimeout := time.Duration(config.httpTimeout) * time.Second
 
 	return &core.ServerConfiguration{
-		WhitelistedExtensions: strings.Split(c.GlobalString("extensions"), ","),
-		LocalBasePath:         c.GlobalString("local_base_path"),
-		GraphitePort:          c.GlobalInt("graphite_port"),
-		GraphiteHost:          c.GlobalString("graphite_host"),
-		MaximumWidth:          c.GlobalInt("maximum_width"),
-		RemoteBasePath:        c.GlobalString("remote_base_path"),
-		RemoteBaseURL:         c.GlobalString("remote_base_url"),
+		WhitelistedExtensions: strings.Split(config.extensions, ","),
+		LocalBasePath:         config.localBasePath,
+		GraphitePort:          config.graphitePort,
+		GraphiteHost:          config.graphiteHost,
+		MaximumWidth:          config.maximumWidth,
+		RemoteBasePath:        config.remoteBasePath,
+		RemoteBaseURL:         config.remoteBaseURL,
 
-		AWSAccessKeyID: c.GlobalString("aws_access_key_id"),
-		AWSSecretKey:   c.GlobalString("aws_secret_key"),
-		AWSBucket:      c.GlobalString("aws_bucket"),
+		AWSAccessKeyID: config.awsAccessKeyID,
+		AWSSecretKey:   config.awsSecretKey,
+		AWSBucket:      config.awsBucket,
 
 		// Manta uploader
-		MantaURL:    c.GlobalString("manta_url"),
-		MantaUser:   c.GlobalString("manta_user"),
-		MantaKeyID:  c.GlobalString("manta_key_id"),
-		SDCIdentity: c.GlobalString("sdc_identity"),
+		MantaURL:    config.mantaURL,
+		MantaUser:   config.mantaUser,
+		MantaKeyID:  config.mantaKeyID,
+		SDCIdentity: config.sdcIdentity,
 
-		Outputs:             c.GlobalString("outputs"),
-		DefaultQuality:      uint(c.GlobalInt("default_quality")),
-		UploaderConcurrency: uint(c.GlobalInt("uploader_concurrency")),
+		Outputs:             config.outputs,
+		DefaultQuality:      uint(config.defaultQuality),
+		UploaderConcurrency: uint(config.uploaderConcurrency),
 		HTTPTimeout:         httpTimeout,
-	}
-}
-
-func handleShutdownSignals() {
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT)
-
-	<-shutdown
-	server.ShuttingDown = true
-	log.Println("Shutting down. Allowing requests to finish within 30 seconds. Interrupt again to quit immediately.")
-
-	go func() {
-		shutdown := make(chan os.Signal, 1)
-		signal.Notify(shutdown, syscall.SIGHUP, syscall.SIGINT)
-
-		<-shutdown
-		log.Println("Forced to shutdown.")
-		os.Exit(0)
-	}()
-}
-
-func initializePprofServer() {
-	log.Println(http.ListenAndServe("localhost:6060", nil))
-}
-
-func setGoMaxProcs(maxprocs int) {
-	if maxprocs != 0 {
-		runtime.GOMAXPROCS(maxprocs)
 	}
 }
