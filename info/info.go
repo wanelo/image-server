@@ -9,6 +9,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -76,16 +77,25 @@ func (i Info) ImageDetails() (*ImageDetails, error) {
 }
 
 func (i Info) DetailsFromImageMagick() (*ImageDetails, error) {
-	args := []string{"-format", "%[fx:w]:%[fx:h]:%m", i.Path}
-	out, err := exec.Command("identify", args...).Output()
-	dimensions := fmt.Sprintf("%s", out)
-	dimensions = strings.TrimSpace(dimensions)
+	tmpDir, err := ioutil.TempDir("", "magick")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
 
-	log.Println("Info.DetailsFromImageMagick - Using ImageMagick as fallback:", i.Path)
+	args := []string{"-format", "%[fx:w]:%[fx:h]:%m", i.Path}
+	cmd := exec.Command("identify", args...)
+	cmd.Env = []string{"TMPDIR=" + tmpDir, "MAGICK_DISK_LIMIT=100000000"}
+	out, err := cmd.Output()
 
 	if err != nil {
 		return nil, fmt.Errorf("ImageMagick failed to identify properties")
 	}
+
+	dimensions := fmt.Sprintf("%s", out)
+	dimensions = strings.TrimSpace(dimensions)
+
+	log.Println("Info.DetailsFromImageMagick - Using ImageMagick as fallback:", i.Path)
 
 	d := strings.Split(dimensions, ":")
 	w, err := strconv.Atoi(d[0])
