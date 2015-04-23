@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"github.com/unrolled/render"
 	"github.com/wanelo/image-server/core"
@@ -41,6 +42,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	imageDetails, err := request.Create()
 	if err != nil {
 		IncrCounter(&status.Posting.FailedCount)
+		glog.Error("Failed to create image from ", sourceURL, " - ", err)
 		errorHandlerJSON(err, w, http.StatusNotFound)
 		return
 	}

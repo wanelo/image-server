@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/unrolled/render"
@@ -13,7 +12,6 @@ func errorHandlerJSON(err error, w http.ResponseWriter, status int) {
 		IndentJSON: true,
 	})
 
-	log.Println(err)
 	json := map[string]string{
 		"error": fmt.Sprintf("%s", err),
 	}
