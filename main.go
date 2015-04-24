@@ -51,6 +51,8 @@ type configT struct {
 	graphiteHost string
 	graphitePort int
 	profile      bool
+
+	version bool
 }
 
 var config configT
@@ -58,6 +60,7 @@ var config configT
 var commands = []*Command{
 	cmdServer,
 	cmdCli,
+	cmdVersion,
 }
 
 // A Command is an implementation of a images command
@@ -107,6 +110,12 @@ func main() {
 	args := flag.Args()
 
 	defer glog.Flush()
+
+	if config.version {
+		cmdVersion.Run(cmdVersion, args)
+		exit()
+		return
+	}
 
 	for _, cmd := range commands {
 		if cmd.Name() == args[0] && cmd.Run != nil {
@@ -171,6 +180,9 @@ func registerFlags() {
 	flag.StringVar(&config.graphiteHost, "graphite_host", "127.0.0.1", "Graphite host")
 	flag.IntVar(&config.graphitePort, "graphite_port", 8125, "Graphite port")
 	flag.BoolVar(&config.profile, "profile", false, "Enable pprof")
+
+	// About & Help
+	flag.BoolVar(&config.version, "version", false, "Version of images")
 }
 
 // initializeUploader creates base path on destination server
