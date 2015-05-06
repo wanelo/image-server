@@ -37,7 +37,7 @@ func init() {
 // InitializeStatusServer starts a web server that can be used to monitor the health of the application.
 // It returns a response with status code 200 if the system is healthy.
 func InitializeStatusServer(listen string, port string) {
-	log.Printf("starting startus check server on http://%s:%s", listen, port)
+	log.Printf("starting status check server on http://%s:%s", listen, port)
 
 	srv := &graceful.Server{
 		Timeout: 30 * time.Second,
