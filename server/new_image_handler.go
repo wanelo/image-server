@@ -15,7 +15,9 @@ import (
 
 // NewImageHandler handles posting new images
 func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
+	go sc.Adapters.Logger.ImagePosted()
 	IncrCounter(&status.Posting.Current)
+
 	defer DecrCounter(&status.Posting.Current)
 	IncrCounter(&status.Posting.TotalCount)
 
@@ -41,6 +43,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	imageDetails, err := request.Create()
 	if err != nil {
+		go sc.Adapters.Logger.ImagePostingFailed()
 		IncrCounter(&status.Posting.FailedCount)
 		glog.Error("Failed to create image from ", sourceURL, " - ", err)
 		errorHandlerJSON(err, w, http.StatusNotFound)

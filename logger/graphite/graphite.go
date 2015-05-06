@@ -20,26 +20,38 @@ func New(h string, p int) (l *Logger) {
 	return logger
 }
 
+func (l *Logger) ImagePosted() {
+	l.track("new_image.request")
+}
+
+func (l *Logger) ImagePostingFailed() {
+	l.track("new_image.request_failed")
+}
+
 func (l *Logger) ImageProcessed(ic *core.ImageConfiguration) {
-	l.track("image_request")
-	l.track("image_request." + ic.Format)
+	l.track("processed")
+	l.track("processed." + ic.Format)
 }
 
 func (l *Logger) ImageProcessedWithErrors(ic *core.ImageConfiguration) {
-	l.track("image_request_fail")
-	l.track("image_request_fail." + ic.Format)
+	l.track("processed_failed")
+	l.track("processed_failed." + ic.Format)
+}
+
+func (l *Logger) SourceDownloaded() {
+	l.track("fetch.source_downloaded")
 }
 
 func (l *Logger) OriginalDownloaded(source string, destination string) {
-	l.track("original_downloaded")
+	l.track("fetch.original_downloaded")
 }
 
 func (l *Logger) OriginalDownloadFailed(source string) {
-	l.track("original_unavailable")
+	l.track("fetch.original_unavailable")
 }
 
 func (l *Logger) OriginalDownloadSkipped(source string) {
-	l.track("original_download_skipped")
+	l.track("fetch.original_download_skipped")
 }
 
 func (l *Logger) track(name string) {

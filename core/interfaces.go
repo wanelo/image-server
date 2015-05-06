@@ -11,8 +11,11 @@ type Fetcher interface {
 }
 
 type Logger interface {
+	ImagePosted()
+	ImagePostingFailed()
 	ImageProcessed(ic *ImageConfiguration)
 	ImageProcessedWithErrors(ic *ImageConfiguration)
+	SourceDownloaded()
 	OriginalDownloaded(source string, destination string)
 	OriginalDownloadFailed(source string)
 	OriginalDownloadSkipped(source string)

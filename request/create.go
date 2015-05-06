@@ -62,8 +62,6 @@ func (r *Request) UploadOriginal(imageDetails *info.ImageDetails) error {
 
 	destination := r.Paths.RemoteOriginalPath(r.Namespace, imageDetails.Hash)
 
-	go r.ServerConfiguration.Adapters.Logger.OriginalDownloaded(localOriginalPath, destination)
-
 	r.UploadImageDetails(imageDetails, uploader)
 
 	// upload original image

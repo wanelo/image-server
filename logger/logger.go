@@ -6,6 +6,18 @@ type Logger struct {
 	Loggers []core.Logger
 }
 
+func (l *Logger) ImagePosted() {
+	for _, logger := range l.Loggers {
+		go logger.ImagePosted()
+	}
+}
+
+func (l *Logger) ImagePostingFailed() {
+	for _, logger := range l.Loggers {
+		go logger.ImagePostingFailed()
+	}
+}
+
 func (l *Logger) ImageProcessed(ic *core.ImageConfiguration) {
 	for _, logger := range l.Loggers {
 		go logger.ImageProcessed(ic)
@@ -15,6 +27,12 @@ func (l *Logger) ImageProcessed(ic *core.ImageConfiguration) {
 func (l *Logger) ImageProcessedWithErrors(ic *core.ImageConfiguration) {
 	for _, logger := range l.Loggers {
 		go logger.ImageProcessedWithErrors(ic)
+	}
+}
+
+func (l *Logger) SourceDownloaded() {
+	for _, logger := range l.Loggers {
+		go logger.SourceDownloaded()
 	}
 }
 
