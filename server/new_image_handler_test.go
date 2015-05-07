@@ -102,7 +102,7 @@ func buildTestS3ServerConfiguration() *core.ServerConfiguration {
 	}
 
 	loggers := []core.Logger{
-		statsd.New(sc.StatsdHost, sc.StatsdPort),
+		statsd.New(),
 	}
 
 	adapters := &core.Adapters{
@@ -122,7 +122,7 @@ func buildTestServerConfiguration() *core.ServerConfiguration {
 	}
 
 	loggers := []core.Logger{
-		statsd.New(sc.StatsdHost, sc.StatsdPort),
+		statsd.New(),
 	}
 
 	adapters := &core.Adapters{

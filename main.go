@@ -48,9 +48,10 @@ type configT struct {
 	httpTimeout          int
 	gomaxprocs           int
 
-	statsdHost string
-	statsdPort int
-	profile    bool
+	statsdHost   string
+	statsdPort   int
+	statsdPrefix string
+	profile      bool
 
 	version bool
 }
@@ -179,6 +180,7 @@ func registerFlags() {
 	// Monitoring and Profiling
 	flag.StringVar(&config.statsdHost, "statsd_host", "127.0.0.1", "Statsd host")
 	flag.IntVar(&config.statsdPort, "statsd_port", 8125, "Statsd port")
+	flag.StringVar(&config.statsdPrefix, "statsd_prefix", "image_server.", "Statsd prefix")
 	flag.BoolVar(&config.profile, "profile", false, "Enable pprof")
 
 	// About & Help
@@ -197,9 +199,10 @@ func initializeUploader(sc *core.ServerConfiguration) {
 func serverConfiguration() (*core.ServerConfiguration, error) {
 	sc := serverConfigurationFromConfig()
 
-	loggers := []core.Logger{
-		statsd.New(sc.StatsdHost, sc.StatsdPort),
-	}
+	statsd.Host = config.statsdHost
+	statsd.Port = config.statsdPort
+	statsd.Prefix = config.statsdPrefix
+	loggers := []core.Logger{statsd.New()}
 
 	adapters := &core.Adapters{
 		Fetcher: &fetcher.Fetcher{},
@@ -221,11 +224,10 @@ func serverConfigurationFromConfig() *core.ServerConfiguration {
 	return &core.ServerConfiguration{
 		WhitelistedExtensions: strings.Split(config.extensions, ","),
 		LocalBasePath:         config.localBasePath,
-		StatsdPort:            config.statsdPort,
-		StatsdHost:            config.statsdHost,
-		MaximumWidth:          config.maximumWidth,
-		RemoteBasePath:        config.remoteBasePath,
-		RemoteBaseURL:         config.remoteBaseURL,
+
+		MaximumWidth:   config.maximumWidth,
+		RemoteBasePath: config.remoteBasePath,
+		RemoteBaseURL:  config.remoteBaseURL,
 
 		AWSAccessKeyID: config.awsAccessKeyID,
 		AWSSecretKey:   config.awsSecretKey,

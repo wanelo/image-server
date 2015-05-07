@@ -9,14 +9,16 @@ import (
 	"github.com/wanelo/image-server/core"
 )
 
+var Host string
+var Port int
+var Prefix string
+
 type Logger struct {
-	Host   string
-	Port   int
 	statsd *statsd.StatsdBuffer
 }
 
-func New(h string, p int) (l *Logger) {
-	logger := &Logger{Host: h, Port: p}
+func New() (l *Logger) {
+	logger := &Logger{}
 	logger.initializeStatsd()
 	return logger
 }
@@ -61,9 +63,8 @@ func (l *Logger) track(name string) {
 }
 
 func (l *Logger) initializeStatsd() {
-	prefix := "images_server."
-	server := fmt.Sprintf("%v:%v", l.Host, l.Port)
-	statsdclient := statsd.NewStatsdClient(server, prefix)
+	server := fmt.Sprintf("%v:%v", Host, Port)
+	statsdclient := statsd.NewStatsdClient(server, Prefix)
 	statsdclient.CreateSocket()
 	interval := time.Second * 2 // aggregate stats and flush every 2 seconds
 	l.statsd = statsd.NewStatsdBuffer(interval, statsdclient)

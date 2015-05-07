@@ -13,8 +13,6 @@ type ServerConfiguration struct {
 	UploaderConcurrency   uint
 	ProcessorConcurrency  uint
 	HTTPTimeout           time.Duration
-	StatsdHost            string
-	StatsdPort            int
 	Adapters              *Adapters
 	Outputs               string
 	AWSAccessKeyID        string
