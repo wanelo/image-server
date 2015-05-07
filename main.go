@@ -197,8 +197,6 @@ func initializeUploader(sc *core.ServerConfiguration) {
 func serverConfiguration() (*core.ServerConfiguration, error) {
 	sc := serverConfigurationFromConfig()
 
-	log.Println(sc)
-
 	loggers := []core.Logger{
 		graphite.New(sc.GraphiteHost, sc.GraphitePort),
 	}
