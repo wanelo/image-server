@@ -58,8 +58,8 @@ func (l *Logger) OriginalDownloadSkipped(source string) {
 }
 
 func (l *Logger) track(name string) {
-	// metric := fmt.Sprintf("stats.image_server.%s", name)
-	l.statsd.Incr(name, 1)
+	metric := fmt.Sprintf("%s_count", name)
+	l.statsd.Incr(metric, 1)
 }
 
 func (l *Logger) initializeStatsd() {
