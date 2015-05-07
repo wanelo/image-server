@@ -52,8 +52,8 @@ Flags:
 
   MONITORING & PROFILING
     --profile                   Enable pprof
-    --graphite_host '127.0.0.1' Graphite host
-    --graphite_port '8125'      Graphite port	`,
+    --statsd_host '127.0.0.1' Statsd host
+    --statsd_port '8125'      Statsd port	`,
 }
 
 func init() {

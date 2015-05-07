@@ -13,7 +13,7 @@ import (
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/logger"
-	"github.com/wanelo/image-server/logger/graphite"
+	"github.com/wanelo/image-server/logger/statsd"
 	"github.com/wanelo/image-server/paths"
 	"github.com/wanelo/image-server/uploader"
 )
@@ -48,9 +48,9 @@ type configT struct {
 	httpTimeout          int
 	gomaxprocs           int
 
-	graphiteHost string
-	graphitePort int
-	profile      bool
+	statsdHost string
+	statsdPort int
+	profile    bool
 
 	version bool
 }
@@ -177,8 +177,8 @@ func registerFlags() {
 	flag.IntVar(&config.gomaxprocs, "gomaxprocs", 0, "It will use the default when set to 0")
 
 	// Monitoring and Profiling
-	flag.StringVar(&config.graphiteHost, "graphite_host", "127.0.0.1", "Graphite host")
-	flag.IntVar(&config.graphitePort, "graphite_port", 8125, "Graphite port")
+	flag.StringVar(&config.statsdHost, "statsd_host", "127.0.0.1", "Statsd host")
+	flag.IntVar(&config.statsdPort, "statsd_port", 8125, "Statsd port")
 	flag.BoolVar(&config.profile, "profile", false, "Enable pprof")
 
 	// About & Help
@@ -198,7 +198,7 @@ func serverConfiguration() (*core.ServerConfiguration, error) {
 	sc := serverConfigurationFromConfig()
 
 	loggers := []core.Logger{
-		graphite.New(sc.GraphiteHost, sc.GraphitePort),
+		statsd.New(sc.StatsdHost, sc.StatsdPort),
 	}
 
 	adapters := &core.Adapters{
@@ -221,8 +221,8 @@ func serverConfigurationFromConfig() *core.ServerConfiguration {
 	return &core.ServerConfiguration{
 		WhitelistedExtensions: strings.Split(config.extensions, ","),
 		LocalBasePath:         config.localBasePath,
-		GraphitePort:          config.graphitePort,
-		GraphiteHost:          config.graphiteHost,
+		StatsdPort:            config.statsdPort,
+		StatsdHost:            config.statsdHost,
 		MaximumWidth:          config.maximumWidth,
 		RemoteBasePath:        config.remoteBasePath,
 		RemoteBaseURL:         config.remoteBaseURL,

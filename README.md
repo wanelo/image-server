@@ -197,7 +197,7 @@ Make sure you increase the version number in core/version.go
 make release
 ```
 
-## Graphite Events
+## Statsd Events
 
 A local cache was not found and the image was processed. This also tracks count of images sent to remote store.
 ```

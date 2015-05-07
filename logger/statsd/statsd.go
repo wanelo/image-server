@@ -1,22 +1,23 @@
-package graphite
+package statsd
 
 import (
 	"fmt"
 	"log"
+	"time"
 
-	"github.com/marpaia/graphite-golang"
+	"github.com/quipo/statsd"
 	"github.com/wanelo/image-server/core"
 )
 
 type Logger struct {
-	Host     string
-	Port     int
-	graphite *graphite.Graphite
+	Host   string
+	Port   int
+	statsd *statsd.StatsdBuffer
 }
 
 func New(h string, p int) (l *Logger) {
 	logger := &Logger{Host: h, Port: p}
-	logger.initializeGraphite()
+	logger.initializeStatsd()
 	return logger
 }
 
@@ -55,19 +56,18 @@ func (l *Logger) OriginalDownloadSkipped(source string) {
 }
 
 func (l *Logger) track(name string) {
-	metric := fmt.Sprintf("stats.image_server.%s", name)
-	l.graphite.SimpleSend(metric, "1")
+	// metric := fmt.Sprintf("stats.image_server.%s", name)
+	l.statsd.Incr(name, 1)
 }
 
-func (l *Logger) initializeGraphite() {
-	var err error
+func (l *Logger) initializeStatsd() {
+	prefix := "images_server."
+	server := fmt.Sprintf("%v:%v", l.Host, l.Port)
+	statsdclient := statsd.NewStatsdClient(server, prefix)
+	statsdclient.CreateSocket()
+	interval := time.Second * 2 // aggregate stats and flush every 2 seconds
+	l.statsd = statsd.NewStatsdBuffer(interval, statsdclient)
+	// defer stats.Close()
 
-	l.graphite, err = graphite.NewGraphite(l.Host, l.Port)
-
-	// if you couldn't connect to graphite, use a nop
-	if err != nil {
-		l.graphite = graphite.NewGraphiteNop(l.Host, l.Port)
-	}
-
-	log.Println("Loaded Graphite connection")
+	log.Println("Loaded Statsd connection:", server)
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
 	"github.com/wanelo/image-server/logger"
-	"github.com/wanelo/image-server/logger/graphite"
+	"github.com/wanelo/image-server/logger/statsd"
 	"github.com/wanelo/image-server/paths"
 	"github.com/wanelo/image-server/server"
 	"github.com/wanelo/image-server/uploader"
@@ -102,7 +102,7 @@ func buildTestS3ServerConfiguration() *core.ServerConfiguration {
 	}
 
 	loggers := []core.Logger{
-		graphite.New(sc.GraphiteHost, sc.GraphitePort),
+		statsd.New(sc.StatsdHost, sc.StatsdPort),
 	}
 
 	adapters := &core.Adapters{
@@ -122,7 +122,7 @@ func buildTestServerConfiguration() *core.ServerConfiguration {
 	}
 
 	loggers := []core.Logger{
-		graphite.New(sc.GraphiteHost, sc.GraphitePort),
+		statsd.New(sc.StatsdHost, sc.StatsdPort),
 	}
 
 	adapters := &core.Adapters{
