@@ -15,8 +15,6 @@ import (
 	"github.com/goamz/goamz/s3"
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/logger"
-	"github.com/wanelo/image-server/logger/statsd"
 	"github.com/wanelo/image-server/paths"
 	"github.com/wanelo/image-server/server"
 	"github.com/wanelo/image-server/uploader"
@@ -101,14 +99,9 @@ func buildTestS3ServerConfiguration() *core.ServerConfiguration {
 		AWSBucket:      os.Getenv("AWS_BUCKET"),
 	}
 
-	loggers := []core.Logger{
-		statsd.New(),
-	}
-
 	adapters := &core.Adapters{
 		Fetcher: &fetcher.Fetcher{},
 		Paths:   &paths.Paths{LocalBasePath: sc.LocalBasePath, RemoteBasePath: sc.RemoteBasePath, RemoteBaseURL: sc.RemoteBaseURL},
-		Logger:  &logger.Logger{Loggers: loggers},
 	}
 	sc.Adapters = adapters
 	return sc
@@ -121,14 +114,9 @@ func buildTestServerConfiguration() *core.ServerConfiguration {
 		DefaultQuality: 90,
 	}
 
-	loggers := []core.Logger{
-		statsd.New(),
-	}
-
 	adapters := &core.Adapters{
 		Fetcher: &fetcher.Fetcher{},
 		Paths:   &paths.Paths{LocalBasePath: sc.LocalBasePath, RemoteBasePath: sc.RemoteBasePath, RemoteBaseURL: sc.RemoteBaseURL},
-		Logger:  &logger.Logger{Loggers: loggers},
 	}
 	sc.Adapters = adapters
 	return sc

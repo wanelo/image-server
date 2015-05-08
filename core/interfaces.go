@@ -3,7 +3,6 @@ package core
 type Adapters struct {
 	Fetcher Fetcher
 	Paths   Paths
-	Logger  Logger
 }
 
 type Fetcher interface {

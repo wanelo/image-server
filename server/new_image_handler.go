@@ -9,13 +9,14 @@ import (
 	"github.com/unrolled/render"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/info"
+	"github.com/wanelo/image-server/logger"
 	"github.com/wanelo/image-server/request"
 	"github.com/wanelo/image-server/uploader"
 )
 
 // NewImageHandler handles posting new images
 func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {
-	go sc.Adapters.Logger.ImagePosted()
+	go logger.ImagePosted()
 	IncrCounter(&status.Posting.Current)
 
 	defer DecrCounter(&status.Posting.Current)
@@ -43,7 +44,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 
 	imageDetails, err := request.Create()
 	if err != nil {
-		go sc.Adapters.Logger.ImagePostingFailed()
+		go logger.ImagePostingFailed()
 		IncrCounter(&status.Posting.FailedCount)
 		glog.Error("Failed to create image from ", sourceURL, " - ", err)
 		errorHandlerJSON(err, w, http.StatusNotFound)

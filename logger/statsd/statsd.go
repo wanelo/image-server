@@ -7,20 +7,21 @@ import (
 
 	"github.com/quipo/statsd"
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/logger"
 )
 
-var Host string
-var Port int
-var Prefix string
-
 type Logger struct {
+	Host   string
+	Port   int
+	Prefix string
 	statsd *statsd.StatsdBuffer
 }
 
-func New() (l *Logger) {
-	logger := &Logger{}
-	logger.initializeStatsd()
-	return logger
+func Enable(host string, port int, prefix string) {
+	l := &Logger{Host: host, Port: port, Prefix: prefix}
+	l.initializeStatsd()
+
+	logger.Loggers = append(logger.Loggers, l)
 }
 
 func (l *Logger) ImagePosted() {
@@ -63,8 +64,8 @@ func (l *Logger) track(name string) {
 }
 
 func (l *Logger) initializeStatsd() {
-	server := fmt.Sprintf("%v:%v", Host, Port)
-	statsdclient := statsd.NewStatsdClient(server, Prefix)
+	server := fmt.Sprintf("%v:%v", l.Host, l.Port)
+	statsdclient := statsd.NewStatsdClient(server, l.Prefix)
 	statsdclient.CreateSocket()
 	interval := time.Second * 2 // aggregate stats and flush every 2 seconds
 	l.statsd = statsd.NewStatsdBuffer(interval, statsdclient)

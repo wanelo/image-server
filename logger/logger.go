@@ -2,54 +2,56 @@ package logger
 
 import "github.com/wanelo/image-server/core"
 
-type Logger struct {
-	Loggers []core.Logger
+var Loggers []core.Logger
+
+func initialize() {
+	Loggers = []core.Logger{}
 }
 
-func (l *Logger) ImagePosted() {
-	for _, logger := range l.Loggers {
+func ImagePosted() {
+	for _, logger := range Loggers {
 		go logger.ImagePosted()
 	}
 }
 
-func (l *Logger) ImagePostingFailed() {
-	for _, logger := range l.Loggers {
+func ImagePostingFailed() {
+	for _, logger := range Loggers {
 		go logger.ImagePostingFailed()
 	}
 }
 
-func (l *Logger) ImageProcessed(ic *core.ImageConfiguration) {
-	for _, logger := range l.Loggers {
+func ImageProcessed(ic *core.ImageConfiguration) {
+	for _, logger := range Loggers {
 		go logger.ImageProcessed(ic)
 	}
 }
 
-func (l *Logger) ImageProcessedWithErrors(ic *core.ImageConfiguration) {
-	for _, logger := range l.Loggers {
+func ImageProcessedWithErrors(ic *core.ImageConfiguration) {
+	for _, logger := range Loggers {
 		go logger.ImageProcessedWithErrors(ic)
 	}
 }
 
-func (l *Logger) SourceDownloaded() {
-	for _, logger := range l.Loggers {
+func SourceDownloaded() {
+	for _, logger := range Loggers {
 		go logger.SourceDownloaded()
 	}
 }
 
-func (l *Logger) OriginalDownloaded(source string, destination string) {
-	for _, logger := range l.Loggers {
+func OriginalDownloaded(source string, destination string) {
+	for _, logger := range Loggers {
 		go logger.OriginalDownloaded(source, destination)
 	}
 }
 
-func (l *Logger) OriginalDownloadFailed(source string) {
-	for _, logger := range l.Loggers {
+func OriginalDownloadFailed(source string) {
+	for _, logger := range Loggers {
 		go logger.OriginalDownloadFailed(source)
 	}
 }
 
-func (l *Logger) OriginalDownloadSkipped(source string) {
-	for _, logger := range l.Loggers {
+func OriginalDownloadSkipped(source string) {
+	for _, logger := range Loggers {
 		go logger.OriginalDownloadSkipped(source)
 	}
 }

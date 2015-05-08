@@ -12,7 +12,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/wanelo/image-server/core"
 	fetcher "github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/logger"
 	"github.com/wanelo/image-server/logger/statsd"
 	"github.com/wanelo/image-server/paths"
 	"github.com/wanelo/image-server/uploader"
@@ -198,16 +197,11 @@ func initializeUploader(sc *core.ServerConfiguration) {
 
 func serverConfiguration() (*core.ServerConfiguration, error) {
 	sc := serverConfigurationFromConfig()
-
-	statsd.Host = config.statsdHost
-	statsd.Port = config.statsdPort
-	statsd.Prefix = config.statsdPrefix
-	loggers := []core.Logger{statsd.New()}
+	statsd.Enable(config.statsdHost, config.statsdPort, config.statsdPrefix)
 
 	adapters := &core.Adapters{
 		Fetcher: &fetcher.Fetcher{},
 		Paths:   &paths.Paths{LocalBasePath: sc.LocalBasePath, RemoteBasePath: sc.RemoteBasePath, RemoteBaseURL: sc.RemoteBaseURL},
-		Logger:  &logger.Logger{Loggers: loggers},
 	}
 	sc.Adapters = adapters
 
