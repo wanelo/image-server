@@ -33,13 +33,22 @@ func (l *Logger) ImagePostingFailed() {
 }
 
 func (l *Logger) ImageProcessed(ic *core.ImageConfiguration) {
-	l.track("processed")
-	l.track("processed." + ic.Format)
+	l.track("processing.version.ok")
+	l.track("processing.version.ok." + ic.Format)
+}
+
+func (l *Logger) ImageAlreadyProcessed(ic *core.ImageConfiguration) {
+	l.track("processing.version.noop")
+	l.track("processing.version.noop." + ic.Format)
 }
 
 func (l *Logger) ImageProcessedWithErrors(ic *core.ImageConfiguration) {
-	l.track("processed_failed")
-	l.track("processed_failed." + ic.Format)
+	l.track("processing.version.failed")
+	l.track("processing.version.failed." + ic.Format)
+}
+
+func (l *Logger) AllImagesAlreadyProccessed() {
+	l.track("processing.versions.noop")
 }
 
 func (l *Logger) SourceDownloaded() {

@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/wanelo/image-server/core"
+	"github.com/wanelo/image-server/logger"
 	"github.com/wanelo/image-server/parser"
 )
 
@@ -33,6 +34,7 @@ func (r *Request) ProcessMultiple() error {
 
 	if missing == nil {
 		// All the files are already uploaded. Nothing do do!
+		logger.AllImagesAlreadyProccessed()
 		return nil
 	}
 

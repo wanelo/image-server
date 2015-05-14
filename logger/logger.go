@@ -26,9 +26,21 @@ func ImageProcessed(ic *core.ImageConfiguration) {
 	}
 }
 
+func ImageAlreadyProcessed(ic *core.ImageConfiguration) {
+	for _, logger := range Loggers {
+		go logger.ImageAlreadyProcessed(ic)
+	}
+}
+
 func ImageProcessedWithErrors(ic *core.ImageConfiguration) {
 	for _, logger := range Loggers {
 		go logger.ImageProcessedWithErrors(ic)
+	}
+}
+
+func AllImagesAlreadyProccessed() {
+	for _, logger := range Loggers {
+		go logger.AllImagesAlreadyProccessed()
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/wanelo/image-server/core"
 	"github.com/wanelo/image-server/info"
+	"github.com/wanelo/image-server/logger"
 	adapter "github.com/wanelo/image-server/processor/cli"
 )
 
@@ -46,6 +47,7 @@ func (p *Processor) CreateImage() error {
 	c := make(chan ProcessorResult)
 	go p.uniqueCreateImage(c)
 	ipr := <-c
+
 	return ipr.Error
 }
 
@@ -97,6 +99,7 @@ func (p *Processor) createIfNotAvailable() (bool, error) {
 		err = processor.CreateImage()
 
 		if err != nil {
+			logger.ImageProcessedWithErrors(p.ImageConfiguration)
 			log.Println(err)
 			return false, err
 		}
@@ -110,12 +113,16 @@ func (p *Processor) createIfNotAvailable() (bool, error) {
 }
 
 func (p *Processor) notifyProcessed() {
+	logger.ImageProcessed(p.ImageConfiguration)
+
 	p.Channels.ImageProcessed <- p.ImageConfiguration
 	close(p.Channels.ImageProcessed)
 	close(p.Channels.Skipped)
 }
 
 func (p *Processor) notifySkipped() {
+	logger.ImageAlreadyProcessed(p.ImageConfiguration)
+
 	p.Channels.Skipped <- p.Destination
 	close(p.Channels.ImageProcessed)
 	close(p.Channels.Skipped)
