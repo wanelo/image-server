@@ -38,9 +38,9 @@ func ImageProcessedWithErrors(ic *core.ImageConfiguration) {
 	}
 }
 
-func AllImagesAlreadyProccessed() {
+func AllImagesAlreadyProcessed(namespace string, hash string, sourceURL string) {
 	for _, logger := range Loggers {
-		go logger.AllImagesAlreadyProccessed()
+		go logger.AllImagesAlreadyProcessed(namespace, hash, sourceURL)
 	}
 }
 

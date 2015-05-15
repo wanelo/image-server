@@ -15,7 +15,7 @@ type Logger interface {
 	ImageProcessed(ic *ImageConfiguration)
 	ImageAlreadyProcessed(ic *ImageConfiguration)
 	ImageProcessedWithErrors(ic *ImageConfiguration)
-	AllImagesAlreadyProccessed()
+	AllImagesAlreadyProcessed(namespace string, hash string, sourceURL string)
 	SourceDownloaded()
 	OriginalDownloaded(source string, destination string)
 	OriginalDownloadFailed(source string)

@@ -34,7 +34,7 @@ func (r *Request) ProcessMultiple() error {
 
 	if missing == nil {
 		// All the files are already uploaded. Nothing do do!
-		logger.AllImagesAlreadyProccessed()
+		logger.AllImagesAlreadyProcessed(r.Namespace, r.Hash, r.SourceURL)
 		return nil
 	}
 

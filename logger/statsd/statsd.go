@@ -47,7 +47,7 @@ func (l *Logger) ImageProcessedWithErrors(ic *core.ImageConfiguration) {
 	l.track("processing.version.failed." + ic.Format)
 }
 
-func (l *Logger) AllImagesAlreadyProccessed() {
+func (l *Logger) AllImagesAlreadyProcessed(namespace string, hash string, sourceURL string) {
 	l.track("processing.versions.noop")
 }
 
