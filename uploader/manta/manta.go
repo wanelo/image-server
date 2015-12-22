@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/golang/glog"
-	client "github.com/wanelo/image-server/uploader/manta/client"
+	client "github.com/image-server/image-server/uploader/manta/client"
 )
 
 type MantaClient interface {

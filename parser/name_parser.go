@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/wanelo/image-server/core"
+	"github.com/image-server/image-server/core"
 )
 
 var reR, reS, reW, reF *regexp.Regexp

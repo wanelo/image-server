@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/uploader/manta"
-	"github.com/wanelo/image-server/uploader/noop"
-	"github.com/wanelo/image-server/uploader/s3"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/uploader/manta"
+	"github.com/image-server/image-server/uploader/noop"
+	"github.com/image-server/image-server/uploader/s3"
 )
 
 type Uploader struct {

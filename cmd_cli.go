@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	cliprocessor "github.com/wanelo/image-server/cli"
+	cliprocessor "github.com/image-server/image-server/cli"
 )
 
 var cmdCli = &Command{

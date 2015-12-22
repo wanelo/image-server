@@ -17,7 +17,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"github.com/wanelo/image-server/mime"
+	"github.com/image-server/image-server/mime"
 	_ "golang.org/x/image/webp"
 )
 

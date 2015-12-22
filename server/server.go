@@ -7,8 +7,8 @@ import (
 
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
+	"github.com/image-server/image-server/core"
 	"github.com/tylerb/graceful"
-	"github.com/wanelo/image-server/core"
 )
 
 // InitializeServer creates a new http server to handle image processing requests

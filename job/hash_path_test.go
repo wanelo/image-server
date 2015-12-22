@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/wanelo/image-server/job"
-	. "github.com/wanelo/image-server/test"
+	"github.com/image-server/image-server/job"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestToMantaPath(t *testing.T) {

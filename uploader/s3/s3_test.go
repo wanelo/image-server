@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/wanelo/image-server/test"
-	"github.com/wanelo/image-server/uploader/s3"
+	. "github.com/image-server/image-server/test"
+	"github.com/image-server/image-server/uploader/s3"
 )
 
 func TestItemToHash(t *testing.T) {

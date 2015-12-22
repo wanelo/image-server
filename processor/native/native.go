@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"code.google.com/p/graphics-go/graphics"
-	"github.com/wanelo/image-server/core"
+	"github.com/image-server/image-server/core"
 )
 
 type Processor struct{}

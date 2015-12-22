@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	. "github.com/wanelo/image-server/test"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestLineToItem(t *testing.T) {

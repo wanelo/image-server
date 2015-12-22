@@ -2,9 +2,9 @@ package request
 
 import (
 	"github.com/golang/glog"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
-	"github.com/wanelo/image-server/processor"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
+	"github.com/image-server/image-server/processor"
 )
 
 func (r *Request) Process(ic *core.ImageConfiguration) error {

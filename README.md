@@ -1,6 +1,6 @@
 # Image Server
 
-[![Build Status](https://magnum.travis-ci.com/wanelo/image-server.svg?token=xxYxjHDAXkDK41qZ1dqA&branch=master)](https://magnum.travis-ci.com/wanelo/image-server)
+[![Build Status](https://magnum.travis-ci.com/image-server/image-server.svg?token=xxYxjHDAXkDK41qZ1dqA&branch=master)](https://magnum.travis-ci.com/image-server/image-server)
 
 
 ## Server
@@ -123,8 +123,8 @@ Set up the environment:
 
 ```bash
 mkdir -p $GOPATH/src/github.com/wanelo/
-git clone https://github.com/wanelo/image-server $GOPATH/src/github.com/wanelo/image-server
-ln -s $GOPATH/src/github.com/wanelo/image-server ~/workspace/image-server
+git clone https://github.com/image-server/image-server $GOPATH/src/github.com/image-server/image-server
+ln -s $GOPATH/src/github.com/image-server/image-server ~/workspace/image-server
 cd ~/workspace/image-server
 ```
 

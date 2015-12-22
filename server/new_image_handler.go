@@ -6,12 +6,12 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
+	"github.com/image-server/image-server/logger"
+	"github.com/image-server/image-server/request"
+	"github.com/image-server/image-server/uploader"
 	"github.com/unrolled/render"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
-	"github.com/wanelo/image-server/logger"
-	"github.com/wanelo/image-server/request"
-	"github.com/wanelo/image-server/uploader"
 )
 
 // NewImageHandler handles posting new images

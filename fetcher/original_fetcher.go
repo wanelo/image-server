@@ -3,8 +3,8 @@ package fetcher
 import (
 	"fmt"
 
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
 )
 
 // OriginalFetcher is used to download orinal images either from our the image store or from the original source

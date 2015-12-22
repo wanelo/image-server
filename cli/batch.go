@@ -10,13 +10,13 @@ import (
 	"sync"
 
 	"github.com/golang/glog"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/fetcher"
-	"github.com/wanelo/image-server/info"
-	"github.com/wanelo/image-server/parser"
-	"github.com/wanelo/image-server/processor"
-	"github.com/wanelo/image-server/uploader"
-	mantaclient "github.com/wanelo/image-server/uploader/manta/client"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/fetcher"
+	"github.com/image-server/image-server/info"
+	"github.com/image-server/image-server/parser"
+	"github.com/image-server/image-server/processor"
+	"github.com/image-server/image-server/uploader"
+	mantaclient "github.com/image-server/image-server/uploader/manta/client"
 )
 
 // Process instanciates image processing based on the tab delimited input that

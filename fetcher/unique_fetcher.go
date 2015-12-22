@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/golang/glog"
-	httpFetcher "github.com/wanelo/image-server/fetcher/http"
+	httpFetcher "github.com/image-server/image-server/fetcher/http"
 )
 
 type UniqueFetcher struct {

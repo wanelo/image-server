@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/image-server/image-server/core"
+	mantajob "github.com/image-server/image-server/job/manta"
+	"github.com/image-server/image-server/uploader/manta/client"
 	"github.com/unrolled/render"
-	"github.com/wanelo/image-server/core"
-	mantajob "github.com/wanelo/image-server/job/manta"
-	"github.com/wanelo/image-server/uploader/manta/client"
 )
 
 func CreateBatchHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerConfiguration) {

@@ -3,8 +3,8 @@ package job
 import (
 	"fmt"
 
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/uploader/manta/client"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/uploader/manta/client"
 )
 
 var ImageExecutable = fmt.Sprintf("/wanelo/public/images/bin/images-solaris-%s", core.VERSION)

@@ -3,8 +3,8 @@ package client_test
 import (
 	"testing"
 
-	. "github.com/wanelo/image-server/test"
-	"github.com/wanelo/image-server/uploader/manta/client"
+	. "github.com/image-server/image-server/test"
+	"github.com/image-server/image-server/uploader/manta/client"
 )
 
 func TestLineToItem(t *testing.T) {

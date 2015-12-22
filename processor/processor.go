@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
-	"github.com/wanelo/image-server/logger"
-	adapter "github.com/wanelo/image-server/processor/cli"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
+	"github.com/image-server/image-server/logger"
+	adapter "github.com/image-server/image-server/processor/cli"
 )
 
 type ProcessorResult struct {

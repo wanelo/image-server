@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/logger"
 	"github.com/quipo/statsd"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/logger"
 )
 
 type Logger struct {

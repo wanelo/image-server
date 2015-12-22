@@ -3,7 +3,7 @@ package server
 // import (
 // 	"testing"
 //
-// 	"github.com/wanelo/image-server/core"
+// 	"github.com/image-server/image-server/core"
 // )
 //
 // func TestAllowedImageValid(t *testing.T) {

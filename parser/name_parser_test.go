@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/wanelo/image-server/core"
+	"github.com/image-server/image-server/core"
 )
 
 func ensureImageConfiguration(t *testing.T, ic *core.ImageConfiguration, w int, h int, q uint, f string) {

@@ -3,8 +3,8 @@ package request_test
 import (
 	"testing"
 
-	"github.com/wanelo/image-server/request"
-	. "github.com/wanelo/image-server/test"
+	"github.com/image-server/image-server/request"
+	. "github.com/image-server/image-server/test"
 )
 
 type FakeUploader struct{}

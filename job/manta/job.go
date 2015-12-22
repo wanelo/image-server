@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/wanelo/image-server/job"
-	"github.com/wanelo/image-server/uploader/manta/client"
+	"github.com/image-server/image-server/job"
+	"github.com/image-server/image-server/uploader/manta/client"
 )
 
 type Job struct {

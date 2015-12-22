@@ -3,9 +3,9 @@ package request
 import (
 	"log"
 
-	"github.com/wanelo/image-server/fetcher"
-	"github.com/wanelo/image-server/info"
-	"github.com/wanelo/image-server/uploader"
+	"github.com/image-server/image-server/fetcher"
+	"github.com/image-server/image-server/info"
+	"github.com/image-server/image-server/uploader"
 )
 
 func (r *Request) Create() (*info.ImageDetails, error) {

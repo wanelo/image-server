@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
-	"github.com/wanelo/image-server/processor/cli"
-	. "github.com/wanelo/image-server/test"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
+	"github.com/image-server/image-server/processor/cli"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestFullSizeImage(t *testing.T) {

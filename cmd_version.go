@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/wanelo/image-server/core"
+	"github.com/image-server/image-server/core"
 )
 
 var cmdVersion = &Command{

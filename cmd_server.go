@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/wanelo/image-server/server"
+	"github.com/image-server/image-server/server"
 )
 
 var cmdServer = &Command{

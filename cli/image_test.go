@@ -3,8 +3,8 @@ package cli_test
 import (
 	"testing"
 
-	"github.com/wanelo/image-server/cli"
-	. "github.com/wanelo/image-server/test"
+	"github.com/image-server/image-server/cli"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestItemToHash(t *testing.T) {

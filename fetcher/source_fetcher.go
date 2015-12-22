@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
 )
 
 // SourceFetcher handles fetching source original images

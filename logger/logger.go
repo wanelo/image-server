@@ -1,6 +1,6 @@
 package logger
 
-import "github.com/wanelo/image-server/core"
+import "github.com/image-server/image-server/core"
 
 var Loggers []core.Logger
 

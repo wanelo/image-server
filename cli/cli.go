@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
 )
 
 // Item represents all image properties needed for the result of the processing

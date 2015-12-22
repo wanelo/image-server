@@ -2,8 +2,8 @@ package logfile
 
 import (
 	"github.com/golang/glog"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/logger"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/logger"
 )
 
 type Logger struct {

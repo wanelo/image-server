@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/uploader"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/uploader"
 
-	"github.com/wanelo/image-server/request"
+	"github.com/image-server/image-server/request"
 )
 
 // ResizeManyHandler asumes the original image is either stores locally or on the remote server

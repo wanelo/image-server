@@ -10,12 +10,12 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/wanelo/image-server/core"
-	fetcher "github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/logger/logfile"
-	"github.com/wanelo/image-server/logger/statsd"
-	"github.com/wanelo/image-server/paths"
-	"github.com/wanelo/image-server/uploader"
+	"github.com/image-server/image-server/core"
+	fetcher "github.com/image-server/image-server/fetcher/http"
+	"github.com/image-server/image-server/logger/logfile"
+	"github.com/image-server/image-server/logger/statsd"
+	"github.com/image-server/image-server/paths"
+	"github.com/image-server/image-server/uploader"
 )
 
 // configT collects all the global state of the logging setup.

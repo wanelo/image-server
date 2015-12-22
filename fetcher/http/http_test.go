@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	httpFetcher "github.com/wanelo/image-server/fetcher/http"
+	httpFetcher "github.com/image-server/image-server/fetcher/http"
 
-	. "github.com/wanelo/image-server/test"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestUniqueFetcher(t *testing.T) {

@@ -3,8 +3,8 @@ package core_test
 import (
 	"testing"
 
-	"github.com/wanelo/image-server/core"
-	. "github.com/wanelo/image-server/test"
+	"github.com/image-server/image-server/core"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestToContentTypeForJPEG(t *testing.T) {

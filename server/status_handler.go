@@ -6,10 +6,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/processor/cli"
 	"github.com/tylerb/graceful"
 	"github.com/unrolled/render"
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/processor/cli"
 )
 
 // Stats store atomic values

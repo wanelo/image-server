@@ -13,13 +13,13 @@ import (
 
 	"github.com/goamz/goamz/aws"
 	"github.com/goamz/goamz/s3"
-	"github.com/wanelo/image-server/core"
-	fetcher "github.com/wanelo/image-server/fetcher/http"
-	"github.com/wanelo/image-server/paths"
-	"github.com/wanelo/image-server/server"
-	"github.com/wanelo/image-server/uploader"
+	"github.com/image-server/image-server/core"
+	fetcher "github.com/image-server/image-server/fetcher/http"
+	"github.com/image-server/image-server/paths"
+	"github.com/image-server/image-server/server"
+	"github.com/image-server/image-server/uploader"
 
-	. "github.com/wanelo/image-server/test"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestNewImageHandlerWithData(t *testing.T) {

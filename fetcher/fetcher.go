@@ -3,7 +3,7 @@ package fetcher
 import (
 	"sync"
 
-	"github.com/wanelo/image-server/info"
+	"github.com/image-server/image-server/info"
 )
 
 var mu sync.RWMutex // To protect ImageDownloads

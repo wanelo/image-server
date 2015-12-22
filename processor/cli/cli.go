@@ -9,8 +9,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/wanelo/image-server/core"
-	"github.com/wanelo/image-server/info"
+	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/info"
 )
 
 type Processor struct {

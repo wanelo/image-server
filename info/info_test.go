@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/wanelo/image-server/info"
-	. "github.com/wanelo/image-server/test"
+	"github.com/image-server/image-server/info"
+	. "github.com/image-server/image-server/test"
 )
 
 func TestImageHash(t *testing.T) {
