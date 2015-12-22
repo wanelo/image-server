@@ -1,7 +1,6 @@
 # Image Server
 
-[![Build Status](https://magnum.travis-ci.com/image-server/image-server.svg?token=xxYxjHDAXkDK41qZ1dqA&branch=master)](https://magnum.travis-ci.com/image-server/image-server)
-
+[![Build Status](https://travis-ci.org/image-server/image-server.svg)](https://travis-ci.org/image-server/image-server)
 
 ## Server
 
