@@ -3,6 +3,7 @@ language: go
 go: '1.5.2'
 
 before_script:
+  - sudo apt-get update -qq
   - sudo apt-get install giflib-dbg
 
 script: go get -d -v ./... && go test -race ./...
