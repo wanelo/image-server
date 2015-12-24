@@ -58,14 +58,14 @@ func (u *Uploader) CreateDirectory(path string) error {
 	return nil
 }
 
-func Initialize(accessKey string, secretKey string, bucketName string) {
-	bucket = retrieveBucket(accessKey, secretKey, bucketName)
+func Initialize(accessKey, secretKey, bucketName, regionName string) {
+	bucket = retrieveBucket(accessKey, secretKey, bucketName, regionName)
 }
 
-func retrieveBucket(accessKey, secretKey, bucketName string) *s3.Bucket {
+func retrieveBucket(accessKey, secretKey, bucketName, regionName string) *s3.Bucket {
 	client := s3.S3{
 		Auth:   aws.Auth{AccessKey: accessKey, SecretKey: secretKey},
-		Region: aws.USEast,
+		Region: regionFromName(regionName),
 		AttemptStrategy: aws.AttemptStrategy{
 			Min:   2,
 			Total: 4 * time.Second,
@@ -76,4 +76,14 @@ func retrieveBucket(accessKey, secretKey, bucketName string) *s3.Bucket {
 		RequestTimeout: 20 * time.Second,
 	}
 	return client.Bucket(bucketName)
+}
+
+func regionFromName(regionName string) aws.Region {
+	for _, region := range aws.Regions {
+		if region.Name == regionName {
+			return region
+		}
+	}
+
+	return aws.USEast
 }

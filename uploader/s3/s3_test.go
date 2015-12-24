@@ -17,8 +17,9 @@ func TestItemToHash(t *testing.T) {
 	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
 	secretKey := os.Getenv("AWS_SECRET_KEY")
 	bucketName := os.Getenv("AWS_BUCKET")
+	regionName := os.Getenv("AWS_REGION")
 
-	s3.Initialize(accessKey, secretKey, bucketName)
+	s3.Initialize(accessKey, secretKey, bucketName, regionName)
 
 	uploader := s3.Uploader{
 		BaseDir: os.Getenv("IMG_REMOTE_BASE_PATH"),

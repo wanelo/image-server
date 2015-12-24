@@ -61,7 +61,7 @@ func (u *Uploader) CreateDirectory(path string) error {
 
 func Initialize(sc *core.ServerConfiguration) error {
 	if sc.AWSAccessKeyID != "" {
-		s3.Initialize(sc.AWSAccessKeyID, sc.AWSSecretKey, sc.AWSBucket)
+		s3.Initialize(sc.AWSAccessKeyID, sc.AWSSecretKey, sc.AWSBucket, sc.AWSRegion)
 	} else if sc.MantaKeyID != "" {
 		manta.Initialize(sc.RemoteBasePath, sc.MantaURL, sc.MantaUser, sc.MantaKeyID, sc.SDCIdentity)
 	}

@@ -93,7 +93,7 @@ Images can be uploaded to either Amazon S3 or Joyent's Manta (we support only on
 
 To store images in S3 the following flags need to be set
 ```shell
---aws_access_key_id $AWS_ACCESS_KEY_ID --aws_secret_key $AWS_SECRET_KEY --aws_bucket $AWS_BUCKET
+--aws_access_key_id $AWS_ACCESS_KEY_ID --aws_secret_key $AWS_SECRET_KEY --aws_bucket $AWS_BUCKET --aws_region us-west-1
 ```
 
 For Manta the following flags are required

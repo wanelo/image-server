@@ -31,6 +31,7 @@ Flags:
     --aws_access_key_id
     --aws_secret_key
     --aws_bucket
+    --aws_region
 
     MANTA
     --manta_url     URL of API. https://us-east.manta.joyent.com

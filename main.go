@@ -34,6 +34,7 @@ type configT struct {
 	awsAccessKeyID string
 	awsSecretKey   string
 	awsBucket      string
+	awsRegion      string
 
 	mantaURL    string
 	mantaUser   string
@@ -160,6 +161,7 @@ func registerFlags() {
 	flag.StringVar(&config.awsAccessKeyID, "aws_access_key_id", "", "S3 Access Key")
 	flag.StringVar(&config.awsSecretKey, "aws_secret_key", "", "S3 Secret")
 	flag.StringVar(&config.awsBucket, "aws_bucket", "", "S3 Bucket")
+	flag.StringVar(&config.awsRegion, "aws_region", "", "S3 Region")
 
 	// Manta uploader
 	flag.StringVar(&config.mantaURL, "manta_url", "", "URL of Manta endpoint. https://us-east.manta.joyent.com")
@@ -228,6 +230,7 @@ func serverConfigurationFromConfig() *core.ServerConfiguration {
 		AWSAccessKeyID: config.awsAccessKeyID,
 		AWSSecretKey:   config.awsSecretKey,
 		AWSBucket:      config.awsBucket,
+		AWSRegion:      config.awsRegion,
 
 		// Manta uploader
 		MantaURL:    config.mantaURL,

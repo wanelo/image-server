@@ -97,6 +97,7 @@ func buildTestS3ServerConfiguration() *core.ServerConfiguration {
 		AWSAccessKeyID: os.Getenv("AWS_ACCESS_KEY_ID"),
 		AWSSecretKey:   os.Getenv("AWS_SECRET_KEY"),
 		AWSBucket:      os.Getenv("AWS_BUCKET"),
+		AWSRegion:      os.Getenv("AWS_REGION"),
 	}
 
 	adapters := &core.Adapters{
