@@ -21,6 +21,7 @@ func (u FakePaths) RemoteInfoPath(string, string) string                        
 func (u FakePaths) TempImagePath(string) string                                          { return "" }
 func (u FakePaths) RandomTempPath() string                                               { return "" }
 func (u FakePaths) LocalOriginalPath(string, string) string                              { return "" }
+func (u FakePaths) LocalImageDirectory(string, string) string                            { return "" }
 func (u FakePaths) LocalImagePath(namespace string, md5 string, imageName string) string { return "" }
 func (u FakePaths) RemoteImageDirectory(namespace string, md5 string) string {
 	return "images/p/f94/4de/077/34f1868a4355e1b86052704"

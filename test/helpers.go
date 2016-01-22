@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -43,6 +44,15 @@ func Matches(tb *testing.T, exp string, act string) {
 	if !regexp.MustCompile(exp).MatchString(act) {
 		_, file, line, _ := runtime.Caller(1)
 		fmt.Printf("\033[31m%s:%d:\n\nexpected: %#v\n\n\tto match: %#v\033[39m\n\n", filepath.Base(file), line, act, exp)
+		tb.FailNow()
+	}
+}
+
+// ExpectFile fails if the file does not exist
+func ExpectFile(tb *testing.T, path string) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		_, file, line, _ := runtime.Caller(1)
+		fmt.Printf("\033[31m%s:%d: Expected file to Exist: %s\033[39m\n\n", filepath.Base(file), line, err)
 		tb.FailNow()
 	}
 }

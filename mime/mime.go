@@ -12,6 +12,8 @@ func ExtToContentType(ext string) string {
 	switch ext {
 	case "jpg":
 		return "image/jpeg"
+	case "pdf":
+		return "application/pdf"
 	default:
 		return fmt.Sprintf("image/%s", ext)
 	}
