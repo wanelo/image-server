@@ -4,11 +4,14 @@ import (
 	"io"
 	"os"
 
+	"github.com/image-server/image-server/mime"
 	"github.com/image-server/image-server/uploader"
-	"github.com/wanelo/image-server/mime"
 )
 
 func (r *Request) UploadFile(filename string) error {
+	localDirectory := r.Paths.LocalImageDirectory(r.Namespace, r.Hash)
+	os.MkdirAll(localDirectory, 0700)
+
 	localPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, filename)
 
 	out, err := os.Create(localPath)

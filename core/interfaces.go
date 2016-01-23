@@ -35,6 +35,7 @@ type Paths interface {
 	RandomTempPath() string
 	LocalOriginalPath(string, string) string
 	LocalImagePath(namespace string, md5 string, imageName string) string
+	LocalImageDirectory(namespace string, md5 string) string
 	RemoteImageDirectory(namespace string, md5 string) string
 	RemoteOriginalPath(string, string) string
 	RemoteOriginalURL(string, string) string
