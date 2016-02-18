@@ -48,23 +48,16 @@ format:
 
 build:
 	@mkdir -p bin/
+	@rm -f bin/images
 	@echo "$(OK_COLOR)==> Building$(NO_COLOR)"
-	@rm -f bin/images bin/solaris/images
 	@$(GO) build -o bin/images-$(VERSION)
 	@cd bin && ln -s images-$(VERSION) images
 	@echo "$(OK_COLOR)==> Building for solaris amd64$(NO_COLOR)"
-	@mkdir -p bin/solaris
-	@GOOS=solaris GOARCH=amd64 $(GO) build -o bin/solaris/images-$(VERSION)
-	@cd bin/solaris && ln -s images-$(VERSION) images
+	@GOOS=solaris GOARCH=amd64 $(GO) build -o bin/images-solaris-$(VERSION)
 	@echo "$(OK_COLOR)==> Building for darwin amd64$(NO_COLOR)"
-	@mkdir -p bin/darwin
-	@GOOS=darwin GOARCH=amd64 $(GO) build -o bin/darwin/images-$(VERSION)
+	@GOOS=darwin GOARCH=amd64 $(GO) build -o bin/images-darwin-$(VERSION)
 	@echo "$(OK_COLOR)==> Building for linux amd64$(NO_COLOR)"
-	@mkdir -p bin/linux
-	@GOOS=linux GOARCH=amd64 $(GO) build -o bin/linux/images-$(VERSION)
-	@echo "$(OK_COLOR)==> Compressing$(NO_COLOR)"
-	@cd bin/solaris && tar -czvf images-$(VERSION).tar.gz images-$(VERSION)
-	@echo "$(OK_COLOR)==> Build OK$(NO_COLOR)"
+	@GOOS=linux GOARCH=amd64 $(GO) build -o bin/images-linux-$(VERSION)
 
 release: tests build
 	@echo "$(OK_COLOR)==> Uploading to manta$(NO_COLOR)"

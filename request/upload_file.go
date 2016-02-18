@@ -3,6 +3,7 @@ package request
 import (
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/image-server/image-server/mime"
 	"github.com/image-server/image-server/uploader"
@@ -34,7 +35,11 @@ func (r *Request) UploadFile(filename string) error {
 
 	remotePath := r.Paths.RemoteImagePath(r.Namespace, r.Hash, filename)
 
-	contentType := mime.ExtToContentType(filename)
+	ext := filepath.Ext(filename)
+	if ext != "" {
+		ext = ext[1:len(ext)]
+	}
+	contentType := mime.ExtToContentType(ext)
 	// upload original image
 	err = uploader.Upload(localPath, remotePath, contentType)
 	if err != nil {
