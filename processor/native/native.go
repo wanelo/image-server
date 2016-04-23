@@ -5,7 +5,7 @@ import (
 	"image/jpeg"
 	"os"
 
-	"code.google.com/p/graphics-go/graphics"
+	"github.com/image-server/graphics-go/graphics"
 	"github.com/image-server/image-server/core"
 )
 
