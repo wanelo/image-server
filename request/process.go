@@ -3,19 +3,37 @@ package request
 import (
 	"github.com/golang/glog"
 	"github.com/image-server/image-server/core"
+	"github.com/image-server/image-server/fetcher"
 	"github.com/image-server/image-server/info"
 	"github.com/image-server/image-server/processor"
 )
 
+// Process downloads or processes an image version
 func (r *Request) Process(ic *core.ImageConfiguration) error {
+	err := r.downloadProcessed(ic)
+	if err == nil {
+		return nil
+	}
+
+	err = r.processImage(ic)
+	return err
+}
+
+// downloadProcessed download an existing image that has been already processed
+func (r *Request) downloadProcessed(ic *core.ImageConfiguration) error {
+	f := fetcher.NewProcessedFetcher(r.Paths)
+	return f.Fetch(ic)
+}
+
+func (r *Request) processImage(ic *core.ImageConfiguration) error {
+	localResizedPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, ic.Filename)
+	localOriginalPath := r.Paths.LocalOriginalPath(r.Namespace, r.Hash)
+
 	// The original file will be downloaded only once, even when every dimension requests it
 	err := r.DownloadOriginal()
 	if err != nil {
 		return err
 	}
-
-	localResizedPath := r.Paths.LocalImagePath(r.Namespace, r.Hash, ic.Filename)
-	localOriginalPath := r.Paths.LocalOriginalPath(r.Namespace, r.Hash)
 
 	// process image
 	pchan := &processor.ProcessorChannels{
@@ -61,6 +79,7 @@ func (r *Request) uploadResizedImage(localResizedPath string, ic *core.ImageConf
 	err = r.Uploader.Upload(localResizedPath, remoteResizedPath, ic.ToContentType())
 
 	if err != nil {
+		glog.Errorln("Unable to upload file", remoteResizedPath, err)
 		return err
 	}
 	return nil

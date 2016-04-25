@@ -9,7 +9,6 @@ import (
 func ensureImageConfiguration(t *testing.T, ic *core.ImageConfiguration, w int, h int, q uint, f string) {
 	if ic.Width != w {
 		t.Errorf("expected %v to be %v", ic.Width, w)
-
 	}
 	if ic.Height != h {
 		t.Errorf("expected %v to be %v", ic.Width, h)
@@ -53,10 +52,8 @@ func TestFullSize(t *testing.T) {
 }
 
 func TestUnsupported(t *testing.T) {
-	_, err := NameToConfiguration(sc, "random.jpg")
-	if err == nil {
-		t.Errorf("expected to receive an error")
-	}
+	ic, _ := NameToConfiguration(sc, "random.jpg")
+	ensureImageConfiguration(t, ic, 0, 0, 0, "")
 }
 
 // Quality is Provided

@@ -29,6 +29,7 @@ func (u FakePaths) RemoteImageDirectory(namespace string, md5 string) string {
 func (u FakePaths) RemoteOriginalPath(string, string) string                              { return "" }
 func (u FakePaths) RemoteOriginalURL(string, string) string                               { return "" }
 func (u FakePaths) RemoteImagePath(namespace string, md5 string, imageName string) string { return "" }
+func (u FakePaths) RemoteImageURL(namespace string, md5 string, imageName string) string  { return "" }
 
 func sampleRequest() *request.Request {
 	return &request.Request{

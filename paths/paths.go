@@ -4,9 +4,9 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"fmt"
-	"strings"
-	"path/filepath"
 	"net/url"
+	"path/filepath"
+	"strings"
 )
 
 // Paths
@@ -38,6 +38,12 @@ func (p *Paths) LocalImagePath(namespace string, md5 string, imageName string) s
 
 func (p *Paths) RemoteImagePath(namespace string, md5 string, imageName string) string {
 	return filepath.Join(p.RemoteBasePath, p.imagePath(namespace, md5, imageName))
+}
+
+func (p *Paths) RemoteImageURL(namespace string, md5 string, imageName string) string {
+	u, _ := url.Parse(p.RemoteBaseURL)
+	u.Path = filepath.Join(u.Path, p.RemoteImagePath(namespace, md5, imageName))
+	return u.String()
 }
 
 // RemoteOriginalPath returns local path for original image

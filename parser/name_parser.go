@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 
@@ -34,8 +33,7 @@ func NameToConfiguration(sc *core.ServerConfiguration, filename string) (*core.I
 		m := reF.FindStringSubmatch(filename)
 		w, h, q, f = "0", "0", m[1], m[2]
 	} else {
-		// return error
-		return &core.ImageConfiguration{}, fmt.Errorf("unsupported output: %s", filename)
+		return &core.ImageConfiguration{Filename: filename}, nil
 	}
 
 	width, _ := strconv.Atoi(w)
