@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-type ImageDetails struct {
+type ImageProperties struct {
 	Hash        string `json:"hash"`
 	Height      int    `json:"height"`
 	Width       int    `json:"width"`
@@ -14,7 +14,7 @@ type ImageDetails struct {
 }
 
 // ImageDetailsToJSON returns a string with JSON representation of the ImageDetails
-func ImageDetailsToJSON(d *ImageDetails) (string, error) {
+func ImageDetailsToJSON(d *ImageProperties) (string, error) {
 	b, err := json.Marshal(d)
 	if err != nil {
 		return "", err
@@ -23,7 +23,7 @@ func ImageDetailsToJSON(d *ImageDetails) (string, error) {
 }
 
 // SaveImageDetail saves ImageDetails in a JSON file on "path"
-func SaveImageDetail(d *ImageDetails, path string) error {
+func SaveImageDetail(d *ImageProperties, path string) error {
 	json, err := ImageDetailsToJSON(d)
 	if err != nil {
 		log.Println(err)

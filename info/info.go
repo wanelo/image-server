@@ -40,11 +40,11 @@ func (i Info) FileHash() (hash string, err error) {
 
 // ImageDetails extracts file hash, height, and width when providing a image path
 // it returns an ImageDetails object
-func (i Info) ImageDetails() (*ImageDetails, error) {
+func (i Info) ImageDetails() (*ImageProperties, error) {
 	if reader, err := os.Open(i.Path); err == nil {
 		defer reader.Close()
 		var contentType string
-		var details *ImageDetails
+		var details *ImageProperties
 
 		im, format, err := image.DecodeConfig(reader)
 		if err == nil && format != "" {
@@ -53,7 +53,7 @@ func (i Info) ImageDetails() (*ImageDetails, error) {
 				return nil, err
 			}
 
-			details = &ImageDetails{
+			details = &ImageProperties{
 				Height:      im.Height,
 				Width:       im.Width,
 				ContentType: contentType,
@@ -76,7 +76,7 @@ func (i Info) ImageDetails() (*ImageDetails, error) {
 	}
 }
 
-func (i Info) DetailsFromImageMagick() (*ImageDetails, error) {
+func (i Info) DetailsFromImageMagick() (*ImageProperties, error) {
 	tmpDir, err := ioutil.TempDir("", "magick")
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func (i Info) DetailsFromImageMagick() (*ImageDetails, error) {
 		return nil, err
 	}
 
-	return &ImageDetails{
+	return &ImageProperties{
 		Height:      h,
 		Width:       w,
 		ContentType: contentType,

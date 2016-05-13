@@ -20,7 +20,7 @@ type OriginalFetcher struct {
 //     - The image hash is present, the image url is optional. The image will be downloaded from our store
 //     - If the image can't be found, and the source url is provided then the image will be downloaded again from the source
 // Returns downloaded true only if it was downloaded from source
-func (f OriginalFetcher) Fetch(namespace string, sourceURL string, imageHash string) (info *info.ImageDetails, downloaded bool, err error) {
+func (f OriginalFetcher) Fetch(namespace string, sourceURL string, imageHash string) (info *info.ImageProperties, downloaded bool, err error) {
 	if sourceURL == "" && imageHash == "" {
 		return nil, false, fmt.Errorf("Missing Hash & URL")
 	}
@@ -36,7 +36,7 @@ func (f OriginalFetcher) Fetch(namespace string, sourceURL string, imageHash str
 	return info, downloaded, err
 }
 
-func (f OriginalFetcher) fetchFromStore(namespace string, imageHash string) (details *info.ImageDetails, err error) {
+func (f OriginalFetcher) fetchFromStore(namespace string, imageHash string) (details *info.ImageProperties, err error) {
 	destination := f.Paths.LocalOriginalPath(namespace, imageHash)
 	source := f.Paths.RemoteOriginalURL(namespace, imageHash)
 	uf := NewUniqueFetcher(source, destination)
@@ -52,7 +52,7 @@ func (f OriginalFetcher) fetchFromStore(namespace string, imageHash string) (det
 	return details, err
 }
 
-func (f OriginalFetcher) fetchFromSource(namespace string, sourceURL string) (info *info.ImageDetails, downloaded bool, err error) {
+func (f OriginalFetcher) fetchFromSource(namespace string, sourceURL string) (info *info.ImageProperties, downloaded bool, err error) {
 	sf := NewSourceFetcher(f.Paths)
 	return sf.Fetch(sourceURL, namespace)
 }

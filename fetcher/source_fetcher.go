@@ -23,14 +23,14 @@ func NewSourceFetcher(paths core.Paths) *SourceFetcher {
 // Fetch returns ImageDetails of downloaded file
 // It will only download the image once, even if multiple concurrent requests to the same url are made
 // downloaded is false when the file was already present locally
-func (f *SourceFetcher) Fetch(url string, namespace string) (*info.ImageDetails, bool, error) {
+func (f *SourceFetcher) Fetch(url string, namespace string) (*info.ImageProperties, bool, error) {
 	c := make(chan FetchResult)
 	go f.uniqueFetchSource(c, url, namespace)
 	r := <-c
 	return r.ImageDetails, r.Downloaded, r.Error
 }
 
-func (f *SourceFetcher) StoreBinary(body io.ReadCloser, namespace string) (*info.ImageDetails, error) {
+func (f *SourceFetcher) StoreBinary(body io.ReadCloser, namespace string) (*info.ImageProperties, error) {
 	tmpOriginalPath := f.Paths.RandomTempPath()
 	defer body.Close()
 

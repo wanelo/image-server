@@ -30,7 +30,7 @@ type Processor struct {
 	Source             string
 	Destination        string
 	ImageConfiguration *core.ImageConfiguration
-	ImageDetails       *info.ImageDetails
+	ImageDetails       *info.ImageProperties
 	Channels           *ProcessorChannels
 }
 

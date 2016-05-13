@@ -14,7 +14,7 @@ import (
 )
 
 type Processor struct {
-	ImageDetails       *info.ImageDetails
+	ImageDetails       *info.ImageProperties
 	ImageConfiguration *core.ImageConfiguration
 	Source             string
 	Destination        string

@@ -54,7 +54,7 @@ func NewImageHandler(w http.ResponseWriter, req *http.Request, sc *core.ServerCo
 	renderImageDetails(w, imageDetails)
 }
 
-func renderImageDetails(w http.ResponseWriter, imageDetails *info.ImageDetails) {
+func renderImageDetails(w http.ResponseWriter, imageDetails *info.ImageProperties) {
 	r := render.New(render.Options{
 		IndentJSON: true,
 	})

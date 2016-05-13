@@ -39,7 +39,7 @@ func TestImageWithWidth(t *testing.T) {
 
 func TestImageWithWidthAndHeight(t *testing.T) {
 	ic := &core.ImageConfiguration{Width: 600, Height: 500, Format: "jpg", Quality: 85, Namespace: "test", ID: "ofrA", Filename: "600x500.jpg"}
-	id := &info.ImageDetails{Width: 600, Height: 500}
+	id := &info.ImageProperties{Width: 600, Height: 500}
 
 	expected := []string{"-strip", "-format", "jpg", "-flatten", "-extent", "600x500", "-gravity", "center", "-background", "rgba(255,255,255,1)", "-quality", "85", "public/test/00/of/rA/original", "public/test/00/of/rA/600x500.jpg"}
 

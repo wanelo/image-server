@@ -8,9 +8,9 @@ import (
 	"github.com/image-server/image-server/uploader"
 )
 
-func (r *Request) Create() (*info.ImageDetails, error) {
+func (r *Request) Create() (*info.ImageProperties, error) {
 	f := fetcher.NewSourceFetcher(r.Paths)
-	var imageDetails *info.ImageDetails
+	var imageDetails *info.ImageProperties
 	var downloaded bool
 	var err error
 
@@ -51,7 +51,7 @@ func (r *Request) DownloadOriginal() error {
 	return err
 }
 
-func (r *Request) UploadOriginal(imageDetails *info.ImageDetails) error {
+func (r *Request) UploadOriginal(imageDetails *info.ImageProperties) error {
 	uploader := uploader.DefaultUploader(r.ServerConfiguration)
 	err := uploader.CreateDirectory(r.Paths.RemoteImageDirectory(r.Namespace, imageDetails.Hash))
 	if err != nil {
@@ -72,7 +72,7 @@ func (r *Request) UploadOriginal(imageDetails *info.ImageDetails) error {
 	return nil
 }
 
-func (r *Request) UploadImageDetails(imageDetails *info.ImageDetails, uploader *uploader.Uploader) {
+func (r *Request) UploadImageDetails(imageDetails *info.ImageProperties, uploader *uploader.Uploader) {
 	localInfoPath := r.Paths.LocalInfoPath(r.Namespace, imageDetails.Hash)
 	remoteInfoPath := r.Paths.RemoteInfoPath(r.Namespace, imageDetails.Hash)
 

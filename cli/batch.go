@@ -170,7 +170,7 @@ func calculateMissingOutputs(sc *core.ServerConfiguration, namespace string, ima
 	return itemOutputs, m, nil
 }
 
-func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) (*info.ImageDetails, error) {
+func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item) (*info.ImageProperties, error) {
 	// Image does not have a hash, need to upload source and get image hash
 	f := fetcher.OriginalFetcher{Paths: sc.Adapters.Paths}
 	imageDetails, _, err := f.Fetch(namespace, item.URL, item.Hash)
@@ -187,7 +187,7 @@ func downloadOriginal(sc *core.ServerConfiguration, namespace string, item *Item
 	return imageDetails, nil
 }
 
-func uploadOriginal(sc *core.ServerConfiguration, namespace string, item *Item, imageDetails *info.ImageDetails) error {
+func uploadOriginal(sc *core.ServerConfiguration, namespace string, item *Item, imageDetails *info.ImageProperties) error {
 
 	localOriginalPath := sc.Adapters.Paths.LocalOriginalPath(namespace, item.Hash)
 	uploader := uploader.DefaultUploader(sc)

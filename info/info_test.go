@@ -73,7 +73,7 @@ func TestImageDetailsOnWEBPWihtoutExtension(t *testing.T) {
 }
 
 func TestImageDetailsToJSON(t *testing.T) {
-	d := &info.ImageDetails{"THISISAHASH", 10, 20, "image/jpeg"}
+	d := &info.ImageProperties{"THISISAHASH", 10, 20, "image/jpeg"}
 	json, err := info.ImageDetailsToJSON(d)
 	expected := "{\"hash\":\"THISISAHASH\",\"height\":10,\"width\":20,\"content_type\":\"image/jpeg\"}"
 	Ok(t, err)
@@ -82,7 +82,7 @@ func TestImageDetailsToJSON(t *testing.T) {
 
 func TestSaveImageDetail(t *testing.T) {
 	path := "../test/test-image-detail.json"
-	d := &info.ImageDetails{"THISISAHASH", 10, 20, "image/jpeg"}
+	d := &info.ImageProperties{"THISISAHASH", 10, 20, "image/jpeg"}
 	info.SaveImageDetail(d, path)
 
 	fileBuffer, err := ioutil.ReadFile(path)
