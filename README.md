@@ -121,7 +121,7 @@ image --remote_base_path public/images --outputs x300.webp,x300.jpg process $MAN
 Set up the environment:
 
 ```bash
-mkdir -p $GOPATH/src/github.com/wanelo/
+mkdir -p $GOPATH/src/github.com/image-server/
 git clone https://github.com/image-server/image-server $GOPATH/src/github.com/image-server/image-server
 ln -s $GOPATH/src/github.com/image-server/image-server ~/workspace/image-server
 cd ~/workspace/image-server
