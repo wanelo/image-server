@@ -1,12 +1,13 @@
 package paths
 
 import (
-	"crypto/md5"
 	"crypto/rand"
 	"fmt"
 	"net/url"
 	"path/filepath"
 	"strings"
+
+	"github.com/image-server/image-server/cache"
 )
 
 // Paths
@@ -65,9 +66,11 @@ func (p *Paths) RemoteInfoPath(namespace string, md5 string) string {
 	return filepath.Join(p.RemoteBasePath, p.infoPath(namespace, md5))
 }
 
-func (p *Paths) TempImagePath(url string) string {
-	data := []byte(url)
-	name := fmt.Sprintf("%x", md5.Sum(data))
+// TempImagePath returns a temporary path to download files.
+// This path is only used before the file is downloaded (we don't know the HASH of the contents just yet)
+func (p *Paths) TempImagePath(urlstr string) string {
+	u, _ := url.Parse(urlstr)
+	name := cache.URLHash(u)
 	return filepath.Join(p.LocalBasePath, "tmp", name)
 }
 
