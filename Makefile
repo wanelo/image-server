@@ -7,7 +7,13 @@ VERSION = $(shell cat core/version.go | grep 'const VERSION' | egrep -o '\d+\.\d
 GO ?= $(shell echo go)
 IMG_MANTA_BASE_PATH ?= public/images
 
-all: format deps tests
+TEST?=$$(go list ./... | grep -v /vendor/)
+VETARGS?=-all -race
+GOFMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
+
+default: test
+
+all: format deps test
 
 dev-server:
 	@$(GO) run *.go -v=0 -alsologtostderr=true --outputs '$(IMG_OUTPUTS)' server
@@ -18,8 +24,8 @@ dev-server-s3:
 dev-server-manta:
 	@$(GO) run *.go --outputs $(IMG_OUTPUTS) --manta_url $(MANTA_URL) --manta_user $(MANTA_USER) --manta_key_id $(MANTA_KEY_ID) --sdc_identity $(SDC_IDENTITY) --remote_base_path $(IMG_MANTA_BASE_PATH) server
 
-tests:
-	@$(GO) test -race -v ./...
+test:
+	go test $(TEST) $(TESTARGS) -timeout=30s -parallel=4
 
 version:
 	@echo $(VERSION)
@@ -59,7 +65,7 @@ build:
 	@echo "$(OK_COLOR)==> Building for linux amd64$(NO_COLOR)"
 	@GOOS=linux GOARCH=amd64 $(GO) build -o bin/images-linux-$(VERSION)
 
-release: tests build
+release: test build
 	@echo "$(OK_COLOR)==> Uploading to manta$(NO_COLOR)"
 	# Solaris
 	@mput -f bin/solaris/images-$(VERSION) /$(MANTA_USER)/public/images/bin/images-solaris-$(VERSION)
@@ -70,3 +76,8 @@ release: tests build
   # Linux
 	@mput -f bin/linux/images-$(VERSION) /$(MANTA_USER)/public/images/bin/images-linux-$(VERSION)
 	@echo "$(VERSION)" | mput -H 'content-type: text/plain' /$(MANTA_USER)/public/images/bin/images-linux-version
+
+fmt:
+	gofmt -w $(GOFMT_FILES)
+	
+.PHONY: all test clean
