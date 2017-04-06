@@ -5,7 +5,7 @@ import (
 	"image/jpeg"
 	"os"
 
-	"github.com/image-server/graphics-go/graphics"
+	"github.com/wanelo/graphics-go/graphics"
 	"github.com/wanelo/image-server/core"
 )
 
