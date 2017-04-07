@@ -43,7 +43,7 @@ An upload request will block till all images have been created (various sizes) *
 
 The request returns the *"Image Information"* after an image is uploaded. The response includes properties of the image, and the image hash to be used to retrieve it in the future.
 
-Image properties can be retrieved by visiting the info page. The response is the same as the one returned when creating the image. Please not url has partitioned the image hash `/123/456/789/<REST_OF_HASH>/`
+Image properties can be retrieved by visiting the info page. The response is the same as the one returned when creating the image. Please note url has partitioned the image hash `/123/456/789/<REST_OF_HASH>/`
 ```shell
 > curl http://localhost:7000/p/6e0/072/682/e66287b662827da75b244a3/info.json
 {
