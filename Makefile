@@ -45,9 +45,9 @@ update-deps:
 	@echo $(DEPS) | xargs -n1 go get -d -u
 
 clean:
-	@rm -rf bin/
-	@rm -fr tmp
-	@rm -fr public
+	@rm -rf bin
+	@rm -rf tmp
+	@rm -rf public
 
 format:
 	@gofmt -l -w .
