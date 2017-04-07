@@ -5,3 +5,6 @@ bin/linux
 bin/images*
 tmp/
 *.prof
+
+# Intellij files
+.idea/
