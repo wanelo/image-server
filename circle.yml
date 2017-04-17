@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/image-server
+    docker:
+      - image: circleci/cci-demo-go-primary:0.0.2
+
+    steps:
+      - checkout
+
+      - run: apt-get update -qq && apt-get install -y giflib-dbg
+
+      - run: go get -d -v ./... && go test -race ./...
+
+
+      # Docker
+      - setup_remote_docker
+
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+
+      - run: |
+         TAG=0.1.$CIRCLE_BUILD_NUM
+         docker build -t wanelo/image-server:$TAG .
+         docker login -u $DOCKER_USER -p $DOCKER_PASS
+         docker push wanelo/image-server:$TAG
+
+
