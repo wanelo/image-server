@@ -32,7 +32,7 @@ jobs:
          docker build -t wanelo/image-server:$TEST_TAG .
 
          docker login -u $DOCKER_USER -p $DOCKER_PASS
-         docker push wanelo/image-server:$TAG
+         docker push wanelo/image-server:$TEST_TAG
 
          docker run --network container:wanelo/image-server:$TEST_TAG wanelo/image-server:$TEST_TAG 'go get -d -v ./... && go test -race ./...'
 
