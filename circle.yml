@@ -34,7 +34,7 @@ jobs:
          docker login -u $DOCKER_USER -p $DOCKER_PASS
          docker push wanelo/image-server:$TEST_TAG
 
-         docker run --network container:wanelo/image-server:$TEST_TAG wanelo/image-server 'go get -d -v ./... && go test -race ./...'
+         docker run --network container:wanelo/image-server wanelo/image-server:$TEST_TAG 'go get -d -v ./... && go test -race ./...'
 
          #docker exec wanelo/image-server
 
