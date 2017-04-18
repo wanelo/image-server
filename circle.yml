@@ -8,10 +8,10 @@ jobs:
     steps:
       - checkout
 
-      - run: apt-get update
-      - run: apt-get install imagemagick -y
-      - run: make deps
-      - run: make build
+#      - run: apt-get update
+#      - run: apt-get install imagemagick -y
+#      - run: make deps
+#      - run: make build
 
       - run: go get -d -v ./... && go test -race ./...
 
