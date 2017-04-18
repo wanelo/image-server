@@ -8,7 +8,7 @@ jobs:
     steps:
       - checkout
 
-      - run: apt-get update -qq && apt-get install -y giflib-tools
+      - run: apt-get update -qq && apt-get install -y imagemagick
 
       - run: go get -d -v ./... && go test -race ./...
 
