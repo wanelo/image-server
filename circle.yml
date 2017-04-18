@@ -3,9 +3,6 @@ jobs:
   build:
     machine: true
     working_directory: ~/image-server
-    docker:
-      - image: circleci/cci-demo-go-primary:0.0.2
-
     steps:
       - checkout
 
