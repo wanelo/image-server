@@ -1,8 +1,10 @@
 version: 2
 jobs:
   build:
-    machine: true
     working_directory: ~/image-server
+    docker:
+      - image: circleci/cci-demo-go-primary:0.0.2
+
     steps:
       - checkout
 
@@ -26,17 +28,11 @@ jobs:
             mv /tmp/docker/* /usr/bin
 
       - run: |
-         TEST_TAG=0.1.$CIRCLE_BUILD_NUM-test
-         docker build -t wanelo/image-server:$TEST_TAG .
+         TAG=0.1.$CIRCLE_BUILD_NUM
+         docker build -t wanelo/image-server:$TAG .
+
+         docker run --network container:wanelo/image-server image-server go get -d -v ./... && go test -race ./...
+
 
          docker login -u $DOCKER_USER -p $DOCKER_PASS
-         docker push wanelo/image-server:$TEST_TAG
-
-         docker run wanelo/image-server:$TEST_TAG 'go get -d -v ./... && go test -race ./...'
-
-         #docker exec wanelo/image-server
-
-
-
-
-
+         docker push wanelo/image-server:$TAG
