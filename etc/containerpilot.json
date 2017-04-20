@@ -1,0 +1,14 @@
+{
+  "consul": "consul:8500",
+  "services": [
+    {
+      "name": "image-server",
+      "port": 7002,
+      "health": [
+        "/usr/local/bin/health.sh"
+      ],
+      "poll": 10,
+      "ttl": 25
+    }
+  ]
+}
