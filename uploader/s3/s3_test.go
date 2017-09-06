@@ -7,23 +7,22 @@ import (
 
 	. "github.com/image-server/image-server/test"
 	"github.com/image-server/image-server/uploader/s3"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func TestItemToHash(t *testing.T) {
-	if os.Getenv("AWS_ACCESS_KEY_ID") == "" {
-		return
-	}
-
-	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
-	secretKey := os.Getenv("AWS_SECRET_KEY")
 	bucketName := os.Getenv("AWS_BUCKET")
 	regionName := os.Getenv("AWS_REGION")
 
-	s3.Initialize(accessKey, secretKey, bucketName, regionName)
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(regionName),
+	}))
+	Assert(t, sess != nil, "We need AWS access for integration tests")
 
-	uploader := s3.Uploader{
-		BaseDir: os.Getenv("IMG_REMOTE_BASE_PATH"),
-	}
+	s3.Initialize(bucketName, regionName)
+
+	uploader := s3.Uploader{}
 
 	existing, err := uploader.ListDirectory("p/543/47c/442/1c41f9467a3f5afed64943b")
 	Ok(t, err)
