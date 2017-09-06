@@ -2,9 +2,16 @@
 
 
 [[projects]]
-  name = "github.com/goamz/goamz"
-  packages = ["aws","s3"]
-  revision = "63291cb652bc024bcd52303631afad8f230b8244"
+  name = "github.com/aws/aws-sdk-go"
+  packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/stscreds","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","internal/shareddefaults","private/protocol","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/restxml","private/protocol/xml/xmlutil","service/s3","service/s3/s3iface","service/s3/s3manager","service/sts"]
+  revision = "960dd6034cbdac0e9716bfa66d91de88b286889f"
+  version = "v1.10.38"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "20b96f641a5ea98f2f8619ff4f3e061cff4833bd"
+  version = "v1.28.2"
 
 [[projects]]
   name = "github.com/golang/glog"
@@ -20,6 +27,12 @@
   name = "github.com/gorilla/mux"
   packages = ["."]
   revision = "8096f47503459bcc74d1f4c487b7e6e42e5746b5"
+
+[[projects]]
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  revision = "3433f3ea46d9f8019119e7dd41274e112a2359a9"
+  version = "0.2.2"
 
 [[projects]]
   name = "github.com/quipo/statsd"
@@ -43,12 +56,6 @@
   version = "v0.2.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/vaughan0/go-ini"
-  packages = ["."]
-  revision = "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
-
-[[projects]]
   name = "golang.org/x/crypto"
   packages = ["ssh","ssh/agent"]
   revision = "c57d4a71915a248dbad846d60825145062b4c18e"
@@ -66,6 +73,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "52f9e8cb0f7726604df89eb86a13f4a7b92b822b6c52230117f977f1a289cf4c"
+  inputs-digest = "b04a31e01431eedf3aa2417650dff3ac4d075ecdf63eff474e745cd4aedddad4"
   solver-name = "gps-cdcl"
   solver-version = 1
