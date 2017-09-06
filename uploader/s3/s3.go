@@ -1,20 +1,26 @@
 package s3
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/goamz/goamz/aws"
-	"github.com/goamz/goamz/s3"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/request"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/golang/glog"
 )
 
 // Uploader for S3
 type Uploader struct {
-	BaseDir string
 }
 
-var bucket *s3.Bucket
+var manager *s3manager.Uploader
+var svc *s3.S3
+var bucket string
 
 // Upload copies a file int a bucket in S3
 func (u *Uploader) Upload(source string, destination string, contType string) error {
@@ -24,14 +30,34 @@ func (u *Uploader) Upload(source string, destination string, contType string) er
 	}
 	defer reader.Close()
 
-	var stat os.FileInfo
-	stat, err = os.Stat(source)
-	if err != nil {
-		return err
-	}
-	size := stat.Size()
+	timeout, _ := time.ParseDuration("4m")
 
-	err = bucket.PutReader(destination, reader, size, contType, s3.PublicRead, s3.Options{})
+	ctx := context.Background()
+	var cancelFn func()
+	if timeout > 0 {
+		ctx, cancelFn = context.WithTimeout(ctx, timeout)
+	}
+	// Ensure the context is canceled to prevent leaking.
+	// See context package for more information, https://golang.org/pkg/context/
+	defer cancelFn()
+
+	// Uploads the object to S3. The Context will interrupt the request if the
+	// timeout expires.
+	_, err = manager.UploadWithContext(ctx, &s3manager.UploadInput{
+		Bucket:      aws.String(bucket),
+		Key:         aws.String(destination),
+		ContentType: aws.String(contType),
+		Body:        reader,
+		ACL:         aws.String("public-read"),
+	})
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == request.CanceledErrorCode {
+			// If the SDK can determine the request or retry delay was canceled
+			// by a context the CanceledErrorCode error code will be returned.
+			glog.Infof("AWS S3 upload canceled due to timeout destination: %s, Error: %v\n", destination, err)
+		}
+	}
+
 	return err
 }
 
@@ -40,12 +66,18 @@ func (u *Uploader) ListDirectory(directory string) ([]string, error) {
 	prefix := directory
 	delim := ""
 	marker := ""
-	max := 0
-	resp, err := bucket.List(prefix, delim, marker, max)
+	var max int64 = 1000
+	resp, err := svc.ListObjects(&s3.ListObjectsInput{
+		Bucket:    aws.String(bucket),
+		Prefix:    aws.String(prefix),
+		Delimiter: aws.String(delim),
+		Marker:    aws.String(marker),
+		MaxKeys:   aws.Int64(max),
+	})
 	if err == nil {
 		entries := resp.Contents
 		for _, entry := range entries {
-			name := filepath.Base(entry.Key)
+			name := filepath.Base(aws.StringValue(entry.Key))
 			names = append(names, name)
 		}
 	}
@@ -58,32 +90,16 @@ func (u *Uploader) CreateDirectory(path string) error {
 	return nil
 }
 
-func Initialize(accessKey, secretKey, bucketName, regionName string) {
-	bucket = retrieveBucket(accessKey, secretKey, bucketName, regionName)
-}
+func Initialize(bucketName string, regionName string) {
+	// Initial credentials loaded from SDK's default credential chain. Such as
+	// the environment, shared credentials (~/.aws/credentials), or EC2 Instance
+	// Role. These credentials will be used to to make the STS Assume Role API.
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(regionName),
+		MaxRetries: aws.Int(4),
+	}))
+	manager = s3manager.NewUploader(sess)
+	svc = s3.New(sess)
 
-func retrieveBucket(accessKey, secretKey, bucketName, regionName string) *s3.Bucket {
-	client := s3.S3{
-		Auth:   aws.Auth{AccessKey: accessKey, SecretKey: secretKey},
-		Region: regionFromName(regionName),
-		AttemptStrategy: aws.AttemptStrategy{
-			Min:   2,
-			Total: 4 * time.Second,
-			Delay: 500 * time.Millisecond,
-		},
-		ConnectTimeout: 15 * time.Second,
-		ReadTimeout:    18 * time.Second,
-		RequestTimeout: 20 * time.Second,
-	}
-	return client.Bucket(bucketName)
-}
-
-func regionFromName(regionName string) aws.Region {
-	for _, region := range aws.Regions {
-		if region.Name == regionName {
-			return region
-		}
-	}
-
-	return aws.USEast
+	bucket = bucketName
 }

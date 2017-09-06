@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/goamz/goamz/aws"
-	"github.com/goamz/goamz/s3"
 	"github.com/image-server/image-server/core"
 	fetcher "github.com/image-server/image-server/fetcher/http"
 	"github.com/image-server/image-server/paths"
@@ -20,9 +18,14 @@ import (
 	"github.com/image-server/image-server/uploader"
 
 	. "github.com/image-server/image-server/test"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"fmt"
 )
 
 func TestNewImageHandlerWithData(t *testing.T) {
+	deleteS3TestDirectory()
 	sc := buildTestS3ServerConfiguration()
 	uploader.Initialize(sc)
 
@@ -41,6 +44,7 @@ func TestNewImageHandlerWithData(t *testing.T) {
 	Matches(t, "\"width\": 574", json)
 	Matches(t, "\"content_type\": \"image/jpeg\"", json)
 	log.Println(response.Body)
+	deleteS3TestDirectory()
 }
 
 func TestNewImageHandlerWithS3(t *testing.T) {
@@ -57,36 +61,51 @@ func TestNewImageHandlerWithS3(t *testing.T) {
 
 	router.ServeHTTP(response, request)
 
-	url := "https://s3.amazonaws.com/wanelo-dev/test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/info.json"
+	url := s3UrlForPath("test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/info.json")
 	resp, err := http.Head(url)
 	Ok(t, err)
 	Equals(t, "200 OK", resp.Status)
 	Equals(t, "application/json", resp.Header.Get("Content-Type"))
 
-	url = "https://s3.amazonaws.com/wanelo-dev/test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/x300.jpg"
+	url = s3UrlForPath("test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/x300.jpg")
+	log.Println(url)
 	resp, err = http.Head(url)
 	Ok(t, err)
 	Equals(t, "200 OK", resp.Status)
 	Equals(t, "image/jpeg", resp.Header.Get("Content-Type"))
 
-	url = "https://s3.amazonaws.com/wanelo-dev/test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/x300.webp"
+	url = s3UrlForPath("test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/x300.webp")
 	resp, err = http.Head(url)
 	Ok(t, err)
 	Equals(t, "200 OK", resp.Status)
 	Equals(t, "image/webp", resp.Header.Get("Content-Type"))
+	deleteS3TestDirectory()
+}
+func s3UrlForPath(path string) string {
+	return fmt.Sprintf("https://s3-%s.amazonaws.com/%s/%s", os.Getenv("AWS_REGION"), os.Getenv("AWS_BUCKET"), path)
 }
 
 func deleteS3TestDirectory() {
-	auth := aws.Auth{
-		AccessKey: os.Getenv("AWS_ACCESS_KEY_ID"),
-		SecretKey: os.Getenv("AWS_SECRET_KEY"),
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(os.Getenv("AWS_REGION")),
+	}))
+	svc := s3.New(sess)
+
+	resp, err := svc.ListObjects(&s3.ListObjectsInput{
+		Bucket:    aws.String(os.Getenv("AWS_BUCKET")),
+		Prefix:    aws.String("test"),
+	})
+	if err == nil {
+		entries := resp.Contents
+		for _, entry := range entries {
+			key := aws.StringValue(entry.Key)
+			fmt.Printf("Deleting key: [%s]\n", key)
+			svc.DeleteObject(&s3.DeleteObjectInput{
+				Bucket: aws.String(os.Getenv("AWS_BUCKET")),
+				Key:    aws.String(key),
+			})
+		}
 	}
-	client := s3.New(auth, aws.USEast)
-	bucket := client.Bucket(os.Getenv("AWS_BUCKET"))
-	bucket.Del("/test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/info.json")
-	bucket.Del("/test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/original")
-	bucket.Del("/test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/x300.jpg")
-	bucket.Del("/test/test_namespace/6da/b5f/6d8/d4bddc73fdff34d4f0507f7/x300.webp")
 }
 
 func buildTestS3ServerConfiguration() *core.ServerConfiguration {
@@ -94,8 +113,7 @@ func buildTestS3ServerConfiguration() *core.ServerConfiguration {
 		LocalBasePath:  "../public",
 		RemoteBasePath: "test",
 		DefaultQuality: 90,
-		AWSAccessKeyID: os.Getenv("AWS_ACCESS_KEY_ID"),
-		AWSSecretKey:   os.Getenv("AWS_SECRET_KEY"),
+		UploaderType: "aws",
 		AWSBucket:      os.Getenv("AWS_BUCKET"),
 		AWSRegion:      os.Getenv("AWS_REGION"),
 	}

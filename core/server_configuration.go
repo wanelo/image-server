@@ -1,6 +1,9 @@
 package core
 
-import "time"
+import (
+	"time"
+	"strings"
+)
 
 // ServerConfiguration struct
 type ServerConfiguration struct {
@@ -23,4 +26,21 @@ type ServerConfiguration struct {
 	MantaUser             string
 	MantaKeyID            string
 	SDCIdentity           string
+	UploaderType          string
+}
+
+func (sc *ServerConfiguration) UploaderIsAws() bool {
+	uploader := strings.ToLower(sc.UploaderType)
+	if uploader == "aws" || uploader == "s3" {
+		return true
+	}
+	return false
+}
+
+func (sc *ServerConfiguration) UploaderIsManta() bool {
+	uploader := strings.ToLower(sc.UploaderType)
+	if uploader == "manta" {
+		return true
+	}
+	return false
 }

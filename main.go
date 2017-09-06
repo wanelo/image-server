@@ -31,6 +31,8 @@ type configT struct {
 	outputs   string
 	listen    string
 
+	uploaderType string
+
 	awsAccessKeyID string
 	awsSecretKey   string
 	awsBucket      string
@@ -157,6 +159,9 @@ func registerFlags() {
 	flag.StringVar(&config.outputs, "outputs", "", "Output files with dimension and compression: 'x300.jpg,x300.webp'")
 	flag.StringVar(&config.listen, "listen", "127.0.0.1", "IP address the server listens to")
 
+	// Uploader
+	flag.StringVar(&config.uploaderType, "uploader", "", "Uploader ['s3', 'manta']")
+
 	// S3 uploader
 	flag.StringVar(&config.awsAccessKeyID, "aws_access_key_id", "", "S3 Access Key")
 	flag.StringVar(&config.awsSecretKey, "aws_secret_key", "", "S3 Secret")
@@ -219,6 +224,19 @@ func serverConfiguration() (*core.ServerConfiguration, error) {
 func serverConfigurationFromConfig() *core.ServerConfiguration {
 	httpTimeout := time.Duration(config.httpTimeout) * time.Second
 
+	var uploader  string
+	if config.uploaderType != "" {
+		uploader = config.uploaderType
+	} else {
+		if config.awsAccessKeyID != "" {
+			uploader = "s3"
+		} else if config.mantaKeyID != "" {
+			uploader = "manta"
+		} else {
+			uploader = "noop"
+		}
+	}
+
 	return &core.ServerConfiguration{
 		WhitelistedExtensions: strings.Split(config.extensions, ","),
 		LocalBasePath:         config.localBasePath,
@@ -227,12 +245,15 @@ func serverConfigurationFromConfig() *core.ServerConfiguration {
 		RemoteBasePath: config.remoteBasePath,
 		RemoteBaseURL:  config.remoteBaseURL,
 
+		UploaderType: uploader,
+
+		// AWS specific
 		AWSAccessKeyID: config.awsAccessKeyID,
 		AWSSecretKey:   config.awsSecretKey,
 		AWSBucket:      config.awsBucket,
 		AWSRegion:      config.awsRegion,
 
-		// Manta uploader
+		// Manta specific
 		MantaURL:    config.mantaURL,
 		MantaUser:   config.mantaUser,
 		MantaKeyID:  config.mantaKeyID,
