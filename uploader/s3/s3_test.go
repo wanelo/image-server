@@ -12,6 +12,10 @@ import (
 )
 
 func TestItemToHash(t *testing.T) {
+	if !hasAwsAuthentication() {
+		return
+	}
+
 	bucketName := os.Getenv("AWS_BUCKET")
 	regionName := os.Getenv("AWS_REGION")
 
@@ -29,4 +33,10 @@ func TestItemToHash(t *testing.T) {
 	log.Println(existing)
 
 	// Equals(t, "6ad5544baa6f5e852e1af26f8c2e45db", image.ToHash())
+}
+
+func hasAwsAuthentication() bool {
+	hasRegion := len(os.Getenv("AWS_REGION")) > 0
+	hasBucket := len(os.Getenv("AWS_BUCKET")) > 0
+	return hasRegion && hasBucket
 }

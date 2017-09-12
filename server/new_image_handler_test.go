@@ -25,6 +25,10 @@ import (
 )
 
 func TestNewImageHandlerWithData(t *testing.T) {
+	if !hasAwsAuthentication() {
+		return
+	}
+
 	deleteS3TestDirectory()
 	sc := buildTestS3ServerConfiguration()
 	uploader.Initialize(sc)
@@ -48,8 +52,11 @@ func TestNewImageHandlerWithData(t *testing.T) {
 }
 
 func TestNewImageHandlerWithS3(t *testing.T) {
-	deleteS3TestDirectory()
+	if !hasAwsAuthentication() {
+		return
+	}
 
+	deleteS3TestDirectory()
 	sc := buildTestS3ServerConfiguration()
 	uploader.Initialize(sc)
 
@@ -83,6 +90,12 @@ func TestNewImageHandlerWithS3(t *testing.T) {
 }
 func s3UrlForPath(path string) string {
 	return fmt.Sprintf("https://s3-%s.amazonaws.com/%s/%s", os.Getenv("AWS_REGION"), os.Getenv("AWS_BUCKET"), path)
+}
+
+func hasAwsAuthentication() bool {
+	hasRegion := len(os.Getenv("AWS_REGION")) > 0
+	hasBucket := len(os.Getenv("AWS_BUCKET")) > 0
+	return hasRegion && hasBucket
 }
 
 func deleteS3TestDirectory() {
