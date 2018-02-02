@@ -32,6 +32,7 @@ type configT struct {
 	listen    string
 
 	uploaderType string
+	maxFileAge   int
 
 	awsAccessKeyID string
 	awsSecretKey   string
@@ -161,6 +162,7 @@ func registerFlags() {
 
 	// Uploader
 	flag.StringVar(&config.uploaderType, "uploader", "", "Uploader ['s3', 'manta']")
+	flag.IntVar(&config.maxFileAge, "max_file_age", 30, "Max file age in minutes")
 
 	// S3 uploader
 	flag.StringVar(&config.awsAccessKeyID, "aws_access_key_id", "", "S3 Access Key")
@@ -213,6 +215,7 @@ func serverConfiguration() (*core.ServerConfiguration, error) {
 		Paths:   &paths.Paths{LocalBasePath: sc.LocalBasePath, RemoteBasePath: sc.RemoteBasePath, RemoteBaseURL: sc.RemoteBaseURL},
 	}
 	sc.Adapters = adapters
+	sc.CleanUpTicker = time.NewTicker(5 * time.Second)
 
 	return sc, nil
 }
@@ -223,8 +226,14 @@ func serverConfiguration() (*core.ServerConfiguration, error) {
 // as globals. Flags succeeding the Command are not globals.
 func serverConfigurationFromConfig() *core.ServerConfiguration {
 	httpTimeout := time.Duration(config.httpTimeout) * time.Second
+	var maxFileAge time.Duration
+	if config.maxFileAge > 0 {
+		maxFileAge = time.Duration(config.maxFileAge) * time.Minute
+	} else {
+		maxFileAge = time.Minute
+	}
 
-	var uploader  string
+	var uploader string
 	if config.uploaderType != "" {
 		uploader = config.uploaderType
 	} else {
@@ -246,6 +255,7 @@ func serverConfigurationFromConfig() *core.ServerConfiguration {
 		RemoteBaseURL:  config.remoteBaseURL,
 
 		UploaderType: uploader,
+		MaxFileAge:   maxFileAge,
 
 		// AWS specific
 		AWSAccessKeyID: config.awsAccessKeyID,
