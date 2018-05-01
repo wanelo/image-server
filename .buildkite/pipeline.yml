@@ -3,5 +3,3 @@ steps:
     command:
       - "docker build -t $REGISTRY_URI:$DOCKER_TAG --build-arg SHORT_COMMIT_HASH=$SHORT_COMMIT_HASH ."
       - "docker push $REGISTRY_URI:$DOCKER_TAG"
-    agents:
-      queue: "docker"
